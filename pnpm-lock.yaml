@@ -41,6 +41,9 @@ importers:
       lodash:
         specifier: ^4.17.23
         version: 4.17.23
+      lodash.debounce:
+        specifier: ^4.0.8
+        version: 4.0.8
       nprogress:
         specifier: ^0.2.0
         version: 0.2.0

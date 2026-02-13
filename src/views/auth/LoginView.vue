@@ -8,17 +8,17 @@
             </div>
             <div class="card-body min-vh-100 position-relative d-flex flex-column justify-content-center">
                 <div class="auth-brand mb-0 text-center">
-                    <a href="l" class="logo-dark">
+                    <a href="/" class="logo-dark">
                         <img :src="logoImg" alt="dark logo" />
                     </a>
-                    <a href="" class="logo-light">
+                    <a href="/" class="logo-light">
                         <img :src="logoImg" alt="logo" />
                     </a>
                 </div>
 
                 <div class="mt-auto">
                     <div class="text-center">
-                        <!-- <h4 class="fw-bold text-dark">{{ t('auth.login.title') }}</h4> -->
+                        <h4 class="fw-bold text-dark">{{ t('auth.login.title') }}</h4>
                         <p class="text-muted w-lg-75 mx-auto">{{ t('auth.login.subtitle') }}</p>
                     </div>
 

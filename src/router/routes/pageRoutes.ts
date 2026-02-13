@@ -13,6 +13,24 @@ const routes: RouteRecordRaw[] = [
             middleware: "auth",
         },
         children: [],
+    },
+        {
+        path: "/users",
+        component: () =>
+            import("@/views/users/UsersIndex.vue").then((m) => m.default || m),
+        children: [
+            {
+                path: "",
+                name: "users.index",
+                redirect: { name: "users.list" },
+            },
+            {
+                path: "list",
+                name: "users.list",
+                component: () =>
+                    import("@/views/users/UsersList.vue").then((m) => m.default || m),
+            }
+        ],
     }
     // {
     //     path: "/currencies",

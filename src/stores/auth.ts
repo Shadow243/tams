@@ -47,8 +47,31 @@ export const useAuthStore = defineStore('auth', {
                 })
                 .catch(handleError)
         },
-        logout() {
-            // ...
+        async logout() {
+            try {
+                // Call API logout endpoint
+                await axiosInstance.post(`${appConfig.apiUrl}/logout`)
+            } catch (error) {
+                console.warn('Logout API call failed:', error)
+            } finally {
+                // Clear auth data regardless of API call result
+                const { removeCookie: removeToken } = useCookie('token', '')
+                const { removeCookie: removeXsrfToken } = useCookie('XSRF-TOKEN', '')
+                
+                // Remove cookies
+                removeToken()
+                removeXsrfToken()
+                
+                // Clear localStorage
+                localStorage.removeItem('token')
+                
+                // Clear state
+                this.token = ''
+                this.user = null
+                
+                // Clear axios authorization header
+                delete axiosInstance.defaults.headers.common['Authorization']
+            }
         },
     },
 })
