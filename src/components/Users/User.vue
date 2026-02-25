@@ -43,7 +43,7 @@
       <a
         href="javascript:void(0);"
         @click="$emit('edit', user)"
-        class="btn btn-default btn-icon btn-sm"
+        class="btn btn-success btn-icon btn-sm"
         title="Edit"
       >
         <i class="ti ti-edit fs-lg"></i>
@@ -51,7 +51,7 @@
       <a
         href="javascript:void(0);"
         @click="$emit('delete', user.id)"
-        class="btn btn-default btn-icon btn-sm"
+        class="btn btn-danger btn-icon btn-sm"
         title="Delete"
       >
         <i class="ti ti-trash fs-lg"></i>
