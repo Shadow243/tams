@@ -3,23 +3,18 @@
   <!-- <metainfo>
     <template #title="{ content }">TAMS | {{ content }}</template>
   </metainfo> -->
-  <div id="main-wrapper" class="flex">
+  <div id="main-wrapper" class="wrapper">
+    <TopBar v-if="user" />
     <SideBar v-if="user" />
-    <div class="page-wrapper w-full" role="main">
-      <TopBar v-if="user" />
-      <!-- Main Content -->
-      <div class="">
-        <!-- <div class="container full-container py-5"> -->
-        <!-- <router-view></router-view> -->
-        <router-view v-slot="{ Component, route }">
-          <transition name="scale" mode="out-in">
-            <div class="container full-container pl-5 pr-5" :key="route.name">
-              <component :is="Component"></component>
-            </div>
-          </transition>
-        </router-view>
-        <!-- </div> -->
-      </div>
+    <div class="content-page" role="main">
+      <router-view v-slot="{ Component, route }">
+        <transition name="scale" mode="out-in">
+          <div class="container-fluid" :key="route.name">
+            <component :is="Component"></component>
+          </div>
+        </transition>
+      </router-view>
+      <Footer v-if="user" />
     </div>
   </div>
 </template>
@@ -28,6 +23,7 @@
 import { computed } from 'vue'
 import TopBar from './partials/TheTopBar.vue'
 import SideBar from './partials/TheSidebar.vue'
+import Footer from './partials/TheFooter.vue'
 import { useHead } from '@vueuse/head'
 
 import { useAuthStore } from '@/stores/auth'
@@ -35,7 +31,7 @@ import { useAuthStore } from '@/stores/auth'
 useHead({
   title: 'Accueil',
   htmlAttrs: {
-    lang: 'en',
+    lang: 'fr',
     amp: true,
   },
   link: [

@@ -2,6 +2,8 @@
 // @ts-nocheck
 // import { useCrudStore } from "@/stores/crud";
 import logo from "@/assets/images/logo.png";
+import icon from "@/assets/images/icon-small.png";
+
 // import facebook from "@/assets/images/facebook-icon.svg";
 // import google from "@/assets/images/google-icon.svg";
 // import breadcrumbImg from "@/assets/images/money.png";
@@ -14,6 +16,7 @@ export const logoImg = logo;
 // export const googleImg = google;
 // export const breadcrumbImage = breadcrumbImg;
 export const avatarImage = avatarDefault;
+export const iconImage = icon;
 // export const welcomeImage = welcomeImg;
 
 export const hidePreloader = (): void => {

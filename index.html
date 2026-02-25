@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en" data-skin="saas" data-bs-theme="light" data-menu-color="dark" data-topbar-color="light" data-layout-width="fluid" dir="ltr" data-sidenav-size="on-hover-active" data-layout-position="fixed">
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
@@ -27,11 +27,15 @@
           
           // Initialize window.config and window.defaultConfig for LayoutCustomizer
           window.defaultConfig = window.defaultConfig || {
-            skin: 'default',
+            skin: 'saas',
             theme: 'light',
-            'sidenav-color': 'light',
-            'sidenav-size': 'default',
+            'menu-color': 'dark',
             'topbar-color': 'light',
+            'layout-width': 'fluid',
+            'dir': 'ltr',
+            'sidenav-size': 'on-hover-active',
+            'layout-position': 'fixed',
+
             position: 'fixed',
             width: 'fluid',
             dir: 'ltr',
@@ -43,12 +47,67 @@
           var savedConfig = sessionStorage.getItem('__THEME_CONFIG__');
           if (savedConfig && savedConfig !== 'undefined') {
             try {
-              window.config = JSON.parse(savedConfig);
+              var parsedConfig = JSON.parse(savedConfig);
+              // Merge saved config with defaults, prioritizing saved values but ensuring all keys exist
+              window.config = JSON.parse(JSON.stringify(window.defaultConfig));
+              Object.keys(parsedConfig).forEach(function(key) {
+                window.config[key] = parsedConfig[key];
+              });
+              
+              // Validate and fix invalid values
+              if (window.config.skin === 'default' || !window.config.skin) {
+                window.config.skin = 'saas';
+              }
             } catch (e) {
               window.config = JSON.parse(JSON.stringify(window.defaultConfig));
             }
           } else {
             window.config = JSON.parse(JSON.stringify(window.defaultConfig));
+          }
+          
+          // Function to get system theme preference
+          function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          
+          // Apply configuration to HTML element
+          var html = document.documentElement;
+          var config = window.config;
+          
+          // Apply theme (handle 'system' theme)
+          var actualTheme = config.theme === 'system' ? getSystemTheme() : config.theme;
+          html.setAttribute('data-bs-theme', actualTheme);
+          
+          // Apply all other attributes with proper fallbacks
+          var skin = config.skin;
+          if (skin === 'default' || !skin) {
+            skin = 'saas';
+            config.skin = 'saas'; // Update config to prevent reapplying 'default'
+          }
+          html.setAttribute('data-skin', skin);
+          html.setAttribute('data-menu-color', config['menu-color'] || config['sidenav-color'] || 'dark');
+          html.setAttribute('data-topbar-color', config['topbar-color'] || 'light');
+          html.setAttribute('data-layout-width', config['layout-width'] || config.width || 'fluid');
+          html.setAttribute('dir', config.dir || 'ltr');
+          html.setAttribute('data-sidenav-size', config['sidenav-size'] || 'on-hover-active');
+          html.setAttribute('data-layout-position', config['layout-position'] || config.position || 'fixed');
+          
+          if (config['sidenav-user']) {
+            html.setAttribute('data-sidenav-user', 'true');
+          }
+          
+          if (config.monochrome) {
+            html.classList.add('monochrome');
+          }
+          
+          // Save the corrected config
+          sessionStorage.setItem('__THEME_CONFIG__', JSON.stringify(config));
+          
+          // Listen for system theme changes when 'system' is selected
+          if (config.theme === 'system') {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+              html.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+            });
           }
         } catch (e) {
           console.warn('Unable to initialize config:', e);
