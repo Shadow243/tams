@@ -50,9 +50,6 @@ export const useOperatorStore = defineStore('operators', {
                 params.paginate = this.filters.perPage.toString()
                 params.page = page.toString()
 
-                console.log('🔍 Fetching operators with params:', params)
-                console.log('📊 Current filters:', this.filters)
-
                 const response = await axiosInstance.get(`${appConfig.apiUrl}/operators`, {
                     params,
                 })
@@ -62,7 +59,6 @@ export const useOperatorStore = defineStore('operators', {
                     this.operator_list = response.data.data || []
                 }
             } catch (error) {
-                console.error('❌ Error fetching operators:', error)
                 handleError(error)
             } finally {
                 this.loading = false

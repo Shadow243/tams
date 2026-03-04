@@ -134,6 +134,24 @@ let appRoutes = [
     type: 'menu',
   },
   {
+    icon: 'building-store',
+    label: t('sidebar.branches'),
+    route: 'branches.list',
+    type: 'menu',
+  },
+  {
+    icon: 'wallet',
+    label: t('sidebar.wallets'),
+    route: 'wallets.list',
+    type: 'menu',
+  },
+  {
+    icon: 'arrows-exchange',
+    label: t('sidebar.transaction_types'),
+    route: 'transaction-types.list',
+    type: 'menu',
+  },
+  {
     icon: 'globe',
     label: t('sidebar.countries'),
     route: 'countries.list',
