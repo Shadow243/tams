@@ -302,6 +302,7 @@
     "update": "Update",
     "create": "Create",
     "export": "Export",
+    "exporting": "Exporting...",
     "search_placeholder": "Search by code, name or description...",
     "no_records": "No transaction types found",
     "per_page": "per page",

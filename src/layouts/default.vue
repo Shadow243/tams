@@ -53,5 +53,30 @@ const user = computed(() => authStore.user)
 const authStore = useAuthStore()
 </script>
 
-<style>
+<style scoped>
+/* Scale transition styles */
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.3s ease;
+}
+
+.scale-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.scale-enter-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.scale-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(1.05);
+}
 </style>

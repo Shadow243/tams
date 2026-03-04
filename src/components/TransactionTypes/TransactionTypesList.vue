@@ -10,9 +10,15 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
+            :disabled="isExportingPDF"
           >
-            <i class="ti ti-download me-1"></i>
-            {{ t('transaction_types.export') || 'Export' }}
+            <span v-if="isExportingPDF" class="spinner-border spinner-border-sm me-1"></span>
+            <i v-else class="ti ti-download me-1"></i>
+            {{
+              isExportingPDF
+                ? t('transaction_types.exporting') || 'Exporting...'
+                : t('transaction_types.export') || 'Export'
+            }}
           </button>
           <ul class="dropdown-menu">
             <li>
@@ -22,8 +28,14 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="#" @click.prevent="exportPDF">
-                <i class="ti ti-file-type-pdf me-2"></i>
+              <a
+                class="dropdown-item"
+                href="#"
+                @click.prevent="exportPDF"
+                :class="{ disabled: isExportingPDF }"
+              >
+                <span v-if="isExportingPDF" class="spinner-border spinner-border-sm me-2"></span>
+                <i v-else class="ti ti-file-type-pdf me-2"></i>
                 PDF
               </a>
             </li>
@@ -228,6 +240,7 @@ const emit = defineEmits<{
 
 const searchQuery = ref('')
 const perPage = ref(15)
+const isExportingPDF = ref(false)
 
 const debouncedSearch = debounce(() => {
   emit('search', searchQuery.value)
@@ -304,14 +317,18 @@ const exportCSV = () => {
 }
 
 const exportPDF = async () => {
+  if (isExportingPDF.value) return
+
   try {
+    isExportingPDF.value = true
+
     const params: Record<string, string> = {}
 
     if (searchQuery.value) {
       params.search = searchQuery.value
     }
 
-    const response = await axiosInstance.get('/transaction-types/export/pdf', {
+    const response = await axiosInstance.get(`${appConfig.apiUrl}/transaction-types/export/pdf`, {
       params,
       responseType: 'blob',
     })
@@ -319,14 +336,18 @@ const exportPDF = async () => {
     const blob = new Blob([response.data], { type: 'application/pdf' })
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
-    link.href = url
-    link.download = `transaction-types-${new Date().toISOString().split('T')[0]}.pdf`
+    link.setAttribute('href', url)
+    link.setAttribute('download', `transaction-types-${new Date().toISOString().split('T')[0]}.pdf`)
+    link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
   } catch (error) {
     console.error('Error exporting PDF:', error)
+    alert("Erreur lors de l'export PDF")
+  } finally {
+    isExportingPDF.value = false
   }
 }
 </script>

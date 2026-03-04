@@ -302,6 +302,7 @@
     "update": "Mettre à jour",
     "create": "Créer",
     "export": "Exporter",
+    "exporting": "Exportation...",
     "search_placeholder": "Rechercher par code, nom ou description...",
     "no_records": "Aucun type d'opération trouvé",
     "per_page": "par page",
