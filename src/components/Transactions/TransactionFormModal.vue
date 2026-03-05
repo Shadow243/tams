@@ -1,0 +1,635 @@
+<template>
+  <div
+    :class="['modal', { show: show }]"
+    :style="{ display: show ? 'block' : 'none' }"
+    tabindex="-1"
+    role="dialog"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i :class="`ti ${isEditing ? 'ti-edit' : 'ti-plus'} me-2`"></i>
+            {{
+              isEditing
+                ? t('transactions.edit_transaction') || 'Modifier la transaction'
+                : t('transactions.add_transaction') || 'Nouvelle transaction'
+            }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            @click="closeModal"
+            :disabled="processing"
+          ></button>
+        </div>
+
+        <form @submit.prevent="handleSubmit">
+          <div class="modal-body">
+            <!-- Transaction Type & Branch -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="transaction_type_id" class="form-label">
+                  {{ t('transactions.transaction_type') || "Type d'opération" }}
+                  <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select"
+                  id="transaction_type_id"
+                  v-model.number="localForm.transaction_type_id"
+                  required
+                  :disabled="processing"
+                  @change="onTransactionTypeChange"
+                >
+                  <option :value="null" disabled>
+                    {{ t('transactions.select_type') || 'Sélectionnez un type' }}
+                  </option>
+                  <option v-for="type in transactionTypes" :key="type.id" :value="type.id">
+                    {{ type.name }} ({{ type.code }})
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="branch_id" class="form-label">
+                  {{ t('transactions.branch') || 'Agence' }}
+                  <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select"
+                  id="branch_id"
+                  v-model.number="localForm.branch_id"
+                  required
+                  :disabled="processing"
+                  @change="calculateAutomaticFee"
+                >
+                  <option :value="null" disabled>
+                    {{ t('transactions.select_branch') || 'Sélectionnez une agence' }}
+                  </option>
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                    {{ branch.name }} ({{ branch.code }})
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="ti ti-user me-2"></i>
+                  {{ t('transactions.customer_info') || 'Informations client' }}
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label">
+                      {{ t('transactions.customer') || 'Client' }}
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        :value="selectedCustomerDisplay"
+                        readonly
+                        :placeholder="
+                          t('transactions.no_customer_selected') || 'Aucun client sélectionné'
+                        "
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        @click="showCustomerSearch = true"
+                        :disabled="processing"
+                      >
+                        <i class="ti ti-search me-1"></i>
+                        {{ t('transactions.search_customer') || 'Rechercher' }}
+                      </button>
+                      <button
+                        v-if="selectedCustomer"
+                        type="button"
+                        class="btn btn-outline-danger"
+                        @click="clearCustomer"
+                        :disabled="processing"
+                      >
+                        <i class="ti ti-x"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="customer_phone" class="form-label">
+                      {{ t('transactions.customer_phone') || 'Téléphone client' }}
+                    </label>
+                    <input
+                      type="tel"
+                      class="form-control"
+                      id="customer_phone"
+                      v-model="localForm.customer_phone"
+                      :placeholder="t('transactions.customer_phone_placeholder') || '237XXXXXXXXX'"
+                      :disabled="processing || !!selectedCustomer"
+                      maxlength="12"
+                    />
+                    <small class="text-muted">
+                      {{ t('transactions.customer_phone_hint') || 'Format: 237XXXXXXXXX' }}
+                    </small>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="wallet_id" class="form-label">
+                      {{ t('transactions.wallet') || 'Portefeuille' }}
+                      <small class="text-muted"
+                        >({{ t('transactions.optional') || 'optionnel' }})</small
+                      >
+                    </label>
+                    <select
+                      class="form-select"
+                      id="wallet_id"
+                      v-model.number="localForm.wallet_id"
+                      :disabled="processing"
+                    >
+                      <option :value="null">
+                        {{ t('transactions.select_wallet') || 'Sélectionnez un portefeuille' }}
+                      </option>
+                      <option v-for="wallet in wallets" :key="wallet.id" :value="wallet.id">
+                        {{ wallet.name }} ({{ wallet.code }})
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Amount & Fees -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">
+                    <i class="ti ti-currency-dollar me-2"></i>
+                    {{ t('transactions.amount_fees') || 'Montants et frais' }}
+                  </h6>
+                  <div class="form-check form-switch">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="auto_calculate_fee"
+                      v-model="autoCalculateFee"
+                      @change="toggleAutoCalculate"
+                    />
+                    <label class="form-check-label" for="auto_calculate_fee">
+                      {{ t('transactions.auto_calculate_fee') || 'Calcul automatique des frais' }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="gross_amount" class="form-label">
+                      {{ t('transactions.gross_amount') || 'Montant brut' }}
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="gross_amount"
+                        v-model.number="localForm.gross_amount"
+                        required
+                        min="0"
+                        step="1"
+                        :disabled="processing"
+                        @input="onAmountChange"
+                      />
+                      <span class="input-group-text">XAF</span>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="fee_amount" class="form-label">
+                      {{ t('transactions.fee_amount') || 'Frais' }}
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="fee_amount"
+                        v-model.number="localForm.fee_amount"
+                        required
+                        min="0"
+                        step="1"
+                        :disabled="processing || autoCalculateFee"
+                        :readonly="autoCalculateFee"
+                      />
+                      <span class="input-group-text">XAF</span>
+                    </div>
+                    <small v-if="calculatingFee" class="text-info">
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                      {{ t('transactions.calculating') || 'Calcul en cours...' }}
+                    </small>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                      {{ t('transactions.net_amount') || 'Montant net' }}
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control fw-bold text-success"
+                        :value="formatAmount(netAmount)"
+                        readonly
+                      />
+                      <span class="input-group-text">XAF</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Withdrawal Code & Destination (for specific transaction types) -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="destination_branch_id" class="form-label">
+                  {{ t('transactions.destination_branch') || 'Agence de destination' }}
+                  <small class="text-muted"
+                    >({{ t('transactions.optional') || 'optionnel' }})</small
+                  >
+                </label>
+                <select
+                  class="form-select"
+                  id="destination_branch_id"
+                  v-model.number="localForm.destination_branch_id"
+                  :disabled="processing"
+                >
+                  <option :value="null">
+                    {{ t('transactions.select_destination_branch') || 'Sélectionnez une agence' }}
+                  </option>
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                    {{ branch.name }} ({{ branch.code }})
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="withdrawal_code" class="form-label">
+                  {{ t('transactions.withdrawal_code') || 'Code de retrait' }}
+                  <small class="text-muted"
+                    >({{ t('transactions.optional') || 'optionnel' }})</small
+                  >
+                </label>
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control font-monospace"
+                    id="withdrawal_code"
+                    v-model="localForm.withdrawal_code"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    :placeholder="t('transactions.withdrawal_code_placeholder') || '000000'"
+                    :disabled="processing"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    @click="generateWithdrawalCode"
+                    :disabled="processing"
+                  >
+                    <i class="ti ti-refresh"></i>
+                    {{ t('transactions.generate') || 'Générer' }}
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="localForm.withdrawal_code" class="col-md-6 mb-3">
+                <label for="expires_at" class="form-label">
+                  {{ t('transactions.expires_at') || "Date d'expiration" }}
+                  <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  id="expires_at"
+                  v-model="localForm.expires_at"
+                  :min="minExpirationDate"
+                  required
+                  :disabled="processing"
+                />
+              </div>
+
+              <!-- Status (only for edit mode) -->
+              <div v-if="isEditing" class="col-md-6 mb-3">
+                <label for="status" class="form-label">
+                  {{ t('transactions.status') || 'Statut' }}
+                </label>
+                <select
+                  class="form-select"
+                  id="status"
+                  v-model="localForm.status"
+                  :disabled="processing"
+                >
+                  <option value="pending">
+                    {{ t('transactions.status_pending') || 'En attente' }}
+                  </option>
+                  <option value="available">
+                    {{ t('transactions.status_available') || 'Disponible' }}
+                  </option>
+                  <option value="completed">
+                    {{ t('transactions.status_completed') || 'Complétée' }}
+                  </option>
+                  <option value="cancelled">
+                    {{ t('transactions.status_cancelled') || 'Annulée' }}
+                  </option>
+                  <option value="failed">{{ t('transactions.status_failed') || 'Échouée' }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Preview Card -->
+            <div v-if="showPreview" class="card border-info">
+              <div class="card-body">
+                <h6 class="card-title text-info">
+                  <i class="ti ti-eye me-2"></i>
+                  {{ t('transactions.preview') || 'Aperçu' }}
+                </h6>
+                <div class="row">
+                  <div class="col-md-4">
+                    <small class="text-muted">{{ t('transactions.gross_amount') }}</small>
+                    <div class="fs-5">{{ formatCurrency(localForm.gross_amount || 0) }}</div>
+                  </div>
+                  <div class="col-md-4">
+                    <small class="text-muted">{{ t('transactions.fee_amount') }}</small>
+                    <div class="fs-5 text-danger">
+                      - {{ formatCurrency(localForm.fee_amount || 0) }}
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <small class="text-muted">{{ t('transactions.net_amount') }}</small>
+                    <div class="fs-4 fw-bold text-success">{{ formatCurrency(netAmount) }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="closeModal"
+              :disabled="processing"
+            >
+              {{ t('transactions.cancel') || 'Annuler' }}
+            </button>
+            <button type="submit" class="btn btn-primary" :disabled="processing || !isFormValid">
+              <span v-if="processing" class="spinner-border spinner-border-sm me-2"></span>
+              <i v-else :class="`ti ${isEditing ? 'ti-device-floppy' : 'ti-check'} me-2`"></i>
+              {{
+                isEditing
+                  ? t('transactions.update') || 'Mettre à jour'
+                  : t('transactions.create') || 'Créer'
+              }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop -->
+  <div v-if="show" class="modal-backdrop fade show"></div>
+
+  <!-- Customer Search Modal -->
+  <CustomerSearchModal
+    :show="showCustomerSearch"
+    @close="showCustomerSearch = false"
+    @select="onCustomerSelected"
+  />
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useI18n } from '@/composables/useI18n'
+import axiosInstance from '@/plugins/axios'
+import type { TransactionFormData } from '@/types'
+import CustomerSearchModal from './CustomerSearchModal.vue'
+
+const { t } = useI18n()
+
+interface Props {
+  show: boolean
+  formData?: TransactionFormData
+  transactionTypes: any[]
+  branches: any[]
+  wallets: any[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  formData: () => ({
+    transaction_type_id: null,
+    branch_id: null,
+    customer_id: null,
+    customer_phone: '',
+    wallet_id: null,
+    gross_amount: 0,
+    fee_amount: 0,
+    destination_branch_id: null,
+    withdrawal_code: '',
+    expires_at: '',
+    status: 'pending',
+  }),
+  transactionTypes: () => [],
+  branches: () => [],
+  wallets: () => [],
+})
+
+const emit = defineEmits<{
+  close: []
+  submit: [data: TransactionFormData]
+}>()
+
+const localForm = ref<TransactionFormData>({ ...props.formData })
+const processing = ref(false)
+const autoCalculateFee = ref(true)
+const calculatingFee = ref(false)
+const showCustomerSearch = ref(false)
+const selectedCustomer = ref<any>(null)
+const showPreview = ref(false)
+
+let feeCalculationTimeout: ReturnType<typeof setTimeout> | null = null
+
+watch(
+  () => props.formData,
+  (newData) => {
+    if (newData) {
+      localForm.value = { ...newData }
+      showPreview.value = false
+    }
+  },
+  { deep: true }
+)
+
+watch(
+  () => props.show,
+  (newShow) => {
+    if (newShow) {
+      localForm.value = { ...props.formData }
+      selectedCustomer.value = null
+      showPreview.value = false
+    }
+  }
+)
+
+const isEditing = computed(() => !!localForm.value.id)
+
+const netAmount = computed(() => {
+  return (localForm.value.gross_amount || 0) - (localForm.value.fee_amount || 0)
+})
+
+const minExpirationDate = computed(() => {
+  const now = new Date()
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+  return now.toISOString().slice(0, 16)
+})
+
+const selectedCustomerDisplay = computed(() => {
+  if (selectedCustomer.value) {
+    return `${selectedCustomer.value.full_name} (${selectedCustomer.value.phone})`
+  }
+  return ''
+})
+
+const isFormValid = computed(() => {
+  return (
+    localForm.value.transaction_type_id &&
+    localForm.value.branch_id &&
+    localForm.value.gross_amount > 0 &&
+    localForm.value.fee_amount >= 0 &&
+    (!localForm.value.withdrawal_code || localForm.value.expires_at)
+  )
+})
+
+const onTransactionTypeChange = () => {
+  calculateAutomaticFee()
+  showPreview.value = true
+}
+
+const onAmountChange = () => {
+  if (autoCalculateFee.value) {
+    calculateAutomaticFee()
+  }
+  showPreview.value = true
+}
+
+const toggleAutoCalculate = () => {
+  if (autoCalculateFee.value) {
+    calculateAutomaticFee()
+  }
+}
+
+const calculateAutomaticFee = async () => {
+  if (!autoCalculateFee.value) return
+  if (
+    !localForm.value.transaction_type_id ||
+    !localForm.value.branch_id ||
+    !localForm.value.gross_amount
+  ) {
+    return
+  }
+
+  if (feeCalculationTimeout) {
+    clearTimeout(feeCalculationTimeout)
+  }
+
+  feeCalculationTimeout = setTimeout(async () => {
+    calculatingFee.value = true
+
+    try {
+      const response = await axiosInstance.get('/fee-rules/applicable', {
+        params: {
+          transaction_type_id: localForm.value.transaction_type_id,
+          branch_id: localForm.value.branch_id,
+          amount: localForm.value.gross_amount,
+        },
+      })
+
+      if (response.data.data) {
+        localForm.value.fee_amount = response.data.data.calculated_fee || 0
+      }
+    } catch (error) {
+      console.error('Error calculating fee:', error)
+    } finally {
+      calculatingFee.value = false
+    }
+  }, 500)
+}
+
+const generateWithdrawalCode = () => {
+  localForm.value.withdrawal_code = Math.floor(100000 + Math.random() * 900000).toString()
+
+  // Set default expiration to 7 days from now
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 7)
+  expiresAt.setMinutes(expiresAt.getMinutes() - expiresAt.getTimezoneOffset())
+  localForm.value.expires_at = expiresAt.toISOString().slice(0, 16)
+}
+
+const onCustomerSelected = (customer: any) => {
+  selectedCustomer.value = customer
+  localForm.value.customer_id = customer.id
+  localForm.value.customer_phone = customer.phone
+}
+
+const clearCustomer = () => {
+  selectedCustomer.value = null
+  localForm.value.customer_id = null
+  localForm.value.customer_phone = ''
+}
+
+const handleSubmit = () => {
+  if (!isFormValid.value) return
+
+  processing.value = true
+  emit('submit', localForm.value)
+}
+
+const closeModal = () => {
+  emit('close')
+}
+
+const formatAmount = (amount: number) => {
+  return new Intl.NumberFormat('fr-FR').format(amount)
+}
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XAF',
+    minimumFractionDigits: 0,
+  }).format(amount)
+}
+
+defineExpose({
+  setProcessing: (value: boolean) => {
+    processing.value = value
+  },
+})
+</script>
+
+<style scoped>
+.modal.show {
+  display: block;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.font-monospace {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1em;
+  letter-spacing: 0.1em;
+}
+</style>

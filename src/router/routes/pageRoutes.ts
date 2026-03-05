@@ -121,6 +121,42 @@ const routes: RouteRecordRaw[] = [
                     import("@/views/configurations/transaction-types.vue").then((m) => m.default || m),
             }
         ],
+    },
+    {
+        path: "/configurations/fee-rules",
+        component: () =>
+            import("@/views/configurations/FeeRulesIndex.vue").then((m) => m.default || m),
+        children: [
+            {
+                path: "",
+                name: "fee-rules.index",
+                redirect: { name: "fee-rules.list" },
+            },
+            {
+                path: "list",
+                name: "fee-rules.list",
+                component: () =>
+                    import("@/views/configurations/fee-rules.vue").then((m) => m.default || m),
+            }
+        ],
+    },
+    {
+        path: "/transactions",
+        component: () =>
+            import("@/views/transactions/TransactionsIndex.vue").then((m) => m.default || m),
+        children: [
+            {
+                path: "",
+                name: "transactions.index",
+                redirect: { name: "transactions.list" },
+            },
+            {
+                path: "list",
+                name: "transactions.list",
+                component: () =>
+                    import("@/views/transactions/transactions.vue").then((m) => m.default || m),
+            }
+        ],
     }
     // {
     //     path: "/currencies",

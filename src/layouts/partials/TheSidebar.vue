@@ -118,9 +118,9 @@ let appRoutes = [
     type: 'header',
   },
   {
-    icon: 'currency-dollar',
+    icon: 'receipt-2',
     label: t('sidebar.transactions'),
-    route: 'home',
+    route: 'transactions.list',
     type: 'menu',
   },
   {
@@ -149,6 +149,12 @@ let appRoutes = [
     icon: 'arrows-exchange',
     label: t('sidebar.transaction_types'),
     route: 'transaction-types.list',
+    type: 'menu',
+  },
+  {
+    icon: 'receipt',
+    label: t('sidebar.fee_rules'),
+    route: 'fee-rules.list',
     type: 'menu',
   },
   {
