@@ -33,43 +33,38 @@
                   {{ t('transactions.transaction_type') || "Type d'opération" }}
                   <span class="text-danger">*</span>
                 </label>
-                <select
-                  class="form-select"
-                  id="transaction_type_id"
-                  v-model.number="localForm.transaction_type_id"
-                  required
+                <SearchableSelect
+                  v-model="localForm.transaction_type_id"
+                  :options="transactionTypes"
+                  :option-label="(type) => `${type.name} (${type.code})`"
+                  option-value="id"
+                  :placeholder="t('transactions.select_type') || 'Sélectionnez un type'"
                   :disabled="processing"
                   @change="onTransactionTypeChange"
-                >
-                  <option :value="null" disabled>
-                    {{ t('transactions.select_type') || 'Sélectionnez un type' }}
-                  </option>
-                  <option v-for="type in transactionTypes" :key="type.id" :value="type.id">
-                    {{ type.name }} ({{ type.code }})
-                  </option>
-                </select>
+                />
               </div>
 
               <div class="col-md-6 mb-3">
                 <label for="branch_id" class="form-label">
                   {{ t('transactions.branch') || 'Agence' }}
                   <span class="text-danger">*</span>
+                  <span v-if="!canSelectBranch" class="badge bg-info ms-2">{{
+                    t('transactions.auto_from_user') || 'Automatique'
+                  }}</span>
                 </label>
-                <select
-                  class="form-select"
-                  id="branch_id"
-                  v-model.number="localForm.branch_id"
-                  required
-                  :disabled="processing"
+                <SearchableSelect
+                  v-model="localForm.branch_id"
+                  :options="branches"
+                  :option-label="(branch) => `${branch.name} (${branch.code})`"
+                  option-value="id"
+                  :placeholder="t('transactions.select_branch') || 'Sélectionnez une agence'"
+                  :disabled="processing || !canSelectBranch"
                   @change="calculateAutomaticFee"
-                >
-                  <option :value="null" disabled>
-                    {{ t('transactions.select_branch') || 'Sélectionnez une agence' }}
-                  </option>
-                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
-                    {{ branch.name }} ({{ branch.code }})
-                  </option>
-                </select>
+                />
+                <div v-if="!canSelectBranch" class="form-text">
+                  <i class="ti ti-info-circle me-1"></i>
+                  {{ t('transactions.branch_from_user') || "Agence de l'utilisateur connecté" }}
+                </div>
               </div>
             </div>
 
@@ -143,19 +138,28 @@
                         >({{ t('transactions.optional') || 'optionnel' }})</small
                       >
                     </label>
-                    <select
-                      class="form-select"
-                      id="wallet_id"
-                      v-model.number="localForm.wallet_id"
-                      :disabled="processing"
-                    >
-                      <option :value="null">
-                        {{ t('transactions.select_wallet') || 'Sélectionnez un portefeuille' }}
-                      </option>
-                      <option v-for="wallet in wallets" :key="wallet.id" :value="wallet.id">
-                        {{ wallet.name }} ({{ wallet.code }})
-                      </option>
-                    </select>
+                    <SearchableSelect
+                      v-model="localForm.wallet_id"
+                      :options="availableWallets"
+                      :option-label="
+                        (wallet) =>
+                          `${wallet.wallet_number} - ${wallet.operator?.name || 'N/A'} (${
+                            wallet.currency?.code || 'N/A'
+                          })`
+                      "
+                      option-value="id"
+                      :placeholder="
+                        t('transactions.select_wallet') || 'Sélectionnez un portefeuille'
+                      "
+                      :disabled="processing || !localForm.branch_id"
+                      :clearable="true"
+                    />
+                    <small v-if="!localForm.branch_id" class="text-muted">
+                      <i class="ti ti-info-circle me-1"></i>
+                      {{
+                        t('transactions.select_branch_first') || "Sélectionnez d'abord une agence"
+                      }}
+                    </small>
                   </div>
                 </div>
               </div>
@@ -185,6 +189,36 @@
               </div>
               <div class="card-body">
                 <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <label for="currency_code" class="form-label">
+                      {{ t('transactions.currency') || 'Devise' }}
+                      <span class="text-danger">*</span>
+                    </label>
+                    <SearchableSelect
+                      v-model="localForm.currency_code"
+                      :options="activeCurrencies"
+                      :option-label="
+                        (currency) => `${currency.name} (${currency.code}) - ${currency.symbol}`
+                      "
+                      option-value="code"
+                      :placeholder="t('transactions.select_currency') || 'Sélectionnez une devise'"
+                      :disabled="processing || loadingCurrencies || !!localForm.wallet_id"
+                      @change="onCurrencyChange"
+                    />
+                    <small v-if="localForm.wallet_id" class="text-muted">
+                      <i class="ti ti-info-circle me-1"></i>
+                      {{
+                        t('transactions.currency_from_wallet') ||
+                        'Devise définie par le portefeuille sélectionné'
+                      }}
+                    </small>
+                    <small v-if="loadingCurrencies" class="text-info">
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                      {{ t('common.loading') || 'Chargement...' }}
+                    </small>
+                  </div>
+                </div>
+                <div class="row">
                   <div class="col-md-4 mb-3">
                     <label for="gross_amount" class="form-label">
                       {{ t('transactions.gross_amount') || 'Montant brut' }}
@@ -202,7 +236,7 @@
                         :disabled="processing"
                         @input="onAmountChange"
                       />
-                      <span class="input-group-text">XAF</span>
+                      <span class="input-group-text">{{ selectedCurrencySymbol }}</span>
                     </div>
                   </div>
 
@@ -223,7 +257,7 @@
                         :disabled="processing || autoCalculateFee"
                         :readonly="autoCalculateFee"
                       />
-                      <span class="input-group-text">XAF</span>
+                      <span class="input-group-text">{{ selectedCurrencySymbol }}</span>
                     </div>
                     <small v-if="calculatingFee" class="text-info">
                       <span class="spinner-border spinner-border-sm me-1"></span>
@@ -242,7 +276,7 @@
                         :value="formatAmount(netAmount)"
                         readonly
                       />
-                      <span class="input-group-text">XAF</span>
+                      <span class="input-group-text">{{ selectedCurrencySymbol }}</span>
                     </div>
                   </div>
                 </div>
@@ -410,13 +444,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from '@/composables/useI18n'
-import axiosInstance from '@/plugins/axios'
+import { useAuthStore } from '@/stores/auth'
+import { useCurrencyStore } from '@/stores/currencies'
+import { axiosInstance } from '@/plugins/axios'
+import { appConfig } from '@/config/app'
 import type { TransactionFormData } from '@/types'
 import CustomerSearchModal from './CustomerSearchModal.vue'
+import SearchableSelect from '@/components/Shared/SearchableSelect.vue'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
+const currencyStore = useCurrencyStore()
 
 interface Props {
   show: boolean
@@ -433,6 +473,7 @@ const props = withDefaults(defineProps<Props>(), {
     customer_id: null,
     customer_phone: '',
     wallet_id: null,
+    currency_code: 'CDF',
     gross_amount: 0,
     fee_amount: 0,
     destination_branch_id: null,
@@ -457,8 +498,60 @@ const calculatingFee = ref(false)
 const showCustomerSearch = ref(false)
 const selectedCustomer = ref<any>(null)
 const showPreview = ref(false)
+const loadingCurrencies = ref(false)
 
 let feeCalculationTimeout: ReturnType<typeof setTimeout> | null = null
+
+// Check if user can manually select branch (admin or supervisor)
+const canSelectBranch = computed(() => {
+  if (!authStore.user) return false
+
+  const permissions = authStore.user.permissions || []
+  const roles = authStore.user.roles || []
+
+  // Admin role or no branch assigned = can select any branch
+  if (roles.includes('admin') || roles.includes('superviseur')) {
+    return true
+  }
+
+  // User without branch_id should be able to select
+  if (!authStore.user.branch_id) {
+    return true
+  }
+
+  // Check for high-level permissions that indicate admin/supervisor role
+  return (
+    permissions.includes('gerer branches') ||
+    permissions.includes('editer branches') ||
+    permissions.some((p) => p.includes('gerer') && !p.includes('transactions'))
+  )
+})
+
+// Initialize branch_id from authenticated user and load currencies
+onMounted(async () => {
+  // Only auto-set branch_id if user cannot select branch manually (not admin/supervisor)
+  if (authStore.user?.branch_id && !canSelectBranch.value) {
+    localForm.value.branch_id = authStore.user.branch_id
+  }
+
+  // Load currencies if not already loaded
+  if (currencyStore.allCurrencies.length === 0) {
+    loadingCurrencies.value = true
+    try {
+      await currencyStore.fetchAllCurrencies()
+      // Set default currency if not already set
+      if (!localForm.value.currency_code && currencyStore.defaultCurrency) {
+        localForm.value.currency_code = currencyStore.defaultCurrency.code
+      }
+    } catch (error) {
+      console.error('Error loading currencies:', error)
+    } finally {
+      loadingCurrencies.value = false
+    }
+  } else if (!localForm.value.currency_code && currencyStore.defaultCurrency) {
+    localForm.value.currency_code = currencyStore.defaultCurrency.code
+  }
+})
 
 watch(
   () => props.formData,
@@ -476,13 +569,70 @@ watch(
   (newShow) => {
     if (newShow) {
       localForm.value = { ...props.formData }
+      // Only auto-set branch_id if user cannot select branch manually (not admin/supervisor)
+      if (authStore.user?.branch_id && !canSelectBranch.value) {
+        localForm.value.branch_id = authStore.user.branch_id
+      }
+      // Set default currency if not set
+      if (!localForm.value.currency_code && currencyStore.defaultCurrency) {
+        localForm.value.currency_code = currencyStore.defaultCurrency.code
+      }
       selectedCustomer.value = null
       showPreview.value = false
     }
   }
 )
 
+// Auto-fill currency when wallet is selected
+watch(
+  () => localForm.value.wallet_id,
+  (newWalletId) => {
+    if (newWalletId) {
+      const selectedWallet = props.wallets.find((w) => w.id === newWalletId)
+      if (selectedWallet?.currency?.code) {
+        localForm.value.currency_code = selectedWallet.currency.code
+      }
+      // Recalculate fees when wallet changes (operator changes)
+      if (autoCalculateFee.value) {
+        calculateAutomaticFee()
+      }
+    }
+  }
+)
+
+// Reset wallet when branch changes
+watch(
+  () => localForm.value.branch_id,
+  (newBranchId, oldBranchId) => {
+    // Only reset if branch actually changed and wallet is selected
+    if (oldBranchId !== undefined && newBranchId !== oldBranchId && localForm.value.wallet_id) {
+      const selectedWallet = props.wallets.find((w) => w.id === localForm.value.wallet_id)
+      // If selected wallet doesn't belong to new branch, clear it
+      if (selectedWallet && selectedWallet.branch_id !== newBranchId) {
+        localForm.value.wallet_id = null
+      }
+    }
+  }
+)
+
 const isEditing = computed(() => !!localForm.value.id)
+
+// Filter wallets by selected branch
+const availableWallets = computed(() => {
+  if (!localForm.value.branch_id) return []
+  return props.wallets.filter((w) => w.branch_id === localForm.value.branch_id)
+})
+
+const activeCurrencies = computed(() => currencyStore.activeCurrencies)
+
+const selectedCurrency = computed(() => {
+  if (!localForm.value.currency_code) return null
+  return currencyStore.getCurrencyByCode(localForm.value.currency_code)
+})
+
+const selectedCurrencySymbol = computed(() => {
+  return selectedCurrency.value?.symbol || 'CDF'
+})
 
 const netAmount = computed(() => {
   return (localForm.value.gross_amount || 0) - (localForm.value.fee_amount || 0)
@@ -513,6 +663,10 @@ const isFormValid = computed(() => {
 
 const onTransactionTypeChange = () => {
   calculateAutomaticFee()
+  showPreview.value = true
+}
+
+const onCurrencyChange = () => {
   showPreview.value = true
 }
 
@@ -547,16 +701,27 @@ const calculateAutomaticFee = async () => {
     calculatingFee.value = true
 
     try {
-      const response = await axiosInstance.get('/fee-rules/applicable', {
+      // Get operator_id from selected wallet if available
+      let operatorId = null
+      if (localForm.value.wallet_id) {
+        const selectedWallet = props.wallets.find((w) => w.id === localForm.value.wallet_id)
+        operatorId = selectedWallet?.operator_id || null
+      }
+
+      const response = await axiosInstance.get(`${appConfig.apiUrl}/fee-rules/applicable`, {
         params: {
           transaction_type_id: localForm.value.transaction_type_id,
           branch_id: localForm.value.branch_id,
+          operator_id: operatorId,
           amount: localForm.value.gross_amount,
         },
       })
+      console.log('Fee calculation API response:', response.data)
 
-      if (response.data.data) {
-        localForm.value.fee_amount = response.data.data.calculated_fee || 0
+      if (response.data && response.data.calculated_fee !== undefined) {
+        localForm.value.fee_amount = response.data.calculated_fee || 0
+        console.log('API fee response:', response.data)
+        console.log('Frais calculé (fee_amount):', localForm.value.fee_amount)
       }
     } catch (error) {
       console.error('Error calculating fee:', error)
@@ -591,6 +756,14 @@ const clearCustomer = () => {
 const handleSubmit = () => {
   if (!isFormValid.value) return
 
+  // Add currency_id to the form before submit
+  const selectedCurrencyObj = currencyStore.getCurrencyByCode(localForm.value.currency_code)
+  if (selectedCurrencyObj && selectedCurrencyObj.id) {
+    localForm.value.currency_id = selectedCurrencyObj.id
+  } else {
+    localForm.value.currency_id = null
+  }
+
   processing.value = true
   emit('submit', localForm.value)
 }
@@ -604,11 +777,8 @@ const formatAmount = (amount: number) => {
 }
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XAF',
-    minimumFractionDigits: 0,
-  }).format(amount)
+  const currencyCode = localForm.value.currency_code || 'CDF'
+  return currencyStore.formatAmount(amount, currencyCode)
 }
 
 defineExpose({

@@ -157,25 +157,17 @@ const routes: RouteRecordRaw[] = [
                     import("@/views/transactions/transactions.vue").then((m) => m.default || m),
             }
         ],
+    },
+    {
+        path: "/configurations/currencies",
+        name: "currencies.list",
+        component: () =>
+            import("@/views/currencies/currencies.vue").then((m) => m.default || m),
+        meta: {
+            title: "Currencies",
+            middleware: "auth",
+        },
     }
-    // {
-    //     path: "/currencies",
-    //     component: () =>
-    //         import("@/views/currencies/CurrenciesIndex.vue").then((m) => m.default || m),
-    //     children: [
-    //         {
-    //             path: "",
-    //             name: "currencies.index",
-    //             redirect: { name: "currencies.list" },
-    //         },
-    //         {
-    //             path: "list",
-    //             name: "currencies.list",
-    //             component: () =>
-    //                 import("@/views/currencies/CurrenciesList.vue").then((m) => m.default || m),
-    //         }
-    //     ],
-    // }
 ];
 
 export default routes;

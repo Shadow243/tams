@@ -156,7 +156,7 @@
               <span class="fw-semibold">{{ Number(wallet.balance).toFixed(2) }}</span>
             </td>
             <td class="text-center">
-              <span class="badge bg-secondary">{{ wallet.currency }}</span>
+              <span class="badge bg-secondary">{{ wallet.currency?.code || 'N/A' }}</span>
             </td>
             <td class="text-center">
               <span

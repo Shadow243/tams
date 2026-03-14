@@ -266,6 +266,18 @@
           <input v-model="form.country_code" type="text" class="form-control" placeholder="+1" />
         </div>
 
+        <div class="col-md-6">
+          <label class="form-label">{{ t('users.form.branch') || 'Branch' }}</label>
+          <SearchableSelect
+            v-model="form.branch_id"
+            :options="branchStore.branch_list"
+            option-label="name"
+            option-value="id"
+            :placeholder="t('users.form.selectBranch') || 'Select Branch'"
+            :clearable="true"
+          />
+        </div>
+
         <div class="col-12" v-if="isEditing && !showPasswordFields">
           <button
             type="button"
@@ -341,20 +353,30 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, reactive, nextTick, type PropType } from 'vue'
+import { computed, ref, watch, reactive, nextTick, type PropType, onMounted } from 'vue'
 // import { debounce } from 'lodash-es'
 import debounce from 'lodash.debounce'
 import type { UsersResponse, UserList } from '@/types'
 import { useI18n } from '@/composables/useI18n'
 import { useUserStore } from '@/stores/users'
+import { useBranchStore } from '@/stores/branches'
 import User from '@/components/Users/User.vue'
 import BaseModal from '@/components/Shared/BaseModal.vue'
+import SearchableSelect from '@/components/Shared/SearchableSelect.vue'
 import { confirmDialog } from '@/utils/notification'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 
 const { t } = useI18n()
 const userStore = useUserStore()
+const branchStore = useBranchStore()
+
+// Load branches on mount
+onMounted(() => {
+  if (branchStore.branch_list.length === 0) {
+    branchStore.fetchBranches()
+  }
+})
 
 // Données du formulaire
 const form = reactive({
@@ -364,6 +386,7 @@ const form = reactive({
   phone: '',
   gender: '',
   country_code: '',
+  branch_id: null,
   password: '',
   password_confirmation: '',
   is_email_verified: false,
@@ -389,6 +412,7 @@ const resetForm = () => {
     phone: '',
     gender: '',
     country_code: '',
+    branch_id: null,
     password: '',
     password_confirmation: '',
     is_email_verified: false,
@@ -510,6 +534,7 @@ const editUser = async (user: any) => {
   form.phone = user.phone_number || user.phone || ''
   form.gender = normalizedGender
   form.country_code = user.country_code || ''
+  form.branch_id = user.branch_id || null
   form.password = ''
   form.password_confirmation = ''
   // Convertir les valeurs en booléens - vérifier si les dates existent ET ne sont pas null

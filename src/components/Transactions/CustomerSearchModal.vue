@@ -109,10 +109,14 @@
                 <input
                   type="text"
                   class="form-control"
+                  :class="{ 'is-invalid': validationErrors.full_name }"
                   id="full_name"
                   v-model="newCustomer.full_name"
                   required
                 />
+                <div v-if="validationErrors.full_name" class="invalid-feedback">
+                  {{ validationErrors.full_name[0] }}
+                </div>
               </div>
 
               <div class="mb-3">
@@ -123,11 +127,44 @@
                 <input
                   type="tel"
                   class="form-control"
+                  :class="{
+                    'is-invalid': validationErrors.phone || (newCustomer.phone && !isPhoneValid),
+                    'is-valid': newCustomer.phone && isPhoneValid,
+                  }"
                   id="phone"
                   v-model="newCustomer.phone"
-                  :placeholder="t('transactions.phone_placeholder') || '237XXXXXXXXX'"
+                  :placeholder="t('transactions.phone_placeholder') || '243XXXXXXXXX'"
                   required
+                  maxlength="12"
+                  pattern="243[0-9]{9}"
+                  @input="validatePhone"
                 />
+                <div v-if="validationErrors.phone" class="invalid-feedback d-block">
+                  {{ validationErrors.phone[0] }}
+                </div>
+                <div
+                  v-else-if="newCustomer.phone && !isPhoneValid"
+                  class="invalid-feedback d-block"
+                >
+                  <span v-if="!newCustomer.phone.startsWith('243')">
+                    ❌ Le numéro doit commencer par <strong>243</strong> (RDC/Congo)
+                  </span>
+                  <span v-else-if="newCustomer.phone.length !== 12">
+                    ❌ Le numéro doit avoir exactement <strong>12 chiffres</strong> (actuellement:
+                    {{ newCustomer.phone.length }})
+                  </span>
+                  <span v-else> ❌ Format invalide </span>
+                </div>
+                <div v-else-if="newCustomer.phone && isPhoneValid" class="valid-feedback d-block">
+                  ✅ Format valide
+                </div>
+                <small class="form-text text-muted d-block mt-1">
+                  <i class="ti ti-info-circle me-1"></i>
+                  {{
+                    t('transactions.phone_format_hint') ||
+                    'Format: 237 suivi de 9 chiffres (ex: 237690123456)'
+                  }}
+                </small>
               </div>
 
               <div class="mb-3">
@@ -137,9 +174,13 @@
                 <input
                   type="text"
                   class="form-control"
+                  :class="{ 'is-invalid': validationErrors.national_id }"
                   id="national_id"
                   v-model="newCustomer.national_id"
                 />
+                <div v-if="validationErrors.national_id" class="invalid-feedback">
+                  {{ validationErrors.national_id[0] }}
+                </div>
               </div>
 
               <div class="d-grid gap-2">
@@ -183,10 +224,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useI18n } from '@/composables/useI18n'
-import axiosInstance from '@/plugins/axios'
+import { axiosInstance } from '@/plugins/axios'
 import Swal from 'sweetalert2'
+import { appConfig } from '@/config/app'
 
 const { t } = useI18n()
 
@@ -221,7 +263,25 @@ const newCustomer = ref({
   national_id: '',
 })
 
+const validationErrors = ref<Record<string, string[]>>({})
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+// Phone validation computed property
+const isPhoneValid = computed(() => {
+  const phone = newCustomer.value.phone
+  if (!phone) return false
+  // Must be exactly 12 digits and start with 243 (RDC/Congo)
+  return phone.length === 12 && phone.startsWith('243') && /^243[0-9]{9}$/.test(phone)
+})
+
+// Real-time phone validation
+const validatePhone = () => {
+  // Clear validation errors when user types
+  if (validationErrors.value.phone) {
+    validationErrors.value.phone = []
+  }
+}
 
 watch(
   () => props.show,
@@ -251,7 +311,7 @@ const performSearch = async () => {
   searching.value = true
 
   try {
-    const response = await axiosInstance.get('/customers', {
+    const response = await axiosInstance.get(`${appConfig.apiUrl}/customers`, {
       params: {
         search: searchQuery.value,
         per_page: 10,
@@ -260,7 +320,6 @@ const performSearch = async () => {
 
     searchResults.value = response.data.data || []
   } catch (error) {
-    console.error('Error searching customers:', error)
     searchResults.value = []
   } finally {
     searching.value = false
@@ -282,9 +341,15 @@ const showCreateForm = () => {
 
 const createCustomer = async () => {
   creating.value = true
+  validationErrors.value = {}
+
+  console.log('Creating customer:', newCustomer.value)
+  console.log('API URL:', `${appConfig.apiUrl}/customers`)
 
   try {
-    const response = await axiosInstance.post('/customers', newCustomer.value)
+    const response = await axiosInstance.post(`${appConfig.apiUrl}/customers`, newCustomer.value)
+
+    console.log('Customer created successfully:', response.data)
 
     await Swal.fire({
       icon: 'success',
@@ -297,14 +362,33 @@ const createCustomer = async () => {
     emit('select', response.data.data)
     closeModal()
   } catch (error: any) {
-    Swal.fire({
-      icon: 'error',
-      title: t('transactions.error') || 'Erreur',
-      text:
-        error.response?.data?.message ||
-        t('transactions.error_creating_customer') ||
-        'Erreur lors de la création du client',
-    })
+    console.error('Error creating customer:', error)
+    console.error('Error response:', error.response)
+    console.error('Error message:', error.message)
+
+    // Handle validation errors (422)
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      validationErrors.value = error.response.data.errors
+
+      Swal.fire({
+        icon: 'error',
+        title: t('transactions.validation_error') || 'Erreur de validation',
+        html: Object.values(error.response.data.errors)
+          .flat()
+          .map((err: any) => `<p class="mb-1">• ${err}</p>`)
+          .join(''),
+      })
+    } else {
+      // Handle other errors
+      Swal.fire({
+        icon: 'error',
+        title: t('transactions.error') || 'Erreur',
+        text:
+          error.response?.data?.message ||
+          t('transactions.error_creating_customer') ||
+          'Erreur lors de la création du client',
+      })
+    }
   } finally {
     creating.value = false
   }
@@ -312,6 +396,7 @@ const createCustomer = async () => {
 
 const cancelCreate = () => {
   showingCreateForm.value = false
+  validationErrors.value = {}
   newCustomer.value = {
     full_name: '',
     phone: '',
@@ -325,6 +410,7 @@ const resetModal = () => {
   searching.value = false
   showingCreateForm.value = false
   creating.value = false
+  validationErrors.value = {}
   newCustomer.value = {
     full_name: '',
     phone: '',

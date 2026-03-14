@@ -1,6 +1,7 @@
 import type { PaginationLink, Meta } from "./global";
 import type { Branch } from "./branches";
 import type { Operator } from "./operators";
+import type { Currency } from "@/stores/currencies";
 
 export interface Wallet {
     id: number;
@@ -11,7 +12,8 @@ export interface Wallet {
     operator?: Operator;
     wallet_number: string;
     balance: string | number;
-    currency: string;
+    currency_id: number;
+    currency?: Currency;
     formatted_balance: string;
     status: 'active' | 'inactive';
     status_label: string;
@@ -40,6 +42,6 @@ export interface WalletFormData {
     operator_id: number | null;
     wallet_number: string;
     balance?: number | string;
-    currency?: string;
+    currency_id?: number | null;
     status?: 'active' | 'inactive';
 }

@@ -158,6 +158,7 @@
               <th width="12%">{{ t('transactions.table.type') || 'Type' }}</th>
               <th width="10%">{{ t('transactions.table.customer') || 'Client' }}</th>
               <th width="10%">{{ t('transactions.table.amounts') || 'Montants' }}</th>
+              <th width="6%">{{ t('transactions.table.currency') || 'Devise' }}</th>
               <th width="8%">{{ t('transactions.table.fees') || 'Frais' }}</th>
               <th width="8%" class="text-center">
                 {{ t('transactions.table.status') || 'Statut' }}
@@ -210,16 +211,25 @@
               <td>
                 <div class="text-sm">
                   <div>
-                    <strong>{{ formatCurrency(transaction.gross_amount) }}</strong>
+                    <strong>{{ formatCurrency(transaction.gross_amount, transaction) }}</strong>
                   </div>
                   <small class="text-muted"
-                    >Net: {{ formatCurrency(transaction.net_amount) }}</small
+                    >Net: {{ formatCurrency(transaction.net_amount, transaction) }}</small
                   >
                 </div>
               </td>
               <td>
+                <span class="badge bg-primary">
+                  {{
+                    transaction.currency?.name
+                      ? transaction.currency.name + ' (' + transaction.currency.code + ')'
+                      : transaction.currency_code || 'CDF'
+                  }}
+                </span>
+              </td>
+              <td>
                 <span class="badge" :class="`bg-${getFeeModeBadge(transaction.fee_mode_applied)}`">
-                  {{ formatCurrency(transaction.fee_amount) }}
+                  {{ formatCurrency(transaction.fee_amount, transaction) }}
                 </span>
                 <small class="text-muted d-block">{{ transaction.fee_mode_applied_label }}</small>
               </td>
@@ -440,10 +450,18 @@ const getItemNumber = (index: number) => {
   return (props.meta.current_page - 1) * props.meta.per_page + index + 1
 }
 
-const formatCurrency = (amount: number) => {
+const formatCurrency = (amount: number, transaction?: Transaction) => {
+  let currencyCode = 'CDF'
+  if (transaction) {
+    if (transaction.currency?.code) {
+      currencyCode = transaction.currency.code
+    } else if (transaction.currency_code) {
+      currencyCode = transaction.currency_code
+    }
+  }
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'XAF',
+    currency: currencyCode,
     minimumFractionDigits: 0,
   }).format(amount)
 }

@@ -93,7 +93,7 @@ const formData = reactive<WalletFormData>({
   operator_id: null,
   wallet_number: '',
   balance: '',
-  currency: 'USD',
+  currency_id: null,
   status: 'active',
 })
 
@@ -107,7 +107,7 @@ const handleAddWallet = () => {
   formData.operator_id = null
   formData.wallet_number = ''
   formData.balance = ''
-  formData.currency = 'USD'
+  formData.currency_id = null
   formData.status = 'active'
   store.setCurrentWallet(null)
   showModal.value = true
@@ -150,7 +150,7 @@ const handleEditWallet = (wallet: Wallet) => {
   formData.operator_id = wallet.operator_id
   formData.wallet_number = wallet.wallet_number
   formData.balance = wallet.balance
-  formData.currency = wallet.currency
+  formData.currency_id = wallet.currency_id
   formData.status = wallet.status
   store.setCurrentWallet(wallet)
   showModal.value = true

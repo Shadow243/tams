@@ -327,9 +327,12 @@ const downloadPDF = async () => {
   downloading.value = true
 
   try {
-    const response = await axiosInstance.get(`/transactions/${props.transaction.id}/receipt`, {
-      responseType: 'blob',
-    })
+    const response = await axiosInstance.get(
+      `${appConfig.apiUrl}/transactions/${props.transaction.id}/receipt`,
+      {
+        responseType: 'blob',
+      }
+    )
 
     const blob = new Blob([response.data], { type: 'application/pdf' })
     const url = window.URL.createObjectURL(blob)

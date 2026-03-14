@@ -124,10 +124,6 @@ let appRoutes = [
     type: 'menu',
   },
   {
-    label: t('sidebar.params'),
-    type: 'header',
-  },
-  {
     icon: 'device-desktop',
     label: t('sidebar.operators'),
     route: 'operators.list',
@@ -152,9 +148,19 @@ let appRoutes = [
     type: 'menu',
   },
   {
+    label: t('sidebar.params'),
+    type: 'header',
+  },
+  {
     icon: 'receipt',
     label: t('sidebar.fee_rules'),
     route: 'fee-rules.list',
+    type: 'menu',
+  },
+  {
+    icon: 'currency-dollar',
+    label: t('sidebar.currencies'),
+    route: 'currencies.list',
     type: 'menu',
   },
   {

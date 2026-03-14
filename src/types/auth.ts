@@ -10,10 +10,12 @@ export interface User {
     email: string
     locale: string
     active: number
+    branch_id: number | null
     created_at: string
     updated_at: string
     email_verified_at: string | null
     permissions: string[]
+    roles?: string[]
 }
 
 export interface LoginCredentials {

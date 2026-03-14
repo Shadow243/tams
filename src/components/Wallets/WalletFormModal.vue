@@ -18,27 +18,33 @@
           <form @submit.prevent="handleSubmit">
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">{{ t('wallets.form.branch') || 'Branch' }} *</label>
-                <select v-model="localForm.branch_id" class="form-select" required>
-                  <option :value="null" disabled>
-                    {{ t('wallets.form.selectBranch') || 'Select a branch' }}
-                  </option>
-                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
-                    {{ branch.name }}
-                  </option>
-                </select>
+                <label for="branch_id" class="form-label">
+                  {{ t('wallets.form.branch') || 'Branch' }}
+                  <span class="text-danger">*</span>
+                </label>
+                <SearchableSelect
+                  v-model="localForm.branch_id"
+                  :options="branches"
+                  option-label="name"
+                  option-value="id"
+                  :placeholder="t('wallets.form.selectBranch') || 'Select a branch'"
+                  :disabled="processing"
+                />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">{{ t('wallets.form.operator') || 'Operator' }} *</label>
-                <select v-model="localForm.operator_id" class="form-select" required>
-                  <option :value="null" disabled>
-                    {{ t('wallets.form.selectOperator') || 'Select an operator' }}
-                  </option>
-                  <option v-for="operator in operators" :key="operator.id" :value="operator.id">
-                    {{ operator.name }}
-                  </option>
-                </select>
+                <label for="operator_id" class="form-label">
+                  {{ t('wallets.form.operator') || 'Operator' }}
+                  <span class="text-danger">*</span>
+                </label>
+                <SearchableSelect
+                  v-model="localForm.operator_id"
+                  :options="operators"
+                  option-label="name"
+                  option-value="id"
+                  :placeholder="t('wallets.form.selectOperator') || 'Select an operator'"
+                  :disabled="processing"
+                />
               </div>
             </div>
 
@@ -83,14 +89,17 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">{{ t('wallets.form.currency') || 'Currency' }}</label>
-                <input
-                  v-model="localForm.currency"
-                  type="text"
-                  class="form-control"
-                  style="text-transform: uppercase"
-                  maxlength="10"
-                  :placeholder="t('wallets.form.currencyPlaceholder') || 'USD'"
+                <label for="currency_id" class="form-label">
+                  {{ t('wallets.form.currency') || 'Currency' }}
+                  <span class="text-danger">*</span>
+                </label>
+                <SearchableSelect
+                  v-model="localForm.currency_id"
+                  :options="currencies"
+                  :option-label="(currency) => `${currency.code} - ${currency.name}`"
+                  option-value="id"
+                  :placeholder="t('wallets.form.selectCurrency') || 'Select a currency'"
+                  :disabled="processing"
                 />
               </div>
             </div>
@@ -122,14 +131,18 @@ import { reactive, watch, onMounted } from 'vue'
 import { useI18n } from '@/composables/useI18n'
 import { useBranchStore } from '@/stores/branches'
 import { useOperatorStore } from '@/stores/operators'
+import { useCurrencyStore } from '@/stores/currencies'
 import { storeToRefs } from 'pinia'
 import type { WalletFormData } from '@/types'
+import SearchableSelect from '@/components/Shared/SearchableSelect.vue'
 
 const { t } = useI18n()
 const branchStore = useBranchStore()
 const operatorStore = useOperatorStore()
+const currencyStore = useCurrencyStore()
 const { branch_list: branches } = storeToRefs(branchStore)
 const { operator_list: operators } = storeToRefs(operatorStore)
+const { activeCurrencies: currencies } = storeToRefs(currencyStore)
 
 interface Props {
   show: boolean
@@ -150,17 +163,20 @@ const localForm = reactive<WalletFormData>({
   operator_id: null,
   wallet_number: '',
   balance: '',
-  currency: 'USD',
+  currency_id: null,
   status: 'active',
 })
 
-// Load branches and operators on mount
+// Load branches, operators and currencies on mount
 onMounted(async () => {
   if (!branches.value.length) {
     await branchStore.fetchBranches(1, '', 100)
   }
   if (!operators.value.length) {
     await operatorStore.fetchOperators(1, '', 100)
+  }
+  if (!currencies.value.length) {
+    await currencyStore.fetchAllCurrencies()
   }
 })
 
@@ -172,7 +188,7 @@ watch(
     localForm.operator_id = newData.operator_id
     localForm.wallet_number = newData.wallet_number
     localForm.balance = newData.balance || ''
-    localForm.currency = newData.currency || 'USD'
+    localForm.currency_id = newData.currency_id || null
     localForm.status = newData.status || 'active'
   },
   { deep: true, immediate: true }
@@ -187,7 +203,7 @@ watch(
       localForm.operator_id = null
       localForm.wallet_number = ''
       localForm.balance = ''
-      localForm.currency = 'USD'
+      localForm.currency_id = null
       localForm.status = 'active'
     }
   }
@@ -198,7 +214,7 @@ const handleSubmit = () => {
     branch_id: localForm.branch_id,
     operator_id: localForm.operator_id,
     wallet_number: localForm.wallet_number,
-    currency: localForm.currency?.toUpperCase() || 'USD',
+    currency_id: localForm.currency_id,
     status: localForm.status,
   }
 
