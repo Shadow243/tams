@@ -92,6 +92,12 @@ export interface TransactionFormData {
   customer_phone: string | null
   currency_code: string
   currency_id?: number | null
+  currency?: {
+    id: number
+    code: string
+    name: string
+    symbol: string | null
+  }
   gross_amount: number | null
   fee_amount: number | null
   fee_mode_applied: FeeModeApplied | null

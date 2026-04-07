@@ -186,8 +186,14 @@
                     height="50"
                     patternUnits="userSpaceOnUse"
                   >
-                    <rect x="0" y="0" width="4" height="50" fill="black" />
-                    <rect x="4" y="0" width="6" height="50" fill="white" />
+                    <rect
+                      x="0"
+                      y="0"
+                      width="4"
+                      height="50"
+                      :fill="isDark ? '#e2e8f0' : '#1a1a2e'"
+                    />
+                    <rect x="4" y="0" width="6" height="50" fill="transparent" />
                   </pattern>
                 </defs>
                 <rect width="200" height="50" fill="url(#barcode)" />
@@ -226,10 +232,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from '@/composables/useI18n'
-import axiosInstance from '@/plugins/axios'
-import appConfig from '@/config/app'
+import { axiosInstance } from '@/plugins/axios'
+import { appConfig } from '@/config/app'
 import type { Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
@@ -249,75 +255,325 @@ const emit = defineEmits<{
 const downloading = ref(false)
 const receiptContent = ref<HTMLElement | null>(null)
 
+// Detect current Bootstrap theme from <html data-bs-theme>
+const isDark = computed(() => document.documentElement.getAttribute('data-bs-theme') === 'dark')
+
+// Currency code: prefer relation > column > fallback
+const currencyCode = computed(
+  () => props.transaction?.currency?.code ?? props.transaction?.currency_code ?? 'XAF'
+)
+
 const closeModal = () => {
   emit('close')
 }
 
 const printReceipt = () => {
-  if (!receiptContent.value) return
+  if (!receiptContent.value || !props.transaction) return
+
+  const tx = props.transaction
+  const txCurrency = tx.currency?.code ?? tx.currency_code ?? 'XAF'
+  const fmtNum = (n: number) => {
+    try {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: txCurrency,
+        minimumFractionDigits: 0,
+      }).format(n)
+    } catch {
+      return (
+        new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(n) + ' ' + txCurrency
+      )
+    }
+  }
+  const fmtDate = (d: string) =>
+    new Date(d).toLocaleString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+  const statusColors: Record<string, string> = {
+    pending: '#a16207',
+    available: '#1d4ed8',
+    completed: '#15803d',
+    cancelled: '#4b5563',
+    failed: '#b91c1c',
+    expired: '#374151',
+  }
+  const statusBg: Record<string, string> = {
+    pending: '#fef9c3',
+    available: '#dbeafe',
+    completed: '#dcfce7',
+    cancelled: '#f3f4f6',
+    failed: '#fee2e2',
+    expired: '#e5e7eb',
+  }
+  const statusLabel: Record<string, string> = {
+    pending: 'En attente',
+    available: 'Disponible',
+    completed: 'Complétée',
+    cancelled: 'Annulée',
+    failed: 'Échec',
+    expired: 'Expirée',
+  }
+  const sColor = statusColors[tx.status] ?? '#374151'
+  const sBg = statusBg[tx.status] ?? '#f3f4f6'
+  const sLabel = statusLabel[tx.status] ?? tx.status
+
+  const withdrawalRow = tx.withdrawal_code
+    ? `<tr>
+        <td class="label">Code de retrait</td>
+        <td class="value"><span class="code-badge">${tx.withdrawal_code}</span></td>
+       </tr>`
+    : ''
+
+  const destRow = tx.destination_branch
+    ? `<tr><td class="label">Agence destination</td><td class="value">${tx.destination_branch.name}</td></tr>`
+    : ''
+
+  const expiryRow =
+    tx.expires_at && tx.status === 'available'
+      ? `<div class="expiry-alert">⚠ Expire le ${fmtDate(tx.expires_at)}</div>`
+      : ''
 
   const printWindow = window.open('', '_blank')
   if (!printWindow) return
 
-  const content = receiptContent.value.innerHTML
+  printWindow.document.write(`<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Reçu — ${tx.reference}</title>
+  <style>
+    @page { size: 80mm auto; margin: 0; }
+    @media print { body { padding: 0; } }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #111;
+      background: #fff;
+      padding: 14px 16px;
+      max-width: 80mm;
+    }
 
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Reçu - ${props.transaction?.reference}</title>
-        <style>
-          @media print {
-            @page {
-              size: 80mm 120mm;
-              margin: 5mm;
-            }
-          }
-          body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #000;
-            margin: 0;
-            padding: 10px;
-          }
-          .receipt-container {
-            max-width: 80mm;
-          }
-          .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 4px;
-          }
-          .bg-dark { background-color: #333; color: white; }
-          .bg-primary { background-color: #0d6efd; color: white; }
-          .bg-success { background-color: #198754; color: white; }
-          .bg-warning { background-color: #ffc107; color: black; }
-          .bg-danger { background-color: #dc3545; color: white; }
-          .text-success { color: #198754; }
-          .text-danger { color: #dc3545; }
-          .text-muted { color: #6c757d; }
-          .border-top { border-top: 1px solid #dee2e6 !important; }
-          .border-bottom { border-bottom: 1px solid #dee2e6 !important; }
-          .fw-bold { font-weight: 700; }
-          .fs-4 { font-size: 1.5rem; }
-          .fs-5 { font-size: 1.25rem; }
-          .fs-6 { font-size: 1rem; }
-          .small { font-size: 0.875rem; }
-          .text-center { text-align: center; }
-          .text-end { text-align: right; }
-          .alert { padding: 8px; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 4px; }
-          .alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
-        </style>
-      </head>
-      <body onload="window.print(); window.close();">
-        ${content}
-      </body>
-    </html>
-  `)
+    /* Header */
+    .brand {
+      text-align: center;
+      padding-bottom: 12px;
+      border-bottom: 2px dashed #333;
+      margin-bottom: 12px;
+    }
+    .brand-icon {
+      display: inline-block;
+      width: 36px; height: 36px;
+      background: #1a1a2e;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 36px;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .brand-name { font-size: 16px; font-weight: 900; letter-spacing: 3px; }
+    .brand-sub  { font-size: 8px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+    .doc-type   { font-size: 10px; font-weight: 700; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase; }
 
+    /* Info table */
+    .section {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #ccc;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 3px 0; font-size: 10.5px; vertical-align: top; }
+    td.label { color: #555; width: 45%; }
+    td.value  { text-align: right; font-weight: 700; }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      background: ${sBg};
+      color: ${sColor};
+    }
+
+    /* Withdrawal code */
+    .code-badge {
+      display: inline-block;
+      background: #1a1a2e;
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      font-weight: 900;
+    }
+
+    /* Amounts */
+    .amounts { margin-bottom: 10px; }
+    .amount-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; }
+    .amount-label { color: #555; }
+    .amount-value { font-weight: 700; }
+    .amount-gross { color: #1d4ed8; }
+    .amount-fee   { color: #dc2626; }
+    .divider { border: none; border-top: 1px solid #ccc; margin: 6px 0; }
+
+    /* Net total */
+    .net-total {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .net-total .nt-label { font-size: 10px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+    .net-total .nt-value { font-size: 16px; font-weight: 900; color: #15803d; }
+
+    /* Expiry */
+    .expiry-alert {
+      background: #fef9c3;
+      border: 1px dashed #a16207;
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-size: 9.5px;
+      color: #92400e;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* Barcode area */
+    .barcode-area {
+      text-align: center;
+      margin: 10px 0;
+      padding-top: 10px;
+      border-top: 1px dashed #ccc;
+    }
+    .barcode-ref { font-size: 10px; letter-spacing: 2px; font-weight: 700; color: #374151; margin-top: 4px; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      border-top: 2px dashed #333;
+      padding-top: 10px;
+      margin-top: 10px;
+      font-size: 8.5px;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body onload="window.print(); window.close();">
+
+  <!-- Brand header -->
+  <div class="brand">
+    <div class="brand-icon">T</div>
+    <div class="brand-name">TAMS</div>
+    <div class="brand-sub">Transaction &amp; Asset Management</div>
+    <div class="doc-type">Reçu de Transaction</div>
+  </div>
+
+  <!-- Info -->
+  <div class="section">
+    <table>
+      <tr>
+        <td class="label">Référence</td>
+        <td class="value" style="letter-spacing:1px">${tx.reference}</td>
+      </tr>
+      ${withdrawalRow}
+      <tr>
+        <td class="label">Date</td>
+        <td class="value">${fmtDate(tx.created_at)}</td>
+      </tr>
+      <tr>
+        <td class="label">Statut</td>
+        <td class="value"><span class="status-badge">${sLabel}</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Details -->
+  <div class="section">
+    <table>
+      <tr>
+        <td class="label">Type</td>
+        <td class="value">${tx.transaction_type?.name ?? '-'}</td>
+      </tr>
+      <tr>
+        <td class="label">Agence</td>
+        <td class="value">${tx.branch?.name ?? '-'}</td>
+      </tr>
+      ${destRow}
+      ${
+        tx.customer
+          ? `<tr><td class="label">Client</td><td class="value">${
+              tx.customer.full_name
+            }<br><span style="color:#6b7280;font-size:9px">${
+              tx.customer.phone ?? ''
+            }</span></td></tr>`
+          : tx.customer_phone
+          ? `<tr><td class="label">Téléphone</td><td class="value">${tx.customer_phone}</td></tr>`
+          : ''
+      }
+      <tr>
+        <td class="label">Caissier</td>
+        <td class="value">${tx.user?.name ?? '-'}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Amounts -->
+  <div class="amounts">
+    <div class="amount-row">
+      <span class="amount-label">Montant brut</span>
+      <span class="amount-value amount-gross">${fmtNum(tx.gross_amount)}</span>
+    </div>
+    <div class="amount-row">
+      <span class="amount-label">Frais</span>
+      <span class="amount-value amount-fee">− ${fmtNum(tx.fee_amount)}</span>
+    </div>
+  </div>
+  <div class="net-total">
+    <span class="nt-label">Montant Net</span>
+    <span class="nt-value">${fmtNum(tx.net_amount)}</span>
+  </div>
+
+  ${expiryRow}
+
+  <!-- Barcode area -->
+  <div class="barcode-area">
+    <svg width="180" height="40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="bc" x="0" y="0" width="8" height="40" patternUnits="userSpaceOnUse">
+          <rect x="0" y="0" width="3" height="40" fill="#1a1a2e"/>
+          <rect x="3" y="0" width="5" height="40" fill="white"/>
+        </pattern>
+      </defs>
+      <rect width="180" height="40" fill="url(#bc)"/>
+    </svg>
+    <div class="barcode-ref">${tx.reference}</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>Merci pour votre confiance</div>
+    <div>Conservez ce reçu pour toute réclamation</div>
+    <div style="margin-top:4px;letter-spacing:0.5px">TAMS © ${new Date().getFullYear()}</div>
+  </div>
+
+</body>
+</html>`)
   printWindow.document.close()
 }
 
@@ -328,7 +584,7 @@ const downloadPDF = async () => {
 
   try {
     const response = await axiosInstance.get(
-      `${appConfig.apiUrl}/transactions/${props.transaction.id}/receipt`,
+      `${appConfig.apiUrl}/transactions/${props.transaction.uuid}/receipt`,
       {
         responseType: 'blob',
       }
@@ -355,12 +611,20 @@ const downloadPDF = async () => {
   }
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XAF',
-    minimumFractionDigits: 0,
-  }).format(amount)
+const formatCurrency = (amount: number, code?: string) => {
+  const currency = code ?? currencyCode.value
+  try {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+    }).format(amount)
+  } catch {
+    // Fallback for unsupported currency codes
+    return (
+      new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(amount) + ' ' + currency
+    )
+  }
 }
 
 const formatDateTime = (date: string) => {
@@ -400,7 +664,7 @@ const getStatusLabel = (status: string) => {
 }
 
 .receipt-container {
-  background: white;
+  /* background: white; */
   border: 1px solid #dee2e6;
   border-radius: 8px;
   max-width: 600px;

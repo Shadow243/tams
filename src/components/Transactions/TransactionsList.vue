@@ -289,6 +289,14 @@
                   </button>
                   <button
                     type="button"
+                    class="btn btn-sm btn-secondary"
+                    @click.prevent.stop="openReceipt(transaction)"
+                    :title="t('transactions.receipt') || 'Reçu'"
+                  >
+                    <i class="ti ti-receipt"></i>
+                  </button>
+                  <button
+                    type="button"
                     class="btn btn-sm btn-danger"
                     @click.prevent.stop="handleDelete(transaction.id || transaction.uuid)"
                     :disabled="!transaction.can_be_cancelled"
@@ -338,6 +346,13 @@
       </div>
     </div>
   </div>
+
+  <!-- Receipt Modal -->
+  <TransactionReceiptModal
+    :show="showReceiptModal"
+    :transaction="receiptTransaction"
+    @close="showReceiptModal = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -346,6 +361,7 @@ import { useI18n } from '@/composables/useI18n'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 import type { Transaction, Meta } from '@/types'
+import TransactionReceiptModal from '@/components/Transactions/TransactionReceiptModal.vue'
 
 const { t } = useI18n()
 
@@ -396,6 +412,15 @@ const startDate = ref('')
 const endDate = ref('')
 const perPage = ref(15)
 const isExportingPDF = ref(false)
+
+// Receipt modal
+const showReceiptModal = ref(false)
+const receiptTransaction = ref<Transaction | null>(null)
+
+const openReceipt = (transaction: Transaction) => {
+  receiptTransaction.value = transaction
+  showReceiptModal.value = true
+}
 
 let searchTimeout: ReturnType<typeof setTimeout>
 

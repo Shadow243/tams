@@ -9,19 +9,6 @@ import 'nprogress/nprogress.css'
 import './assets/vendor/js/vendors.js'
 import './assets/vendor/js/app.js'
 
-// Disable I18nManager from app.js since we use vue-i18n instead
-if (typeof window !== 'undefined') {
-  // Override I18nManager to prevent translation loading errors
-  (window as any).I18nManager = class {
-    async init() {
-      // Do nothing - we use vue-i18n for translations
-      return Promise.resolve();
-    }
-  };
-}
-
-import './assets/vendor/js/app.js'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createHead } from '@vueuse/head'
@@ -56,8 +43,10 @@ import { vPreline } from './directives/preline'
 
 // Application initialization
 async function initApp() {
-  // Load and merge locales from API
-  await mergeApiLocales()
+  // Try to merge API locales but don't block app startup on failure
+  mergeApiLocales().catch(() => {
+    // API may not be available — local JSON translations are already loaded
+  })
 
   const app = createApp(App)
 
