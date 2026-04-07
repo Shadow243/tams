@@ -54,6 +54,14 @@
       @close="handleCloseModal"
       @submit="handleSubmit"
     />
+
+    <TransactionDetailsModal
+      :show="showDetailsModal"
+      :transaction="selectedTransaction"
+      :loading="isLoadingDetails"
+      @close="handleCloseDetailsModal"
+      @edit="handleEditFromDetails"
+    />
   </div>
 </template>
 
@@ -67,6 +75,7 @@ import { useWalletStore } from '@/stores/wallets'
 import { useI18n } from '@/composables/useI18n'
 import TransactionsList from '@/components/Transactions/TransactionsList.vue'
 import TransactionFormModal from '@/components/Transactions/TransactionFormModal.vue'
+import TransactionDetailsModal from '@/components/Transactions/TransactionDetailsModal.vue'
 import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
@@ -88,7 +97,10 @@ const branchStore = useBranchStore()
 const walletStore = useWalletStore()
 
 const showModal = ref(false)
+const showDetailsModal = ref(false)
 const isEditing = ref(false)
+const selectedTransaction = ref<Transaction | null>(null)
+const isLoadingDetails = ref(false)
 const formData = ref<TransactionFormData>({
   transaction_type_id: null,
   branch_id: null,
@@ -139,7 +151,7 @@ const handleAddTransaction = () => {
 
 const handleEditTransaction = (transaction: Transaction) => {
   isEditing.value = true
-  Object.assign(formData, {
+  formData.value = {
     transaction_type_id: transaction.transaction_type_id,
     branch_id: transaction.branch_id,
     destination_branch_id: transaction.destination_branch_id,
@@ -154,78 +166,58 @@ const handleEditTransaction = (transaction: Transaction) => {
     withdrawal_code: transaction.withdrawal_code,
     expires_at: transaction.expires_at,
     status: transaction.status,
-  })
+  }
   store.setCurrentTransaction(transaction)
   showModal.value = true
 }
 
 const handleViewTransaction = async (transaction: Transaction) => {
-  try {
-    const fullTransaction = await store.fetchTransaction(transaction.id)
+  console.log('Transaction received:', transaction)
+  console.log('Transaction ID:', transaction.id)
+  console.log('Transaction UUID:', transaction.uuid)
 
-    let html = `
-      <div class="text-start">
-        <p><strong>${t('transactions.reference')}:</strong> ${fullTransaction.reference}</p>
-        <p><strong>${t('transactions.type')}:</strong> ${fullTransaction.transaction_type?.name}</p>
-        <p><strong>${t('transactions.branch')}:</strong> ${fullTransaction.branch?.name}</p>
-        ${
-          fullTransaction.customer
-            ? `<p><strong>${t('transactions.customer')}:</strong> ${
-                fullTransaction.customer.full_name
-              } (${fullTransaction.customer.phone})</p>`
-            : ''
-        }
-        ${
-          fullTransaction.customer_phone
-            ? `<p><strong>${t('transactions.phone')}:</strong> ${
-                fullTransaction.customer_phone
-              }</p>`
-            : ''
-        }
-        <hr>
-        <p><strong>${t('transactions.gross_amount')}:</strong> ${formatCurrency(
-      fullTransaction.gross_amount
-    )}</p>
-        <p><strong>${t('transactions.fee_amount')}:</strong> ${formatCurrency(
-      fullTransaction.fee_amount
-    )} (${fullTransaction.fee_mode_applied_label})</p>
-        <p><strong>${t('transactions.net_amount')}:</strong> ${formatCurrency(
-      fullTransaction.net_amount
-    )}</p>
-        <hr>
-        <p><strong>${t('transactions.status')}:</strong> <span class="badge bg-${
-      fullTransaction.status_color
-    }">${fullTransaction.status_label}</span></p>
-        ${
-          fullTransaction.withdrawal_code
-            ? `<p><strong>${t('transactions.withdrawal_code')}:</strong> ${
-                fullTransaction.withdrawal_code
-              }</p>`
-            : ''
-        }
-        ${
-          fullTransaction.expires_at
-            ? `<p><strong>${t('transactions.expires_at')}:</strong> ${new Date(
-                fullTransaction.expires_at
-              ).toLocaleString()}</p>`
-            : ''
-        }
-        <p><strong>${t('transactions.created_by')}:</strong> ${fullTransaction.user?.name}</p>
-        <p><strong>${t('transactions.created_at')}:</strong> ${new Date(
-      fullTransaction.created_at
-    ).toLocaleString()}</p>
-      </div>
-    `
+  // Use id or fallback to uuid
+  const transactionId = transaction.id || transaction.uuid
 
+  if (!transactionId) {
     Swal.fire({
-      title: t('transactions.transaction_details') || 'Détails de la transaction',
-      html: html,
-      width: '600px',
-      confirmButtonText: t('transactions.close') || 'Fermer',
+      title: t('transactions.error') || 'Erreur!',
+      text: 'ID de transaction invalide',
+      icon: 'error',
     })
+    return
+  }
+
+  // Show modal immediately with loading state
+  showDetailsModal.value = true
+  isLoadingDetails.value = true
+  selectedTransaction.value = null
+
+  try {
+    const fullTransaction = await store.fetchTransaction(transactionId)
+    console.log('Full transaction details:', fullTransaction)
+    selectedTransaction.value = fullTransaction
   } catch (error) {
     console.error('Error fetching transaction:', error)
+    showDetailsModal.value = false
+    Swal.fire({
+      title: t('transactions.error') || 'Erreur!',
+      text: t('transactions.fetch_error') || 'Erreur lors du chargement des détails.',
+      icon: 'error',
+    })
+  } finally {
+    isLoadingDetails.value = false
   }
+}
+
+const handleCloseDetailsModal = () => {
+  showDetailsModal.value = false
+  selectedTransaction.value = null
+}
+
+const handleEditFromDetails = (transaction: Transaction) => {
+  showDetailsModal.value = false
+  handleEditTransaction(transaction)
 }
 
 const handleDeleteTransaction = (id: string) => {

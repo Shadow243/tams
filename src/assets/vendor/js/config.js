@@ -2,13 +2,13 @@
     var e = document.documentElement,
         i = sessionStorage.getItem("__THEME_CONFIG__");
     const t = "ltr",
-        a = "default",
-        r = "light",
+        a = "saas",
+        r = "dark",
         s = "fluid",
         d = "fixed",
         o = "on-hover-active",
         n = !1,
-        u = "light",
+        u = "dark",
         b = "dark";
     function c() {
         return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";

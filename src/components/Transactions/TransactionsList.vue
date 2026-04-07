@@ -255,7 +255,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-info"
-                    @click="$emit('view', transaction)"
+                    @click.prevent.stop="handleView(transaction)"
                     :title="t('transactions.view') || 'Voir'"
                   >
                     <i class="ti ti-eye"></i>
@@ -263,7 +263,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-primary"
-                    @click="$emit('edit', transaction)"
+                    @click.prevent.stop="handleEdit(transaction)"
                     :disabled="!transaction.can_be_modified"
                     :title="t('transactions.edit') || 'Modifier'"
                   >
@@ -273,7 +273,7 @@
                     type="button"
                     class="btn btn-sm btn-success"
                     v-if="transaction.status === 'pending' || transaction.status === 'available'"
-                    @click="$emit('complete', transaction.id)"
+                    @click.prevent.stop="handleComplete(transaction.id || transaction.uuid)"
                     :title="t('transactions.complete') || 'Compléter'"
                   >
                     <i class="ti ti-check"></i>
@@ -282,7 +282,7 @@
                     type="button"
                     class="btn btn-sm btn-warning"
                     v-if="transaction.can_be_cancelled"
-                    @click="$emit('cancel', transaction.id)"
+                    @click.prevent.stop="handleCancel(transaction.id || transaction.uuid)"
                     :title="t('transactions.cancel') || 'Annuler'"
                   >
                     <i class="ti ti-x"></i>
@@ -290,7 +290,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-danger"
-                    @click="$emit('delete', transaction.id)"
+                    @click.prevent.stop="handleDelete(transaction.id || transaction.uuid)"
                     :disabled="!transaction.can_be_cancelled"
                     :title="t('transactions.delete') || 'Supprimer'"
                   >
@@ -374,6 +374,19 @@ const emit = defineEmits<{
   'page-change': [page: number]
   refresh: []
 }>()
+
+// Debug: Watch transactions to verify data structure
+watch(
+  () => props.transactions,
+  (newTransactions) => {
+    if (newTransactions.length > 0) {
+      console.log('✅ Sample transaction from API:', newTransactions[0])
+      console.log('✅ Transaction ID:', newTransactions[0].id)
+      console.log('✅ Transaction UUID:', newTransactions[0].uuid)
+    }
+  },
+  { immediate: true }
+)
 
 // Filters
 const searchQuery = ref('')
@@ -550,6 +563,27 @@ const exportPDF = async () => {
     isExportingPDF.value = false
   }
 }
+
+// Action handlers
+const handleView = (transaction: Transaction) => {
+  emit('view', transaction)
+}
+
+const handleEdit = (transaction: Transaction) => {
+  emit('edit', transaction)
+}
+
+const handleDelete = (id: string) => {
+  emit('delete', id)
+}
+
+const handleCancel = (id: string) => {
+  emit('cancel', id)
+}
+
+const handleComplete = (id: string) => {
+  emit('complete', id)
+}
 </script>
 
 <style scoped>
@@ -567,6 +601,11 @@ const exportPDF = async () => {
 
 .app-search input {
   padding-left: 35px;
+}
+
+/* Ensure icons don't capture clicks */
+.btn i {
+  pointer-events: none;
 }
 
 .badge {

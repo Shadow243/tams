@@ -103,9 +103,14 @@ export const useTransactionStore = defineStore('transaction', () => {
     loading.value = true
     try {
       const response = await axiosInstance.get(`${appConfig.apiUrl}/transactions/${id}`)
-      currentTransaction.value = response.data.data
-      return response.data.data
+      
+      // Handle both response formats: direct data or wrapped in data property
+      const transactionData = response.data.data || response.data
+      
+      currentTransaction.value = transactionData
+      return transactionData
     } catch (error) {
+      console.error('❌ Error fetching transaction:', error)
       throw error
     } finally {
       loading.value = false

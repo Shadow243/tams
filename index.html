@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-skin="saas" data-bs-theme="light" data-menu-color="dark" data-topbar-color="light" data-layout-width="fluid" dir="ltr" data-sidenav-size="on-hover-active" data-layout-position="fixed">
+<html lang="en" data-skin="saas" data-bs-theme="dark" data-menu-color="dark" data-topbar-color="dark" data-layout-width="fluid" dir="ltr" data-sidenav-size="on-hover-active" data-layout-position="fixed">
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
@@ -28,9 +28,9 @@
           // Initialize window.config and window.defaultConfig for LayoutCustomizer
           window.defaultConfig = window.defaultConfig || {
             skin: 'saas',
-            theme: 'light',
+            theme: 'dark',
             'menu-color': 'dark',
-            'topbar-color': 'light',
+            'topbar-color': 'dark',
             'layout-width': 'fluid',
             'dir': 'ltr',
             'sidenav-size': 'on-hover-active',
@@ -86,7 +86,7 @@
           }
           html.setAttribute('data-skin', skin);
           html.setAttribute('data-menu-color', config['menu-color'] || config['sidenav-color'] || 'dark');
-          html.setAttribute('data-topbar-color', config['topbar-color'] || 'light');
+          html.setAttribute('data-topbar-color', config['topbar-color'] || 'dark');
           html.setAttribute('data-layout-width', config['layout-width'] || config.width || 'fluid');
           html.setAttribute('dir', config.dir || 'ltr');
           html.setAttribute('data-sidenav-size', config['sidenav-size'] || 'on-hover-active');
