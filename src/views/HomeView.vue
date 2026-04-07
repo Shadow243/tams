@@ -108,21 +108,182 @@
         </button>
       </div>
 
-      <!-- Loading Skeleton -->
-      <div v-if="store.loadingDashboard" class="row g-3 mb-4">
-        <div v-for="i in 6" :key="i" class="col-xl-2 col-lg-4 col-md-4 col-6">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3 placeholder-glow">
-              <span class="placeholder col-6 mb-2"></span>
-              <span class="placeholder col-10 col-lg-8 d-block fs-4"></span>
-              <span class="placeholder col-8 mt-1"></span>
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- Loading Skeleton — mirrors every section of the dashboard          -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <template v-if="store.loadingDashboard">
+        <!-- Skeleton Row 1 · 6 KPI cards -->
+        <div class="row g-3 mb-4">
+          <div v-for="i in 6" :key="'kpi-' + i" class="col-xl-2 col-lg-4 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-3 placeholder-glow">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="placeholder rounded-3" style="width: 44px; height: 44px"></span>
+                  <span class="placeholder col-4 rounded-pill"></span>
+                </div>
+                <span class="placeholder col-8 d-block mb-1" style="height: 1.8rem"></span>
+                <span class="placeholder col-10"></span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- Skeleton Row 2 · Donut chart + Area chart -->
+        <div class="row g-3 mb-4">
+          <!-- Donut -->
+          <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header py-3 border-bottom placeholder-glow">
+                <span class="placeholder col-5"></span>
+              </div>
+              <div
+                class="card-body d-flex flex-column align-items-center justify-content-center p-3 placeholder-glow gap-3"
+              >
+                <!-- Circle -->
+                <span class="placeholder rounded-circle" style="width: 180px; height: 180px"></span>
+                <!-- Legend rows -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 w-100">
+                  <span
+                    v-for="j in 6"
+                    :key="'dl-' + j"
+                    class="placeholder col-3 rounded-pill"
+                    style="height: 0.65rem"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Area chart -->
+          <div class="col-xl-8 col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+              <div
+                class="card-header py-3 border-bottom d-flex align-items-center justify-content-between placeholder-glow"
+              >
+                <span class="placeholder col-4"></span>
+                <span class="placeholder col-2"></span>
+              </div>
+              <div class="card-body p-3 placeholder-glow d-flex flex-column gap-2">
+                <!-- Y-axis + chart area mimic -->
+                <div class="d-flex align-items-end gap-1 w-100" style="height: 260px">
+                  <div class="d-flex flex-column justify-content-between pe-2" style="height: 100%">
+                    <span
+                      v-for="k in 5"
+                      :key="'ya-' + k"
+                      class="placeholder"
+                      style="width: 28px; height: 0.55rem"
+                    ></span>
+                  </div>
+                  <div class="flex-grow-1 h-100 d-flex flex-column justify-content-end gap-1">
+                    <!-- Simulated area wave -->
+                    <span class="placeholder w-100 rounded" style="height: 68%"></span>
+                    <div class="d-flex justify-content-between">
+                      <span
+                        v-for="l in 8"
+                        :key="'xa-' + l"
+                        class="placeholder"
+                        style="width: 28px; height: 0.55rem"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skeleton Row 3 · By-type + By-branch + Recent transactions -->
+        <div class="row g-3 mb-4">
+          <!-- By-type ranking -->
+          <div class="col-xl-4 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header py-3 border-bottom placeholder-glow">
+                <span class="placeholder col-5"></span>
+              </div>
+              <div class="card-body p-3 placeholder-glow d-flex flex-column gap-3">
+                <div v-for="r in 5" :key="'tr-' + r" class="d-flex align-items-center gap-3">
+                  <span
+                    class="placeholder rounded-circle flex-shrink-0"
+                    style="width: 28px; height: 28px"
+                  ></span>
+                  <div class="flex-grow-1 d-flex flex-column gap-1">
+                    <div class="d-flex justify-content-between">
+                      <span class="placeholder" :style="{ width: 55 - r * 5 + '%' }"></span>
+                      <span class="placeholder" style="width: 24px"></span>
+                    </div>
+                    <span class="placeholder w-100 rounded" style="height: 4px"></span>
+                  </div>
+                  <span class="placeholder flex-shrink-0" style="width: 52px"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- By-branch ranking -->
+          <div class="col-xl-4 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header py-3 border-bottom placeholder-glow">
+                <span class="placeholder col-4"></span>
+              </div>
+              <div class="card-body p-3 placeholder-glow d-flex flex-column gap-3">
+                <div v-for="r in 5" :key="'br-' + r" class="d-flex align-items-center gap-3">
+                  <span
+                    class="placeholder rounded-circle flex-shrink-0"
+                    style="width: 28px; height: 28px"
+                  ></span>
+                  <div class="flex-grow-1 d-flex flex-column gap-1">
+                    <div class="d-flex justify-content-between">
+                      <span class="placeholder" :style="{ width: 60 - r * 6 + '%' }"></span>
+                      <span class="placeholder" style="width: 24px"></span>
+                    </div>
+                    <span class="placeholder w-100 rounded" style="height: 4px"></span>
+                  </div>
+                  <span class="placeholder flex-shrink-0" style="width: 52px"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent transactions -->
+          <div class="col-xl-4 col-lg-12">
+            <div class="card border-0 shadow-sm h-100">
+              <div
+                class="card-header py-3 border-bottom d-flex align-items-center justify-content-between placeholder-glow"
+              >
+                <span class="placeholder col-5"></span>
+                <span class="placeholder col-2"></span>
+              </div>
+              <div class="card-body p-0">
+                <div
+                  v-for="r in 8"
+                  :key="'rx-' + r"
+                  class="d-flex align-items-start gap-2 px-3 py-2 border-bottom placeholder-glow"
+                >
+                  <span
+                    class="placeholder rounded-circle flex-shrink-0 mt-1"
+                    style="width: 28px; height: 28px"
+                  ></span>
+                  <div class="flex-grow-1 d-flex flex-column gap-1">
+                    <div class="d-flex justify-content-between">
+                      <span class="placeholder" style="width: 45%"></span>
+                      <span class="placeholder" style="width: 18%"></span>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <span class="placeholder rounded-pill" style="width: 14%"></span>
+                      <span class="placeholder" style="width: 22%"></span>
+                      <span class="placeholder ms-auto" style="width: 16%"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
 
       <!-- KPI Overview Cards -->
-      <div v-else-if="data" class="row g-3 mb-4">
+      <div v-if="!store.loadingDashboard && data" class="row g-3 mb-4">
         <!-- Total Transactions -->
         <div class="col-xl-2 col-lg-4 col-md-4 col-6">
           <div class="card border-0 shadow-sm kpi-card kpi-primary h-100">
