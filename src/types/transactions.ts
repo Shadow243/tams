@@ -109,6 +109,7 @@ export interface TransactionFilters {
   customer_id: string | null
   customer_phone: string | null
   status: TransactionStatus | ''
+  currency_id?: number
   start_date: string | null
   end_date: string | null
   per_page: number

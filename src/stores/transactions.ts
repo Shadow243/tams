@@ -225,12 +225,26 @@ export const useTransactionStore = defineStore('transaction', () => {
         params.branch_id = filters.value.branch_id
       }
 
+      if (filters.value.currency_id) {
+        params.currency_id = filters.value.currency_id
+      }
+
+      console.log('📊 Fetching statistics with params:', params)
+
       const response = await axiosInstance.get(`${appConfig.apiUrl}/transactions/statistics`, {
         params
       })
-      statistics.value = response.data.data
-      return response.data.data
+      
+      console.log('📊 API Response for statistics:', response.data)
+      
+      // Handle both response formats: direct data or wrapped in data property
+      const statsData = response.data.data || response.data
+      console.log('📊 Statistics Data:', statsData)
+      
+      statistics.value = statsData
+      return statsData
     } catch (error) {
+      console.error('❌ Error fetching statistics:', error)
       throw error
     } finally {
       loading.value = false

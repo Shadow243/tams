@@ -10,10 +10,10 @@
         </div>
 
         <div class="text-end mt-3 mt-sm-0">
-          <button @click="handleAddTransaction" type="button" class="btn btn-primary me-2">
+          <button @click.prevent="handleAddTransaction" type="button" class="btn btn-primary me-2">
             <i class="ti ti-plus me-1"></i> {{ t('transactions.add_transaction') }}
           </button>
-          <button @click="handleShowStatistics" type="button" class="btn btn-info">
+          <button @click.prevent="handleShowStatistics" type="button" class="btn btn-info">
             <i class="ti ti-chart-bar me-1"></i> {{ t('transactions.statistics') }}
           </button>
         </div>
@@ -62,6 +62,14 @@
       @close="handleCloseDetailsModal"
       @edit="handleEditFromDetails"
     />
+
+    <TransactionStatisticsModal
+      :show="showStatisticsModal"
+      :statistics="store.statistics"
+      :loading="isLoadingStatistics"
+      @close="showStatisticsModal = false"
+      @filter-change="handleStatisticsFilterChange"
+    />
   </div>
 </template>
 
@@ -72,10 +80,12 @@ import { useTransactionStore } from '@/stores/transactions'
 import { useTransactionTypeStore } from '@/stores/transaction-types'
 import { useBranchStore } from '@/stores/branches'
 import { useWalletStore } from '@/stores/wallets'
+import { useCurrencyStore } from '@/stores/currencies'
 import { useI18n } from '@/composables/useI18n'
 import TransactionsList from '@/components/Transactions/TransactionsList.vue'
 import TransactionFormModal from '@/components/Transactions/TransactionFormModal.vue'
 import TransactionDetailsModal from '@/components/Transactions/TransactionDetailsModal.vue'
+import TransactionStatisticsModal from '@/components/Transactions/TransactionStatisticsModal.vue'
 import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
@@ -95,12 +105,15 @@ const store = useTransactionStore()
 const transactionTypeStore = useTransactionTypeStore()
 const branchStore = useBranchStore()
 const walletStore = useWalletStore()
+const currencyStore = useCurrencyStore()
 
 const showModal = ref(false)
 const showDetailsModal = ref(false)
+const showStatisticsModal = ref(false)
 const isEditing = ref(false)
 const selectedTransaction = ref<Transaction | null>(null)
 const isLoadingDetails = ref(false)
+const isLoadingStatistics = ref(false)
 const formData = ref<TransactionFormData>({
   transaction_type_id: null,
   branch_id: null,
@@ -124,6 +137,7 @@ onMounted(async () => {
     transactionTypeStore.fetchTransactionTypes(),
     branchStore.fetchBranches(),
     walletStore.fetchWallets(),
+    currencyStore.fetchAllCurrencies(),
   ])
 })
 
@@ -322,57 +336,106 @@ const handleCompleteTransaction = (id: string) => {
 }
 
 const handleShowStatistics = async () => {
-  try {
-    await store.fetchStatistics()
-    const stats = store.statistics
+  // Show modal immediately with loading state
+  showStatisticsModal.value = true
+  isLoadingStatistics.value = true
 
-    if (stats) {
-      Swal.fire({
-        title: t('transactions.statistics') || 'Statistiques',
-        html: `
-          <div class="text-start">
-            <h6>${t('transactions.total_transactions')}:</h6>
-            <p class="lead">${stats.total_transactions}</p>
-            <hr>
-            <p><strong>${t('transactions.total_amount')}:</strong> ${formatCurrency(
-          stats.total_amount
-        )}</p>
-            <p><strong>${t('transactions.total_fees')}:</strong> ${formatCurrency(
-          stats.total_fees
-        )}</p>
-            <p><strong>${t('transactions.total_net')}:</strong> ${formatCurrency(
-          stats.total_net
-        )}</p>
-            <hr>
-            <h6>${t('transactions.by_status')}:</h6>
-            <ul class="list-unstyled">
-              <li><span class="badge bg-warning">${t('transactions.pending')}</span>: ${
-          stats.by_status.pending
-        }</li>
-              <li><span class="badge bg-info">${t('transactions.available')}</span>: ${
-          stats.by_status.available
-        }</li>
-              <li><span class="badge bg-success">${t('transactions.completed')}</span>: ${
-          stats.by_status.completed
-        }</li>
-              <li><span class="badge bg-secondary">${t('transactions.cancelled')}</span>: ${
-          stats.by_status.cancelled
-        }</li>
-              <li><span class="badge bg-danger">${t('transactions.failed')}</span>: ${
-          stats.by_status.failed
-        }</li>
-              <li><span class="badge bg-dark">${t('transactions.expired')}</span>: ${
-          stats.by_status.expired
-        }</li>
-            </ul>
-          </div>
-        `,
-        width: '500px',
-        confirmButtonText: t('transactions.close') || 'Fermer',
-      })
-    }
+  try {
+    // Set default filters: default currency and today's date
+    const today = new Date().toISOString().split('T')[0]
+    const defaultCurrencyId =
+      currencyStore.defaultCurrency?.id || currencyStore.activeCurrencies[0]?.id
+
+    store.updateFilters({
+      currency_id: defaultCurrencyId,
+      start_date: today,
+      end_date: today,
+    })
+
+    await store.fetchStatistics()
   } catch (error) {
     console.error('Error fetching statistics:', error)
+    showStatisticsModal.value = false
+    Swal.fire({
+      title: t('transactions.error') || 'Erreur!',
+      text: t('transactions.stats_error') || 'Erreur lors du chargement des statistiques.',
+      icon: 'error',
+    })
+  } finally {
+    isLoadingStatistics.value = false
+  }
+}
+
+const handleStatisticsFilterChange = async (filters: any) => {
+  // Vérifier qu'une devise est sélectionnée
+  if (!filters.currencyId) {
+    return
+  }
+
+  isLoadingStatistics.value = true
+
+  try {
+    // Calculate date range based on period
+    const dateFilters: any = {}
+
+    if (filters.period !== 'custom') {
+      const today = new Date()
+      const startDate = new Date()
+
+      switch (filters.period) {
+        case 'today':
+          dateFilters.start_date = today.toISOString().split('T')[0]
+          dateFilters.end_date = today.toISOString().split('T')[0]
+          break
+        case 'yesterday':
+          startDate.setDate(today.getDate() - 1)
+          dateFilters.start_date = startDate.toISOString().split('T')[0]
+          dateFilters.end_date = startDate.toISOString().split('T')[0]
+          break
+        case 'week':
+          startDate.setDate(today.getDate() - today.getDay())
+          dateFilters.start_date = startDate.toISOString().split('T')[0]
+          dateFilters.end_date = today.toISOString().split('T')[0]
+          break
+        case 'month':
+          startDate.setDate(1)
+          dateFilters.start_date = startDate.toISOString().split('T')[0]
+          dateFilters.end_date = today.toISOString().split('T')[0]
+          break
+        case 'last_month':
+          // Premier jour du mois passé
+          startDate.setMonth(today.getMonth() - 1, 1)
+          dateFilters.start_date = startDate.toISOString().split('T')[0]
+          // Dernier jour du mois passé
+          const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+          dateFilters.end_date = lastDayOfLastMonth.toISOString().split('T')[0]
+          break
+        case 'year':
+          startDate.setMonth(0, 1)
+          dateFilters.start_date = startDate.toISOString().split('T')[0]
+          dateFilters.end_date = today.toISOString().split('T')[0]
+          break
+      }
+    } else {
+      dateFilters.start_date = filters.startDate
+      dateFilters.end_date = filters.endDate
+    }
+
+    // Add currency filter
+    dateFilters.currency_id = filters.currencyId
+
+    // Update store filters and fetch statistics
+    store.updateFilters(dateFilters)
+    await store.fetchStatistics()
+  } catch (error) {
+    console.error('Error fetching filtered statistics:', error)
+    Swal.fire({
+      title: t('transactions.error') || 'Erreur!',
+      text: t('transactions.stats_error') || 'Erreur lors du chargement des statistiques.',
+      icon: 'error',
+    })
+  } finally {
+    isLoadingStatistics.value = false
   }
 }
 
@@ -425,13 +488,5 @@ const handleSubmit = async (data: TransactionFormData) => {
       icon: 'error',
     })
   }
-}
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XAF',
-    minimumFractionDigits: 0,
-  }).format(amount)
 }
 </script>
