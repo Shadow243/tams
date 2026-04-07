@@ -262,14 +262,14 @@ onMounted(async () => {
     branchStore.fetchBranches(),
     walletStore.fetchWallets(),
     currencyStore.fetchAllCurrencies(),
-  ])
 
-  store.updateFilters({
-    currency_id: undefined,
-    start_date: undefined,
-    end_date: undefined,
-  })
-  await store.fetchStatistics()
+    store.updateFilters({
+      currency_id: undefined,
+      start_date: undefined,
+      end_date: undefined,
+    }),
+    store.fetchStatistics(),
+  ])
 })
 
 const handleAddTransaction = () => {

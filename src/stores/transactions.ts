@@ -6,6 +6,8 @@ import type {
   TransactionFormData,
   TransactionFilters,
   TransactionStatistics,
+  DashboardStatistics,
+  DashboardFilters,
   Meta
 } from '@/types'
 import { appConfig } from '@/config/app'
@@ -22,9 +24,11 @@ export const useTransactionStore = defineStore('transaction', () => {
   const loading = ref(false)
   const loadingTransaction = ref(false)
   const loadingStatistics = ref(false)
+  const loadingDashboard = ref(false)
   const processing = ref(false)
   const currentTransaction = ref<Transaction | null>(null)
   const statistics = ref<TransactionStatistics | null>(null)
+  const dashboardStatistics = ref<DashboardStatistics | null>(null)
 
   // Filters
   const filters = ref<TransactionFilters>({
@@ -257,6 +261,49 @@ export const useTransactionStore = defineStore('transaction', () => {
     currentTransaction.value = transaction
   }
 
+  async function fetchDashboardStatistics(dashboardFilters?: Partial<DashboardFilters>) {
+    loadingDashboard.value = true
+    try {
+      const params: Record<string, string | number> = {}
+
+      if (dashboardFilters?.start_date) {
+        params.start_date = dashboardFilters.start_date
+      }
+
+      if (dashboardFilters?.end_date) {
+        params.end_date = dashboardFilters.end_date
+      }
+
+      if (dashboardFilters?.branch_id) {
+        params.branch_id = dashboardFilters.branch_id
+      }
+
+      if (dashboardFilters?.currency_id) {
+        params.currency_id = dashboardFilters.currency_id
+      }
+
+      if (dashboardFilters?.transaction_type_id) {
+        params.transaction_type_id = dashboardFilters.transaction_type_id
+      }
+
+      const response = await axiosInstance.get(
+        `${appConfig.apiUrl}/transactions/dashboard/statistics`,
+        { params }
+      )
+      const responseData = response.data.data || response.data
+      // recent_transactions comes as a resource collection with a nested 'data' key
+      if (responseData.recent_transactions?.data) {
+        responseData.recent_transactions = responseData.recent_transactions.data
+      }
+      dashboardStatistics.value = responseData
+      return responseData
+    } catch (error) {
+      throw error
+    } finally {
+      loadingDashboard.value = false
+    }
+  }
+
   function updateFilters(newFilters: Partial<TransactionFilters>) {
     filters.value = { ...filters.value, ...newFilters }
   }
@@ -293,9 +340,11 @@ export const useTransactionStore = defineStore('transaction', () => {
     loading,
     loadingTransaction,
     loadingStatistics,
+    loadingDashboard,
     processing,
     currentTransaction,
     statistics,
+    dashboardStatistics,
     filters,
 
     // Computed
@@ -314,6 +363,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     changeTransactionStatus,
     verifyWithdrawalCode,
     fetchStatistics,
+    fetchDashboardStatistics,
     setCurrentTransaction,
     updateFilters,
     resetFilters,

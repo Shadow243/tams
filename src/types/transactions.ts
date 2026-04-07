@@ -130,3 +130,60 @@ export interface TransactionStatistics {
     expired: number
   }
 }
+
+export interface DashboardStatisticsByType {
+  type_id: number
+  type_name: string
+  type_code: string
+  count: number
+  total_amount: number
+}
+
+export interface DashboardStatisticsByBranch {
+  branch_id: number
+  branch_name: string
+  branch_code: string
+  count: number
+  total_amount: number
+}
+
+export interface DashboardTrendItem {
+  date: string
+  currency_id: number
+  currency_code: string
+  count: number
+  total_amount: number
+  total_fees: number
+}
+
+export interface DashboardStatistics {
+  overview: {
+    total_transactions: number
+    total_amount: number
+    total_fees: number
+    total_net: number
+    average_amount: number
+    success_rate: number
+  }
+  by_status: {
+    pending: number
+    available: number
+    completed: number
+    cancelled: number
+    failed: number
+    expired: number
+  }
+  by_type: DashboardStatisticsByType[]
+  by_branch: DashboardStatisticsByBranch[]
+  trend: DashboardTrendItem[]
+  recent_transactions: Transaction[]
+}
+
+export interface DashboardFilters {
+  period: string
+  start_date: string | null
+  end_date: string | null
+  branch_id: number | null
+  currency_id: number | null
+  transaction_type_id: number | null
+}
