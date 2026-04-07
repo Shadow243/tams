@@ -33,7 +33,7 @@
             <input
               type="date"
               v-model="filters.start_date"
-              @change="loadDashboard"
+              @change="debouncedLoadDashboard"
               class="form-control form-control-sm"
               style="max-width: 150px"
             />
@@ -41,7 +41,7 @@
             <input
               type="date"
               v-model="filters.end_date"
-              @change="loadDashboard"
+              @change="debouncedLoadDashboard"
               class="form-control form-control-sm"
               style="max-width: 150px"
             />
@@ -49,7 +49,7 @@
           <!-- Branch Filter -->
           <select
             v-model="filters.branch_id"
-            @change="loadDashboard"
+            @change="debouncedLoadDashboard"
             class="form-select form-select-sm"
             style="min-width: 150px"
           >
@@ -63,7 +63,7 @@
           <!-- Currency Filter -->
           <select
             v-model="filters.currency_id"
-            @change="loadDashboard"
+            @change="debouncedLoadDashboard"
             class="form-select form-select-sm"
             style="min-width: 120px"
           >
@@ -77,7 +77,7 @@
           <!-- Type Filter -->
           <select
             v-model="filters.transaction_type_id"
-            @change="loadDashboard"
+            @change="debouncedLoadDashboard"
             class="form-select form-select-sm"
             style="min-width: 150px"
           >
@@ -470,7 +470,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useHead } from '@vueuse/head'
 import { useTransactionStore } from '@/stores/transactions'
 import { useTransactionTypeStore } from '@/stores/transaction-types'
@@ -551,7 +551,7 @@ function getDateRange(period: string): { start: string | null; end: string | nul
 }
 
 function onPeriodChange() {
-  if (filters.value.period !== 'custom') loadDashboard()
+  if (filters.value.period !== 'custom') debouncedLoadDashboard()
 }
 
 async function loadDashboard() {
@@ -564,6 +564,16 @@ async function loadDashboard() {
     transaction_type_id: filters.value.transaction_type_id ?? undefined,
   })
 }
+
+// Debounced wrapper — prevents burst API calls when filters change rapidly
+let _debounceTimer: ReturnType<typeof setTimeout> | null = null
+function debouncedLoadDashboard() {
+  if (_debounceTimer) clearTimeout(_debounceTimer)
+  _debounceTimer = setTimeout(() => loadDashboard(), 300)
+}
+onUnmounted(() => {
+  if (_debounceTimer) clearTimeout(_debounceTimer)
+})
 
 function resetFilters() {
   filters.value = {

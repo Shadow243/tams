@@ -30,6 +30,9 @@ export const useTransactionStore = defineStore('transaction', () => {
   const statistics = ref<TransactionStatistics | null>(null)
   const dashboardStatistics = ref<DashboardStatistics | null>(null)
 
+  // AbortController for in-flight dashboard requests
+  let dashboardAbortController: AbortController | null = null
+
   // Filters
   const filters = ref<TransactionFilters>({
     search: '',
@@ -116,7 +119,6 @@ export const useTransactionStore = defineStore('transaction', () => {
       currentTransaction.value = transactionData
       return transactionData
     } catch (error) {
-      console.error('❌ Error fetching transaction:', error)
       throw error
     } finally {
       loadingTransaction.value = false
@@ -235,17 +237,12 @@ export const useTransactionStore = defineStore('transaction', () => {
         params.currency_id = filters.value.currency_id
       }
 
-      console.log('📊 Fetching statistics with params:', params)
-
       const response = await axiosInstance.get(`${appConfig.apiUrl}/transactions/statistics`, {
         params
       })
       
-      console.log('📊 API Response for statistics:', response.data)
-      
       // Handle both response formats: direct data or wrapped in data property
       const statsData = response.data.data || response.data
-      console.log('📊 Statistics Data:', statsData)
       
       statistics.value = statsData
       return statsData
@@ -262,6 +259,12 @@ export const useTransactionStore = defineStore('transaction', () => {
   }
 
   async function fetchDashboardStatistics(dashboardFilters?: Partial<DashboardFilters>) {
+    // Cancel any in-flight dashboard request
+    if (dashboardAbortController) {
+      dashboardAbortController.abort()
+    }
+    dashboardAbortController = new AbortController()
+
     loadingDashboard.value = true
     try {
       const params: Record<string, string | number> = {}
@@ -288,7 +291,7 @@ export const useTransactionStore = defineStore('transaction', () => {
 
       const response = await axiosInstance.get(
         `${appConfig.apiUrl}/transactions/dashboard/statistics`,
-        { params }
+        { params, signal: dashboardAbortController.signal }
       )
       const responseData = response.data.data || response.data
       // recent_transactions comes as a resource collection with a nested 'data' key
@@ -297,7 +300,11 @@ export const useTransactionStore = defineStore('transaction', () => {
       }
       dashboardStatistics.value = responseData
       return responseData
-    } catch (error) {
+    } catch (error: any) {
+      // Ignore cancellation errors — a new request is already in flight
+      if (error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError') {
+        return
+      }
       throw error
     } finally {
       loadingDashboard.value = false
