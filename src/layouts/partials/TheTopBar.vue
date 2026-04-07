@@ -159,7 +159,10 @@
                   v-for="n in notifStore.notifications"
                   :key="n.id"
                   class="dropdown-item notification-item py-2 text-wrap"
-                  :class="{ 'bg-primary bg-opacity-10': !n.read_at }"
+                  :class="{
+                    'bg-primary bg-opacity-10': !n.read_at,
+                    'opacity-50': notifStore.isActioning(n.id),
+                  }"
                   style="cursor: pointer"
                   @click="notifStore.markAsRead(n.id)"
                 >
@@ -168,9 +171,15 @@
                       <span
                         class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center"
                       >
-                        <i :class="`ti ${n.data.icon} fs-4`"></i>
+                        <span
+                          v-if="notifStore.isActioning(n.id)"
+                          class="spinner-border spinner-border-sm text-secondary"
+                          role="status"
+                        ></span>
+                        <i v-else :class="`ti ${n.data.icon} fs-4`"></i>
                       </span>
                       <span
+                        v-if="!notifStore.isActioning(n.id)"
                         :class="`position-absolute rounded-pill bg-${n.data.color} notification-badge`"
                       >
                         <i :class="`ti ${n.data.icon} align-middle`"></i>
@@ -187,6 +196,7 @@
                     <button
                       type="button"
                       class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
+                      :disabled="notifStore.isActioning(n.id)"
                       @click.stop="notifStore.remove(n.id)"
                     >
                       <i class="ti ti-square-rounded-x fs-xxl"></i>
@@ -199,9 +209,16 @@
               <a
                 href="javascript:void(0);"
                 class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2"
+                :class="{ 'pe-none opacity-50': notifStore.markingAll }"
                 @click.prevent="notifStore.markAllAsRead()"
-                >Mark all as read</a
               >
+                <span
+                  v-if="notifStore.markingAll"
+                  class="spinner-border spinner-border-sm me-1"
+                  role="status"
+                ></span>
+                Mark all as read
+              </a>
             </div>
             <!-- End dropdown-menu -->
           </div>
@@ -492,17 +509,17 @@ const toggleMonochrome = () => {
   sessionStorage.setItem('__THEME_CONFIG__', JSON.stringify(config))
 }
 
-let pollTimer: ReturnType<typeof setInterval> | null = null
-
 onUnmounted(() => {
-  if (pollTimer !== null) clearInterval(pollTimer)
+  notifStore.disconnect()
 })
 
 // Initialize theme on mount
 onMounted(() => {
-  // Start background polling for notification badge
+  // Connect to real-time notifications via Reverb
   notifStore.fetchUnreadCount()
-  pollTimer = setInterval(() => notifStore.fetchUnreadCount(), 30_000)
+  if (user.value?.id) {
+    notifStore.connect(user.value.id)
+  }
 
   try {
     // Get saved theme from config
