@@ -19,6 +19,132 @@
         </div>
       </div>
 
+      <!-- Status Overview - Hidden on mobile, visible on tablet and desktop -->
+      <div class="row mb-4 d-none d-md-flex">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="card-title mb-0 fw-semibold">
+                  <i class="ti ti-chart-pie me-2 text-primary"></i>
+                  {{ t('transactions.by_status') || 'Répartition par Statut' }}
+                </h5>
+                <span class="text-muted small">{{
+                  t('transactions.overview') || "Vue d'ensemble"
+                }}</span>
+              </div>
+
+              <!-- Loading State -->
+              <div v-if="store.loadingStatistics" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-3 text-muted">
+                  {{ t('transactions.loading_stats') || 'Chargement des statistiques...' }}
+                </p>
+              </div>
+
+              <!-- Statistics Content -->
+              <div v-else-if="store.statistics?.by_status" class="row g-3">
+                <!-- Pending -->
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                  <div class="status-card status-pending">
+                    <div class="status-icon-wrapper status-icon-warning">
+                      <i class="ti ti-clock"></i>
+                    </div>
+                    <div class="status-content">
+                      <h3 class="status-count">{{ store.statistics.by_status.pending || 0 }}</h3>
+                      <p class="status-label mb-0">
+                        {{ t('transactions.pending') || 'En attente' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Available -->
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                  <div class="status-card status-available">
+                    <div class="status-icon-wrapper status-icon-info">
+                      <i class="ti ti-check"></i>
+                    </div>
+                    <div class="status-content">
+                      <h3 class="status-count">{{ store.statistics.by_status.available || 0 }}</h3>
+                      <p class="status-label mb-0">
+                        {{ t('transactions.available') || 'Disponible' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Completed -->
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                  <div class="status-card status-completed">
+                    <div class="status-icon-wrapper status-icon-success">
+                      <i class="ti ti-circle-check"></i>
+                    </div>
+                    <div class="status-content">
+                      <h3 class="status-count">{{ store.statistics.by_status.completed || 0 }}</h3>
+                      <p class="status-label mb-0">
+                        {{ t('transactions.completed') || 'Complétée' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cancelled -->
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                  <div class="status-card status-cancelled">
+                    <div class="status-icon-wrapper status-icon-secondary">
+                      <i class="ti ti-x"></i>
+                    </div>
+                    <div class="status-content">
+                      <h3 class="status-count">{{ store.statistics.by_status.cancelled || 0 }}</h3>
+                      <p class="status-label mb-0">
+                        {{ t('transactions.cancelled') || 'Annulée' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Failed -->
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                  <div class="status-card status-failed">
+                    <div class="status-icon-wrapper status-icon-danger">
+                      <i class="ti ti-alert-circle"></i>
+                    </div>
+                    <div class="status-content">
+                      <h3 class="status-count">{{ store.statistics.by_status.failed || 0 }}</h3>
+                      <p class="status-label mb-0">{{ t('transactions.failed') || 'Échouée' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Expired -->
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                  <div class="status-card status-expired">
+                    <div class="status-icon-wrapper status-icon-dark">
+                      <i class="ti ti-clock-hour-4"></i>
+                    </div>
+                    <div class="status-content">
+                      <h3 class="status-count">{{ store.statistics.by_status.expired || 0 }}</h3>
+                      <p class="status-label mb-0">{{ t('transactions.expired') || 'Expirée' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No Data State -->
+              <div v-else class="text-center py-5">
+                <i class="ti ti-chart-pie text-muted" style="font-size: 3rem"></i>
+                <p class="mt-3 text-muted">
+                  {{ t('transactions.no_statistics') || 'Aucune statistique disponible' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col-12">
           <TransactionsList
@@ -58,7 +184,7 @@
     <TransactionDetailsModal
       :show="showDetailsModal"
       :transaction="selectedTransaction"
-      :loading="isLoadingDetails"
+      :loading="store.loadingTransaction"
       @close="handleCloseDetailsModal"
       @edit="handleEditFromDetails"
     />
@@ -66,7 +192,7 @@
     <TransactionStatisticsModal
       :show="showStatisticsModal"
       :statistics="store.statistics"
-      :loading="isLoadingStatistics"
+      :loading="store.loadingStatistics"
       @close="showStatisticsModal = false"
       @filter-change="handleStatisticsFilterChange"
     />
@@ -112,8 +238,6 @@ const showDetailsModal = ref(false)
 const showStatisticsModal = ref(false)
 const isEditing = ref(false)
 const selectedTransaction = ref<Transaction | null>(null)
-const isLoadingDetails = ref(false)
-const isLoadingStatistics = ref(false)
 const formData = ref<TransactionFormData>({
   transaction_type_id: null,
   branch_id: null,
@@ -139,6 +263,13 @@ onMounted(async () => {
     walletStore.fetchWallets(),
     currencyStore.fetchAllCurrencies(),
   ])
+
+  store.updateFilters({
+    currency_id: undefined,
+    start_date: undefined,
+    end_date: undefined,
+  })
+  await store.fetchStatistics()
 })
 
 const handleAddTransaction = () => {
@@ -202,9 +333,8 @@ const handleViewTransaction = async (transaction: Transaction) => {
     return
   }
 
-  // Show modal immediately with loading state
+  // Show modal immediately and start loading
   showDetailsModal.value = true
-  isLoadingDetails.value = true
   selectedTransaction.value = null
 
   try {
@@ -219,8 +349,6 @@ const handleViewTransaction = async (transaction: Transaction) => {
       text: t('transactions.fetch_error') || 'Erreur lors du chargement des détails.',
       icon: 'error',
     })
-  } finally {
-    isLoadingDetails.value = false
   }
 }
 
@@ -248,6 +376,7 @@ const handleDeleteTransaction = (id: string) => {
     if (result.isConfirmed) {
       try {
         await store.deleteTransaction(id)
+        store.fetchStatistics()
         Swal.fire({
           title: t('transactions.success') || 'Succès!',
           text: t('transactions.delete_success') || 'Transaction supprimée avec succès.',
@@ -281,6 +410,7 @@ const handleCancelTransaction = (id: string) => {
     if (result.isConfirmed) {
       try {
         await store.cancelTransaction(id)
+        store.fetchStatistics()
         Swal.fire({
           title: t('transactions.success') || 'Succès!',
           text: t('transactions.cancel_success') || 'Transaction annulée avec succès.',
@@ -316,6 +446,7 @@ const handleCompleteTransaction = (id: string) => {
     if (result.isConfirmed) {
       try {
         await store.completeTransaction(id)
+        store.fetchStatistics()
         Swal.fire({
           title: t('transactions.success') || 'Succès!',
           text: t('transactions.complete_success') || 'Transaction complétée avec succès.',
@@ -336,23 +467,24 @@ const handleCompleteTransaction = (id: string) => {
 }
 
 const handleShowStatistics = async () => {
-  // Show modal immediately with loading state
+  // Ouvrir le modal immédiatement
   showStatisticsModal.value = true
-  isLoadingStatistics.value = true
 
   try {
-    // Set default filters: default currency and today's date
+    // Toujours charger avec les filtres par défaut (devise + date du jour)
     const today = new Date().toISOString().split('T')[0]
     const defaultCurrencyId =
       currencyStore.defaultCurrency?.id || currencyStore.activeCurrencies[0]?.id
 
-    store.updateFilters({
-      currency_id: defaultCurrencyId,
-      start_date: today,
-      end_date: today,
-    })
+    if (defaultCurrencyId) {
+      store.updateFilters({
+        currency_id: defaultCurrencyId,
+        start_date: today,
+        end_date: today,
+      })
 
-    await store.fetchStatistics()
+      await store.fetchStatistics()
+    }
   } catch (error) {
     console.error('Error fetching statistics:', error)
     showStatisticsModal.value = false
@@ -361,8 +493,6 @@ const handleShowStatistics = async () => {
       text: t('transactions.stats_error') || 'Erreur lors du chargement des statistiques.',
       icon: 'error',
     })
-  } finally {
-    isLoadingStatistics.value = false
   }
 }
 
@@ -371,8 +501,6 @@ const handleStatisticsFilterChange = async (filters: any) => {
   if (!filters.currencyId) {
     return
   }
-
-  isLoadingStatistics.value = true
 
   try {
     // Calculate date range based on period
@@ -434,8 +562,6 @@ const handleStatisticsFilterChange = async (filters: any) => {
       text: t('transactions.stats_error') || 'Erreur lors du chargement des statistiques.',
       icon: 'error',
     })
-  } finally {
-    isLoadingStatistics.value = false
   }
 }
 
@@ -466,6 +592,15 @@ const handleSubmit = async (data: TransactionFormData) => {
   try {
     await store.storeTransaction(data)
     showModal.value = false
+
+    // Recharger les statistiques globales après sauvegarde
+    store.updateFilters({
+      currency_id: undefined,
+      start_date: undefined,
+      end_date: undefined,
+    })
+    store.fetchStatistics()
+
     Swal.fire({
       title: t('transactions.success') || 'Succès!',
       text: isEditing.value
@@ -490,3 +625,197 @@ const handleSubmit = async (data: TransactionFormData) => {
   }
 }
 </script>
+
+<style scoped>
+/* Status Cards */
+.status-card {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background: var(--vz-card-bg-custom);
+  border: 1px solid var(--vz-border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--status-color), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--status-color);
+}
+
+.status-card:hover::before {
+  opacity: 1;
+}
+
+/* Icon Wrapper */
+.status-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.status-card:hover .status-icon-wrapper {
+  transform: scale(1.1);
+}
+
+.status-icon-warning {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.2));
+  color: #ffc107;
+}
+
+.status-icon-info {
+  background: linear-gradient(135deg, rgba(13, 202, 240, 0.1), rgba(13, 202, 240, 0.2));
+  color: #0dcaf0;
+}
+
+.status-icon-success {
+  background: linear-gradient(135deg, rgba(25, 135, 84, 0.1), rgba(25, 135, 84, 0.2));
+  color: #198754;
+}
+
+.status-icon-secondary {
+  background: linear-gradient(135deg, rgba(108, 117, 125, 0.1), rgba(108, 117, 125, 0.2));
+  color: #6c757d;
+}
+
+.status-icon-danger {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.2));
+  color: #dc3545;
+}
+
+.status-icon-dark {
+  background: linear-gradient(135deg, rgba(33, 37, 41, 0.1), rgba(33, 37, 41, 0.2));
+  color: #495057;
+}
+
+/* Status Content */
+.status-content {
+  text-align: center;
+  width: 100%;
+}
+
+.status-count {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--vz-body-color);
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.status-label {
+  font-size: 0.813rem;
+  font-weight: 500;
+  color: var(--vz-body-color-rgb);
+  opacity: 0.7;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+}
+
+/* Status Specific Colors */
+.status-pending {
+  --status-color: #ffc107;
+}
+
+.status-available {
+  --status-color: #0dcaf0;
+}
+
+.status-completed {
+  --status-color: #198754;
+}
+
+.status-cancelled {
+  --status-color: #6c757d;
+}
+
+.status-failed {
+  --status-color: #dc3545;
+}
+
+.status-expired {
+  --status-color: #495057;
+}
+
+/* Hover Effects for Count */
+.status-pending:hover .status-count {
+  color: #ffc107;
+}
+
+.status-available:hover .status-count {
+  color: #0dcaf0;
+}
+
+.status-completed:hover .status-count {
+  color: #198754;
+}
+
+.status-cancelled:hover .status-count {
+  color: #6c757d;
+}
+
+.status-failed:hover .status-count {
+  color: #dc3545;
+}
+
+.status-expired:hover .status-count {
+  color: #495057;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .status-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .status-count {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-card {
+    padding: 1.25rem;
+  }
+
+  .status-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .status-count {
+    font-size: 1.5rem;
+  }
+
+  .status-label {
+    font-size: 0.75rem;
+  }
+}
+</style>

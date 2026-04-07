@@ -91,6 +91,7 @@ export interface TransactionFormData {
   wallet_id: number | null
   customer_phone: string | null
   currency_code: string
+  currency_id?: number | null
   gross_amount: number | null
   fee_amount: number | null
   fee_mode_applied: FeeModeApplied | null

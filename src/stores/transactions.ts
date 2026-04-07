@@ -20,6 +20,8 @@ export const useTransactionStore = defineStore('transaction', () => {
   const transactions = ref<TransactionsResponse | null>(null)
   const transaction_list = ref<Transaction[]>([])
   const loading = ref(false)
+  const loadingTransaction = ref(false)
+  const loadingStatistics = ref(false)
   const processing = ref(false)
   const currentTransaction = ref<Transaction | null>(null)
   const statistics = ref<TransactionStatistics | null>(null)
@@ -100,7 +102,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   }
 
   async function fetchTransaction(id: string) {
-    loading.value = true
+    loadingTransaction.value = true
     try {
       const response = await axiosInstance.get(`${appConfig.apiUrl}/transactions/${id}`)
       
@@ -113,7 +115,7 @@ export const useTransactionStore = defineStore('transaction', () => {
       console.error('❌ Error fetching transaction:', error)
       throw error
     } finally {
-      loading.value = false
+      loadingTransaction.value = false
     }
   }
 
@@ -209,7 +211,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   }
 
   async function fetchStatistics() {
-    loading.value = true
+    loadingStatistics.value = true
     try {
       const params: Record<string, string | number> = {}
 
@@ -247,7 +249,7 @@ export const useTransactionStore = defineStore('transaction', () => {
       console.error('❌ Error fetching statistics:', error)
       throw error
     } finally {
-      loading.value = false
+      loadingStatistics.value = false
     }
   }
 
@@ -289,6 +291,8 @@ export const useTransactionStore = defineStore('transaction', () => {
     transactions,
     transaction_list,
     loading,
+    loadingTransaction,
+    loadingStatistics,
     processing,
     currentTransaction,
     statistics,
