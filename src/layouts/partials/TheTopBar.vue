@@ -112,9 +112,15 @@
               data-bs-auto-close="outside"
               aria-haspopup="false"
               aria-expanded="false"
+              @click="openNotifications"
             >
               <i class="ti ti-bell topbar-link-icon animate-ring"></i>
-              <span class="badge text-bg-danger badge-circle topbar-badge">5</span>
+              <span
+                v-if="notifStore.hasUnread"
+                class="badge text-bg-danger badge-circle topbar-badge"
+              >
+                {{ notifStore.unreadCount > 99 ? '99+' : notifStore.unreadCount }}
+              </span>
             </button>
 
             <div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
@@ -124,203 +130,64 @@
                     <h6 class="m-0 fs-md fw-semibold">Notifications</h6>
                   </div>
                   <div class="col text-end">
-                    <a href="#!" class="badge badge-soft-success badge-label py-1"
-                      >07 Notifications</a
-                    >
+                    <a href="javascript:void(0);" class="badge badge-soft-success badge-label py-1">
+                      {{ notifStore.unreadCount }} Notification{{
+                        notifStore.unreadCount !== 1 ? 's' : ''
+                      }}
+                    </a>
                   </div>
                 </div>
               </div>
 
               <div style="max-height: 300px" data-simplebar="">
-                <!-- Notification 1 -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-1">
-                  <span class="d-flex align-items-center gap-3">
-                    <span class="flex-shrink-0 position-relative">
-                      <img :src="avatarImage" class="avatar-md rounded-circle" alt="User Avatar" />
-                      <span class="position-absolute rounded-pill bg-success notification-badge">
-                        <i class="ti ti-bell align-middle"></i>
-                        <span class="visually-hidden">unread notification</span>
-                      </span>
-                    </span>
-                    <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">Emily Johnson</span>
-                      commented on a task in
-                      <span class="fw-medium text-body">Design Sprint</span>
-                      <br />
-                      <span class="fs-xs">12 minutes ago</span>
-                    </span>
-                    <button
-                      type="button"
-                      class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-1"
-                    >
-                      <i class="ti ti-square-rounded-x fs-xxl"></i>
-                    </button>
-                  </span>
+                <!-- Loading state -->
+                <div v-if="notifStore.loading" class="text-center py-4 text-muted">
+                  <div class="spinner-border spinner-border-sm" role="status"></div>
                 </div>
 
-                <!-- Notification 2 -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-2">
-                  <span class="d-flex align-items-center gap-3">
-                    <span class="flex-shrink-0 position-relative">
-                      <img :src="avatarImage" class="avatar-md rounded-circle" alt="User Avatar" />
-                      <span class="position-absolute rounded-pill bg-info notification-badge">
-                        <i class="ti ti-cloud-upload align-middle"></i>
-                        <span class="visually-hidden">upload notification</span>
-                      </span>
-                    </span>
-                    <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">Michael Lee</span>
-                      uploaded files to
-                      <span class="fw-medium text-body">Marketing Assets</span>
-                      <br />
-                      <span class="fs-xs">25 minutes ago</span>
-                    </span>
-                    <button
-                      type="button"
-                      class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-2"
-                    >
-                      <i class="ti ti-square-rounded-x fs-xxl"></i>
-                    </button>
-                  </span>
+                <!-- Empty state -->
+                <div
+                  v-else-if="notifStore.notifications.length === 0"
+                  class="text-center py-4 text-muted"
+                >
+                  <i class="ti ti-bell-off fs-2xl d-block mb-2"></i>
+                  <span class="fs-sm">No notifications</span>
                 </div>
 
-                <!-- Notification 3 - Server CPU Alert -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-6">
+                <!-- Notification items -->
+                <div
+                  v-for="n in notifStore.notifications"
+                  :key="n.id"
+                  class="dropdown-item notification-item py-2 text-wrap"
+                  :class="{ 'bg-primary bg-opacity-10': !n.read_at }"
+                  style="cursor: pointer"
+                  @click="notifStore.markAsRead(n.id)"
+                >
                   <span class="d-flex align-items-center gap-3">
                     <span class="flex-shrink-0 position-relative">
                       <span
                         class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center"
                       >
-                        <i class="ti ti-database fs-4"></i>
+                        <i :class="`ti ${n.data.icon} fs-4`"></i>
                       </span>
-                      <span class="position-absolute rounded-pill bg-danger notification-badge">
-                        <i class="ti ti-alert-circle align-middle"></i>
-                        <span class="visually-hidden">server alert</span>
-                      </span>
-                    </span>
-                    <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">Server #3</span>
-                      CPU usage exceeded 90%
-                      <br />
-                      <span class="fs-xs">Just now</span>
-                    </span>
-                    <button
-                      type="button"
-                      class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-6"
-                    >
-                      <i class="ti ti-square-rounded-x fs-xxl"></i>
-                    </button>
-                  </span>
-                </div>
-
-                <!-- Notification 4 -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-3">
-                  <span class="d-flex align-items-center gap-3">
-                    <span class="flex-shrink-0 position-relative">
-                      <img :src="avatarImage" class="avatar-md rounded-circle" alt="User Avatar" />
-                      <span class="position-absolute rounded-pill bg-warning notification-badge">
-                        <i class="ti ti-alert-triangle align-middle"></i>
-                        <span class="visually-hidden">alert</span>
-                      </span>
-                    </span>
-                    <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">Sophia Ray</span>
-                      flagged an issue in
-                      <span class="fw-medium text-body">Bug Tracker</span>
-                      <br />
-                      <span class="fs-xs">40 minutes ago</span>
-                    </span>
-                    <button
-                      type="button"
-                      class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-3"
-                    >
-                      <i class="ti ti-square-rounded-x fs-xxl"></i>
-                    </button>
-                  </span>
-                </div>
-
-                <!-- Notification 5 -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-4">
-                  <span class="d-flex align-items-center gap-3">
-                    <span class="flex-shrink-0 position-relative">
-                      <img :src="avatarImage" class="avatar-md rounded-circle" alt="User Avatar" />
-                      <span class="position-absolute rounded-pill bg-primary notification-badge">
-                        <i class="ti ti-calendar-event align-middle"></i>
-                        <span class="visually-hidden">event notification</span>
-                      </span>
-                    </span>
-                    <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">David Kim</span>
-                      scheduled a meeting for
-                      <span class="fw-medium text-body">UX Review</span>
-                      <br />
-                      <span class="fs-xs">1 hour ago</span>
-                    </span>
-                    <button
-                      type="button"
-                      class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-4"
-                    >
-                      <i class="ti ti-square-rounded-x fs-xxl"></i>
-                    </button>
-                  </span>
-                </div>
-
-                <!-- Notification 6 -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-5">
-                  <span class="d-flex align-items-center gap-3">
-                    <span class="flex-shrink-0 position-relative">
-                      <img :src="avatarImage" class="avatar-md rounded-circle" alt="User Avatar" />
-                      <span class="position-absolute rounded-pill bg-secondary notification-badge">
-                        <i class="ti ti-edit align-middle"></i>
-                        <span class="visually-hidden">edit</span>
-                      </span>
-                    </span>
-                    <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">Isabella White</span>
-                      updated the document in
-                      <span class="fw-medium text-body">Product Specs</span>
-                      <br />
-                      <span class="fs-xs">2 hours ago</span>
-                    </span>
-                    <button
-                      type="button"
-                      class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-5"
-                    >
-                      <i class="ti ti-square-rounded-x fs-xxl"></i>
-                    </button>
-                  </span>
-                </div>
-
-                <!-- Notification 7 - Deployment Success -->
-                <div class="dropdown-item notification-item py-2 text-wrap" id="message-7">
-                  <span class="d-flex align-items-center gap-3">
-                    <span class="flex-shrink-0 position-relative">
                       <span
-                        class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center"
+                        :class="`position-absolute rounded-pill bg-${n.data.color} notification-badge`"
                       >
-                        <i class="ti ti-rocket fs-4"></i>
-                      </span>
-                      <span class="position-absolute rounded-pill bg-success notification-badge">
-                        <i class="ti ti-check align-middle"></i>
-                        <span class="visually-hidden">deployment</span>
+                        <i :class="`ti ${n.data.icon} align-middle`"></i>
+                        <span class="visually-hidden">notification</span>
                       </span>
                     </span>
                     <span class="flex-grow-1 text-muted">
-                      <span class="fw-medium text-body">Production Server</span>
-                      deployment completed successfully
+                      <span class="fw-medium text-body">{{ n.data.title }}</span>
                       <br />
-                      <span class="fs-xs">30 minutes ago</span>
+                      {{ n.data.body }}
+                      <br />
+                      <span class="fs-xs">{{ timeAgo(n.created_at) }}</span>
                     </span>
                     <button
                       type="button"
                       class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                      data-dismissible="#message-7"
+                      @click.stop="notifStore.remove(n.id)"
                     >
                       <i class="ti ti-square-rounded-x fs-xxl"></i>
                     </button>
@@ -332,7 +199,8 @@
               <a
                 href="javascript:void(0);"
                 class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2"
-                >Read All Messages</a
+                @click.prevent="notifStore.markAllAsRead()"
+                >Mark all as read</a
               >
             </div>
             <!-- End dropdown-menu -->
@@ -469,14 +337,34 @@
   </header>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { logoImg, avatarImage, iconImage } from '@/utils/ui-utils'
 import { useI18n } from '@/composables/useI18n'
 import { useAuthStore } from '@/stores/auth'
+import { useNotificationStore } from '@/stores/notifications'
 import { useSidebarToggle } from '@/composables/sidebar-toggle'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
+
+const notifStore = useNotificationStore()
+
+async function openNotifications() {
+  if (notifStore.notifications.length === 0 || notifStore.hasUnread) {
+    await notifStore.fetchNotifications()
+  }
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`
+  const days = Math.floor(hours / 24)
+  return `${days} day${days > 1 ? 's' : ''} ago`
+}
 
 // i18n
 const { locale, changeLocale } = useI18n()
@@ -604,8 +492,18 @@ const toggleMonochrome = () => {
   sessionStorage.setItem('__THEME_CONFIG__', JSON.stringify(config))
 }
 
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+onUnmounted(() => {
+  if (pollTimer !== null) clearInterval(pollTimer)
+})
+
 // Initialize theme on mount
 onMounted(() => {
+  // Start background polling for notification badge
+  notifStore.fetchUnreadCount()
+  pollTimer = setInterval(() => notifStore.fetchUnreadCount(), 30_000)
+
   try {
     // Get saved theme from config
     const savedConfig = sessionStorage.getItem('__THEME_CONFIG__')
