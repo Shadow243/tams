@@ -20,7 +20,20 @@
     </span>
     <span v-else class="text-muted">-</span>
   </td>
-  <td class="text-end">{{ formatCurrency(branch.cash_balance) }}</td>
+  <td class="text-end">
+    <div
+      v-if="branch.balances && branch.balances.length > 0"
+      class="d-flex flex-column gap-1 align-items-end"
+    >
+      <div v-for="balance in branch.balances" :key="balance.currency_code" class="text-nowrap">
+        <small class="badge badge-soft-primary">
+          {{ balance.currency?.symbol || balance.currency_code }}
+          {{ formatCurrency(balance.cash_balance) }}
+        </small>
+      </div>
+    </div>
+    <span v-else class="text-muted">-</span>
+  </td>
   <td class="text-center">
     <span
       class="badge"

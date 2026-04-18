@@ -170,6 +170,7 @@
     </div>
 
     <TransactionFormModal
+      ref="transactionFormModalRef"
       :show="showModal"
       :form-data="formData"
       :is-editing="isEditing"
@@ -240,6 +241,7 @@ const branchStore = useBranchStore()
 const walletStore = useWalletStore()
 const currencyStore = useCurrencyStore()
 
+const transactionFormModalRef = ref<InstanceType<typeof TransactionFormModal>>()
 const showModal = ref(false)
 const showDetailsModal = ref(false)
 const showStatisticsModal = ref(false)
@@ -612,7 +614,7 @@ const handleCloseModal = () => {
 
 const handleSubmit = async (data: TransactionFormData) => {
   try {
-    await store.storeTransaction(data)
+    const response = await store.storeTransaction(data)
     showModal.value = false
 
     // Recharger les statistiques globales après sauvegarde
@@ -623,7 +625,7 @@ const handleSubmit = async (data: TransactionFormData) => {
     })
     store.fetchStatistics()
 
-    Swal.fire({
+    await Swal.fire({
       title: t('transactions.success') || 'Succès!',
       text: isEditing.value
         ? t('transactions.update_success') || 'Transaction mise à jour avec succès.'
@@ -632,7 +634,17 @@ const handleSubmit = async (data: TransactionFormData) => {
       timer: 2000,
       showConfirmButton: false,
     })
+
+    // Show receipt modal after creation
+    if (!isEditing.value) {
+      const transactionData = response?.data
+      if (transactionData) {
+        receiptTransaction.value = transactionData
+        showReceiptModal.value = true
+      }
+    }
   } catch (error: any) {
+    transactionFormModalRef.value?.setProcessing(false)
     console.error('Error saving transaction:', error)
     const errorMessage =
       error.response?.data?.message ||

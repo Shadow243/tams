@@ -464,6 +464,7 @@ interface Props {
   transactionTypes: any[]
   branches: any[]
   wallets: any[]
+  processing?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -484,6 +485,7 @@ const props = withDefaults(defineProps<Props>(), {
   transactionTypes: () => [],
   branches: () => [],
   wallets: () => [],
+  processing: false,
 })
 
 const emit = defineEmits<{

@@ -1,6 +1,17 @@
 import type { PaginationLink, Meta } from "./global";
 import type { Country } from "./countries";
 
+export interface BranchBalance {
+    currency_code: string;
+    currency?: {
+        code: string;
+        name: string;
+        symbol: string;
+    } | null;
+    cash_balance: number;
+    formatted_balance?: string;
+}
+
 export interface Branch {
     id: number;
     uuid: string;
@@ -10,6 +21,7 @@ export interface Branch {
     country?: Country;
     address: string | null;
     cash_balance: string | number;
+    balances?: BranchBalance[];
     status: 'active' | 'inactive';
     status_label: string;
     is_active: boolean;
