@@ -34,10 +34,18 @@ const apiClient = axios.create(config)
 // Request interceptor to add Authorization header conditionally
 apiClient.interceptors.request.use(
     (config) => {
+        // Always include the main auth token if available
+        if (token.value) {
+            config.headers = config.headers || {}
+            config.headers['Authorization'] = `Bearer ${token.value}`
+        }
+        
+        // Override with base_token for procedure API calls
         if (baseToken.value && config.url?.startsWith(import.meta.env.VITE_PROCEDURE_API_URL)) {
             config.headers = config.headers || {}
             config.headers['Authorization'] = `Bearer ${baseToken.value}`
         }
+        
         return config
     },
     (error) => Promise.reject(error),

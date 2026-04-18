@@ -786,7 +786,13 @@
                 placeholder="000000"
                 maxlength="6"
                 pattern="[0-9]{6}"
+                inputmode="numeric"
+                @input="verificationCode = verificationCode.replace(/[^0-9]/g, '')"
               />
+              <div class="form-text">
+                <i class="ti ti-info-circle me-1"></i>
+                Enter the current 6-digit code displayed in your authenticator app
+              </div>
             </div>
           </div>
           <div v-else class="text-center">
@@ -801,7 +807,13 @@
             type="button"
             class="btn btn-primary"
             @click="confirm2FA"
-            :disabled="!verificationCode || verificationCode.length !== 6 || confirming2FA"
+            :disabled="
+              !twoFactorQR ||
+              !twoFactorSecret ||
+              !verificationCode ||
+              verificationCode.length !== 6 ||
+              confirming2FA
+            "
           >
             <span v-if="confirming2FA" class="spinner-border spinner-border-sm me-2"></span>
             <i v-else class="ti ti-check me-2"></i>
@@ -1343,26 +1355,43 @@ const enable2FA = async () => {
 
 const confirm2FA = async () => {
   if (!verificationCode.value || verificationCode.value.length !== 6) {
+    Swal.fire({
+      title: 'Invalid Code',
+      text: 'Please enter a 6-digit code',
+      icon: 'warning',
+    })
     return
   }
 
   confirming2FA.value = true
   try {
-    await axiosInstance.post(`${appConfig.apiUrl}/user/2fa/confirm`, {
+    console.log('Confirming 2FA with code:', verificationCode.value)
+    const response = await axiosInstance.post(`${appConfig.apiUrl}/user/2fa/confirm`, {
       code: verificationCode.value,
     })
+    console.log('2FA confirm response:', response.data)
 
     twoFactorConfirmed.value = true
     twoFactorEnabled.value = true
+
+    Swal.fire({
+      title: 'Success!',
+      text: '2FA has been enabled successfully',
+      icon: 'success',
+      timer: 2000,
+      showConfirmButton: false,
+    })
 
     // Auto-close modal after 2 seconds
     setTimeout(() => {
       close2FAModal()
     }, 2000)
   } catch (error: any) {
+    console.error('2FA confirm error:', error)
+    console.error('Error response:', error.response)
     Swal.fire({
       title: 'Error!',
-      text: error.response?.data?.message || 'Invalid verification code',
+      text: error.response?.data?.message || error.message || 'Invalid verification code',
       icon: 'error',
     })
   } finally {

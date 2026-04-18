@@ -29,6 +29,9 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-    token: string
-    user: User
+    token?: string
+    user?: User
+    requires_2fa?: boolean
+    temp_token?: string
+    message?: string
 }

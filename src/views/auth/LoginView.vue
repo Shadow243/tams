@@ -52,47 +52,91 @@
                     </p>
 
                     <form class="mt-4" @submit.prevent="submitForm">
-                        <div class="mb-3">
+                        <!-- 2FA Code Input (shown when 2FA is required) -->
+                        <div v-if="requires2FA" class="mb-4">
+                          <div class="alert alert-info">
+                            <i class="ti ti-shield-lock me-2"></i>
+                            {{ t('auth.login.twoFactorRequired') }}
+                          </div>
+                          <BaseTextInput
+                            v-model="twoFactorCode"
+                            name="twoFactorCode"
+                            type="text"
+                            :label="t('auth.login.twoFactorLabel')"
+                            :placeholder="t('auth.login.twoFactorPlaceholder')"
+                            icon="shield-lock"
+                            :required="true"
+                            maxlength="6"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                          />
+                          <small class="text-muted">
+                            <i class="ti ti-info-circle me-1"></i>
+                            Enter the 6-digit code from your authenticator app
+                          </small>
+                        </div>
+
+                        <!-- Login Fields (shown when 2FA is NOT required) -->
+                        <template v-if="!requires2FA">
+                          <div class="mb-3">
                             <BaseTextInput
-                                v-model="form.login"
-                                name="login"
-                                type="email"
-                                :label="t('auth.login.emailLabel')"
-                                :placeholder="t('auth.login.emailPlaceholder')"
-                                rules="required|email"
-                                icon="mail"
-                                :required="true"
+                              v-model="form.login"
+                              name="login"
+                              type="email"
+                              :label="t('auth.login.emailLabel')"
+                              :placeholder="t('auth.login.emailPlaceholder')"
+                              rules="required|email"
+                              icon="mail"
+                              :required="true"
                             />
-                        </div>
+                          </div>
 
-                        <div class="mb-3">
+                          <div class="mb-3">
                             <BasePasswordInput
-                                v-model="form.password"
-                                name="password"
-                                :label="t('auth.login.passwordLabel')"
-                                :placeholder="t('auth.login.passwordPlaceholder')"
-                                rules="required|min:6"
-                                icon="lock-password"
-                                :required="true"
+                              v-model="form.password"
+                              name="password"
+                              :label="t('auth.login.passwordLabel')"
+                              :placeholder="t('auth.login.passwordPlaceholder')"
+                              rules="required|min:6"
+                              icon="lock-password"
+                              :required="true"
                             />
-                        </div>
+                          </div>
 
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
                             <BaseCheckbox
-                                v-model="form.rememberMe"
-                                name="rememberMe"
-                                :label="t('auth.login.rememberMe')"
+                              v-model="form.rememberMe"
+                              name="rememberMe"
+                              :label="t('auth.login.rememberMe')"
                             />
 
-                            <a href="" class="text-decoration-underline link-offset-3 text-muted">{{ t('auth.login.forgotPassword') }}</a>
-                        </div>
+                            <a href="" class="text-decoration-underline link-offset-3 text-muted">{{
+                              t('auth.login.forgotPassword')
+                            }}</a>
+                          </div>
+                        </template>
 
                         <div class="d-grid">
-                            <base-submit class="btn-block" :processing="loading" type="submit" full>
-                                {{ t('auth.login.signInButton') }}
-                            </base-submit>
+                          <base-submit 
+                            class="btn-block" 
+                            :processing="loading" 
+                            :disabled="requires2FA && (!twoFactorCode || twoFactorCode.length !== 6)"
+                            type="submit" 
+                            full
+                          >
+                            {{ requires2FA ? t('auth.login.verifyButton') : t('auth.login.signInButton') }}
+                          </base-submit>
 
-                            <!-- <button type="submit" class="btn btn-primary fw-bold py-2">{{ t('auth.login.signInButton') }}</button> -->
+                          <button
+                            v-if="requires2FA"
+                            type="button"
+                            class="btn btn-link mt-2"
+                            @click="cancelTwoFactor"
+                          >
+                            {{ t('auth.login.backToLogin') }}
+                          </button>
+
+                          <!-- <button type="submit" class="btn btn-primary fw-bold py-2">{{ t('auth.login.signInButton') }}</button> -->
                         </div>
                     </form>
                 </div>
@@ -114,7 +158,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, watch, computed } from 'vue'
+import { reactive, watch, computed, ref } from 'vue'
 import { useHead } from '@vueuse/head'
 import { useForm } from 'vee-validate'
 import { useAuthStore } from '@/stores/auth'
@@ -141,23 +185,81 @@ const form = reactive({
   rememberMe: true,
 })
 
-const { handleSubmit } = useForm<LoginCredentials>({
+const requires2FA = ref(false)
+const twoFactorCode = ref('')
+const tempToken = ref('')
+
+const { handleSubmit, setFieldValue } = useForm<LoginCredentials>({
   initialValues: {
     login: '',
     password: '',
   },
+  validationSchema: computed(() => {
+    // Don't validate login fields when 2FA is required
+    if (requires2FA.value) {
+      return {}
+    }
+    return undefined // Use field-level validation from BaseTextInput
+  }),
 })
 
-const submitForm = handleSubmit(async () => {
-  await exec({
-    method: 'POST',
-    url: `${appConfig.apiUrl}/auth/login`,
-    data: { ...form, device_name: navigator.userAgent },
-  })
+const submitForm = async () => {
+  // Manual validation for 2FA code
+  if (requires2FA.value) {
+    if (!twoFactorCode.value || twoFactorCode.value.length !== 6) {
+      console.warn('2FA code invalid:', twoFactorCode.value)
+      return
+    }
+    console.log('Submitting 2FA code:', twoFactorCode.value)
+    console.log('Temp token:', tempToken.value)
+    
+    // Submit 2FA code
+    await exec({
+      method: 'POST',
+      url: `${appConfig.apiUrl}/auth/verify-2fa`,
+      data: { 
+        code: twoFactorCode.value,
+        temp_token: tempToken.value,
+      },
+    })
+    return
+  }
+  
+  // Submit login credentials (with vee-validate validation)
+  handleSubmit(async () => {
+    console.log('Submitting login credentials')
+    await exec({
+      method: 'POST',
+      url: `${appConfig.apiUrl}/auth/login`,
+      data: { ...form, device_name: navigator.userAgent },
+    })
+  })()
+}
+
+const cancelTwoFactor = () => {
+  requires2FA.value = false
+  twoFactorCode.value = ''
+  tempToken.value = ''
+}
+
+// Sanitize 2FA code input to only allow numbers
+watch(twoFactorCode, (newValue) => {
+  const sanitized = newValue.replace(/[^0-9]/g, '')
+  if (sanitized !== newValue) {
+    twoFactorCode.value = sanitized
+  }
 })
 
 watch(data, (response) => {
-  if (response && response.token) {
+  console.log('Login response:', response)
+  if (response && response.requires_2fa) {
+    // 2FA is required, show 2FA input
+    console.log('2FA required, temp_token:', response.temp_token)
+    requires2FA.value = true
+    tempToken.value = response.temp_token || ''
+  } else if (response && response.token) {
+    // Login successful
+    console.log('Login successful, setting auth data')
     store.setAuthData({
       token: response.token,
       user: response.user,
@@ -175,7 +277,11 @@ watch(user, (currentUser) => {
 })
 
 watch(error, (err) => {
-  if (err) handleError(err)
+  if (err) {
+    console.error('Login error:', err)
+    console.error('Error response:', err.response)
+    handleError(err)
+  }
 })
 </script>
 <style lang="scss" scoped>
