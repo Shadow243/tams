@@ -428,15 +428,16 @@
                 <div class="mb-4">
                   <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1">
-                      <h6 class="fw-semibold mb-1">Two-Factor Authentication (2FA)</h6>
+                      <h6 class="fw-semibold mb-1">{{ t('settings.security.twoFactor.title') }}</h6>
                       <p class="text-muted small mb-0">
-                        Add an extra layer of security to your account
+                        {{ t('settings.security.twoFactor.description') }}
                       </p>
                       <span v-if="twoFactorEnabled" class="badge bg-success mt-2">
-                        <i class="ti ti-check me-1"></i>Enabled
+                        <i class="ti ti-check me-1"></i
+                        >{{ t('settings.security.twoFactor.enabled') }}
                       </span>
                       <span v-else class="badge bg-secondary mt-2">
-                        <i class="ti ti-x me-1"></i>Disabled
+                        <i class="ti ti-x me-1"></i>{{ t('settings.security.twoFactor.disabled') }}
                       </span>
                     </div>
                     <div>
@@ -452,7 +453,7 @@
                           class="spinner-border spinner-border-sm me-2"
                         ></span>
                         <i v-else class="ti ti-shield-lock me-2"></i>
-                        Enable 2FA
+                        {{ t('settings.security.twoFactor.enable') }}
                       </button>
                       <button
                         v-else
@@ -461,7 +462,7 @@
                         @click="disable2FA"
                       >
                         <i class="ti ti-shield-off me-2"></i>
-                        Disable 2FA
+                        {{ t('settings.security.twoFactor.disable') }}
                       </button>
                     </div>
                   </div>
@@ -750,7 +751,7 @@
         <div class="modal-header">
           <h5 class="modal-title" id="twoFactorModalLabel">
             <i class="ti ti-shield-lock me-2"></i>
-            Setup Two-Factor Authentication
+            {{ t('settings.security.twoFactor.modalTitle') }}
           </h5>
           <button
             type="button"
@@ -763,20 +764,20 @@
         <div class="modal-body">
           <div v-if="!twoFactorConfirmed">
             <p class="text-muted mb-3">
-              Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+              {{ t('settings.security.twoFactor.scanQRCode') }}
             </p>
             <div class="text-center mb-3">
               <div v-if="twoFactorQR" v-html="generateQRCode(twoFactorQR)"></div>
               <div v-else class="spinner-border text-primary"></div>
             </div>
             <div v-if="twoFactorSecret" class="alert alert-info">
-              <small class="fw-semibold">Secret Key (manual entry):</small>
+              <small class="fw-semibold">{{ t('settings.security.twoFactor.secretKey') }}</small>
               <div class="font-monospace small mt-1">{{ twoFactorSecret }}</div>
             </div>
             <hr />
             <div class="mb-3">
               <label for="verification-code" class="form-label fw-semibold">
-                Enter the 6-digit code from your app
+                {{ t('settings.security.twoFactor.enterCode') }}
               </label>
               <input
                 type="text"
@@ -791,18 +792,20 @@
               />
               <div class="form-text">
                 <i class="ti ti-info-circle me-1"></i>
-                Enter the current 6-digit code displayed in your authenticator app
+                {{ t('settings.security.twoFactor.codeHelp') }}
               </div>
             </div>
           </div>
           <div v-else class="text-center">
             <i class="ti ti-circle-check text-success" style="font-size: 4rem"></i>
-            <h5 class="mt-3">2FA Enabled Successfully!</h5>
-            <p class="text-muted">Your account is now protected with two-factor authentication.</p>
+            <h5 class="mt-3">{{ t('settings.security.twoFactor.successMessage') }}</h5>
+            <p class="text-muted">{{ t('settings.security.twoFactor.protected') }}</p>
           </div>
         </div>
         <div class="modal-footer" v-if="!twoFactorConfirmed">
-          <button type="button" class="btn btn-secondary" @click="cancel2FASetup">Cancel</button>
+          <button type="button" class="btn btn-secondary" @click="cancel2FASetup">
+            {{ t('settings.security.twoFactor.cancel') }}
+          </button>
           <button
             type="button"
             class="btn btn-primary"
@@ -817,7 +820,7 @@
           >
             <span v-if="confirming2FA" class="spinner-border spinner-border-sm me-2"></span>
             <i v-else class="ti ti-check me-2"></i>
-            Verify and Enable
+            {{ t('settings.security.twoFactor.verifyButton') }}
           </button>
         </div>
         <div class="modal-footer" v-else>
@@ -827,7 +830,7 @@
             data-bs-dismiss="modal"
             @click="close2FAModal"
           >
-            Done
+            {{ t('common.cancel') }}
           </button>
         </div>
       </div>
@@ -844,8 +847,12 @@ import Swal from 'sweetalert2'
 import { applyTheme, applyMonochromeMode, applyTextSize } from '@/utils/theme'
 import { changeLocale } from '@/plugins/i18n'
 import { useUserSettings } from '@/composables/useUserSettings'
+import { useI18n } from '@/composables/useI18n'
+import { useFormat } from '@/plugins/format'
 
+const { t } = useI18n()
 const { refreshSettings } = useUserSettings()
+const format = useFormat()
 
 const authStore = useAuthStore()
 
@@ -955,8 +962,8 @@ const loadSessions = async () => {
     sessions.value = []
 
     Swal.fire({
-      title: 'Error',
-      text: 'Failed to load active sessions',
+      title: t('settings.security.sessions.failedToLoad'),
+      text: t('settings.security.sessions.failedToLoad'),
       icon: 'error',
       toast: true,
       position: 'top-end',
@@ -971,11 +978,11 @@ const loadSessions = async () => {
 const revokeSession = async (id: number) => {
   if (!id) return
   const confirm = await Swal.fire({
-    title: 'Revoke this session?',
-    text: 'This device will be logged out and will need to sign in again.',
+    title: t('settings.security.sessions.revokeConfirm'),
+    text: t('settings.security.sessions.revokeWarning'),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, revoke it',
+    confirmButtonText: t('settings.security.sessions.yesRevoke'),
     confirmButtonColor: '#dc3545',
   })
   if (confirm.isConfirmed) {
@@ -983,15 +990,15 @@ const revokeSession = async (id: number) => {
       await axiosInstance.delete(`${appConfig.apiUrl}/user/sessions/${id}`)
       await loadSessions()
       Swal.fire({
-        title: 'Revoked!',
-        text: 'Session has been revoked successfully',
+        title: t('settings.security.sessions.sessionRevoked'),
+        text: t('settings.security.sessions.sessionRevoked'),
         icon: 'success',
         timer: 2000,
         showConfirmButton: false,
       })
     } catch (error: any) {
       Swal.fire({
-        title: 'Error!',
+        title: t('common.error'),
         text: error.response?.data?.message || 'Failed to revoke session',
         icon: 'error',
       })
@@ -1001,11 +1008,11 @@ const revokeSession = async (id: number) => {
 
 const revokeOtherSessions = async () => {
   const confirm = await Swal.fire({
-    title: 'Revoke all other sessions?',
-    text: 'All other devices will be logged out. Only this device will remain signed in.',
+    title: t('settings.security.sessions.revokeOthersConfirm'),
+    text: t('settings.security.sessions.revokeOthersWarning'),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, revoke all',
+    confirmButtonText: t('settings.security.sessions.yesRevoke'),
     confirmButtonColor: '#dc3545',
   })
   if (confirm.isConfirmed) {
@@ -1013,15 +1020,15 @@ const revokeOtherSessions = async () => {
       await axiosInstance.delete(`${appConfig.apiUrl}/user/sessions`)
       await loadSessions()
       Swal.fire({
-        title: 'Success!',
-        text: 'All other sessions have been revoked',
+        title: t('common.success'),
+        text: t('settings.security.sessions.sessionsRevoked'),
         icon: 'success',
         timer: 2000,
         showConfirmButton: false,
       })
     } catch (error: any) {
       Swal.fire({
-        title: 'Error!',
+        title: t('common.error'),
         text: error.response?.data?.message || 'Failed to revoke sessions',
         icon: 'error',
       })
@@ -1170,15 +1177,15 @@ const saveDisplaySettings = async () => {
     applyTextSize(settings.value.textSize as any)
 
     Swal.fire({
-      title: 'Success!',
-      text: 'Display settings saved successfully',
+      title: t('common.success'),
+      text: t('settings.security.saved'),
       icon: 'success',
       timer: 2000,
       showConfirmButton: false,
     })
   } catch (error: any) {
     Swal.fire({
-      title: 'Error!',
+      title: t('common.error'),
       text: error.response?.data?.message || 'Failed to save settings',
       icon: 'error',
     })
@@ -1200,15 +1207,15 @@ const saveRegionalSettings = async () => {
     refreshSettings()
 
     Swal.fire({
-      title: 'Success!',
-      text: 'Regional settings saved successfully',
+      title: t('common.success'),
+      text: t('settings.security.saved'),
       icon: 'success',
       timer: 2000,
       showConfirmButton: false,
     })
   } catch (error: any) {
     Swal.fire({
-      title: 'Error!',
+      title: t('common.error'),
       text: error.response?.data?.message || 'Failed to save settings',
       icon: 'error',
     })
@@ -1223,15 +1230,15 @@ const saveNotificationSettings = async () => {
     await saveSettingsToAPI()
 
     Swal.fire({
-      title: 'Success!',
-      text: 'Notification settings saved successfully',
+      title: t('common.success'),
+      text: t('settings.security.saved'),
       icon: 'success',
       timer: 2000,
       showConfirmButton: false,
     })
   } catch (error: any) {
     Swal.fire({
-      title: 'Error!',
+      title: t('common.error'),
       text: error.response?.data?.message || 'Failed to save settings',
       icon: 'error',
     })
@@ -1246,15 +1253,15 @@ const saveSecuritySettings = async () => {
     await saveSettingsToAPI()
 
     Swal.fire({
-      title: 'Success!',
-      text: 'Security settings saved successfully',
+      title: t('common.success'),
+      text: t('settings.security.saved'),
       icon: 'success',
       timer: 2000,
       showConfirmButton: false,
     })
   } catch (error: any) {
     Swal.fire({
-      title: 'Error!',
+      title: t('common.error'),
       text: error.response?.data?.message || 'Failed to save settings',
       icon: 'error',
     })
@@ -1269,15 +1276,15 @@ const saveTransactionSettings = async () => {
     await saveSettingsToAPI()
 
     Swal.fire({
-      title: 'Success!',
-      text: 'Transaction settings saved successfully',
+      title: t('common.success'),
+      text: t('settings.security.saved'),
       icon: 'success',
       timer: 2000,
       showConfirmButton: false,
     })
   } catch (error: any) {
     Swal.fire({
-      title: 'Error!',
+      title: t('common.error'),
       text: error.response?.data?.message || 'Failed to save settings',
       icon: 'error',
     })
@@ -1329,7 +1336,6 @@ const enable2FA = async () => {
   enabling2FA.value = true
   try {
     const response = await axiosInstance.post(`${appConfig.apiUrl}/user/2fa/enable`)
-    console.log('2FA enable response:', response.data)
 
     // Handle different possible response structures
     const data = response.data.data || response.data
@@ -1344,7 +1350,7 @@ const enable2FA = async () => {
     }
   } catch (error: any) {
     Swal.fire({
-      title: 'Error!',
+      title: t('settings.security.twoFactor.error'),
       text: error.response?.data?.message || 'Failed to enable 2FA',
       icon: 'error',
     })
@@ -1356,8 +1362,8 @@ const enable2FA = async () => {
 const confirm2FA = async () => {
   if (!verificationCode.value || verificationCode.value.length !== 6) {
     Swal.fire({
-      title: 'Invalid Code',
-      text: 'Please enter a 6-digit code',
+      title: t('settings.security.twoFactor.invalidCode'),
+      text: t('settings.security.twoFactor.enterSixDigits'),
       icon: 'warning',
     })
     return
@@ -1375,8 +1381,8 @@ const confirm2FA = async () => {
     twoFactorEnabled.value = true
 
     Swal.fire({
-      title: 'Success!',
-      text: '2FA has been enabled successfully',
+      title: t('settings.security.twoFactor.success'),
+      text: t('settings.security.twoFactor.successMessage'),
       icon: 'success',
       timer: 2000,
       showConfirmButton: false,
@@ -1390,7 +1396,7 @@ const confirm2FA = async () => {
     console.error('2FA confirm error:', error)
     console.error('Error response:', error.response)
     Swal.fire({
-      title: 'Error!',
+      title: t('settings.security.twoFactor.error'),
       text: error.response?.data?.message || error.message || 'Invalid verification code',
       icon: 'error',
     })
@@ -1401,11 +1407,11 @@ const confirm2FA = async () => {
 
 const disable2FA = async () => {
   const confirm = await Swal.fire({
-    title: 'Disable 2FA?',
-    text: 'Your account will be less secure without two-factor authentication.',
+    title: t('settings.security.twoFactor.disableConfirm'),
+    text: t('settings.security.twoFactor.disableWarning'),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, disable it',
+    confirmButtonText: t('settings.security.twoFactor.yesDisable'),
     confirmButtonColor: '#dc3545',
   })
 
@@ -1415,15 +1421,15 @@ const disable2FA = async () => {
       twoFactorEnabled.value = false
 
       Swal.fire({
-        title: 'Success!',
-        text: '2FA has been disabled',
+        title: t('settings.security.twoFactor.success'),
+        text: t('settings.security.twoFactor.disabledSuccess'),
         icon: 'success',
         timer: 2000,
         showConfirmButton: false,
       })
     } catch (error: any) {
       Swal.fire({
-        title: 'Error!',
+        title: t('settings.security.twoFactor.error'),
         text: error.response?.data?.message || 'Failed to disable 2FA',
         icon: 'error',
       })

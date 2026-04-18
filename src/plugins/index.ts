@@ -5,6 +5,7 @@ import echoPlugin from './echo';
 import i18n from "@/plugins/i18n";
 import { registerVeeValidate } from '@/plugins/vee-validate'
 import VueApexCharts from 'vue3-apexcharts'
+import { formatPlugin } from './format'
 
 export function registerPlugins(app: App): void {
     app.use(i18n);
@@ -12,5 +13,6 @@ export function registerPlugins(app: App): void {
     app.use(axiosPlugin);
     app.use(echoPlugin);
     app.use(VueApexCharts);
+    app.use(formatPlugin);
     registerVeeValidate(app);
 }
