@@ -11,6 +11,8 @@ interface UserFormData {
     phone?: string
     gender?: string
     country_code?: string
+    branch_id?: number | null
+    role_id?: number | null
     password?: string
     password_confirmation?: string
     is_driver?: boolean

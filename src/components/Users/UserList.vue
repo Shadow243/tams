@@ -278,6 +278,16 @@
           />
         </div>
 
+        <div class="col-md-6">
+          <label class="form-label">{{ t('users.form.role') || 'Role' }}</label>
+          <select v-model="form.role_id" class="form-select">
+            <option :value="null">{{ t('users.form.selectRole') || 'Select Role' }}</option>
+            <option v-for="role in roles" :key="role.id" :value="role.id">
+              {{ role.name }}
+            </option>
+          </select>
+        </div>
+
         <div class="col-12" v-if="isEditing && !showPasswordFields">
           <button
             type="button"
@@ -378,7 +388,21 @@ onMounted(() => {
   if (branchStore.branch_list.length === 0) {
     branchStore.fetchBranches()
   }
+  fetchRoles()
 })
+
+// Roles state
+const roles = ref<Array<{ id: number; name: string }>>([])
+
+// Fetch roles from API
+const fetchRoles = async () => {
+  try {
+    const response = await axiosInstance.get(`${appConfig.apiUrl}/users/roles`)
+    roles.value = response.data || []
+  } catch (error) {
+    console.error('Error fetching roles:', error)
+  }
+}
 
 // Données du formulaire
 const form = reactive({
@@ -389,6 +413,7 @@ const form = reactive({
   gender: '',
   country_code: '',
   branch_id: null,
+  role_id: null,
   password: '',
   password_confirmation: '',
   is_email_verified: false,
@@ -415,6 +440,7 @@ const resetForm = () => {
     gender: '',
     country_code: '',
     branch_id: null,
+    role_id: null,
     password: '',
     password_confirmation: '',
     is_email_verified: false,
@@ -537,6 +563,10 @@ const editUser = async (user: any) => {
   form.gender = normalizedGender
   form.country_code = user.country_code || ''
   form.branch_id = user.branch_id || null
+  form.role_id =
+    user.roles && user.roles.length > 0
+      ? roles.value.find((r) => r.name === user.roles[0])?.id || null
+      : null
   form.password = ''
   form.password_confirmation = ''
   // Convertir les valeurs en booléens - vérifier si les dates existent ET ne sont pas null
