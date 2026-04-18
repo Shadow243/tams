@@ -34,6 +34,30 @@ export function showWarningMessage(message: string | null = null, timeOut = 3000
   toastr.warning(message || '', 'Avertissement', { timeOut })
 }
 
+export function showToast(options: {
+  type: 'success' | 'error' | 'warning' | 'info'
+  message: string
+  title?: string
+  timeOut?: number
+}) {
+  const { type, message, title, timeOut = 3000 } = options
+  
+  switch (type) {
+    case 'success':
+      toastr.success(message, title || 'Effectué', { timeOut })
+      break
+    case 'error':
+      toastr.error(message, title || 'Erreur', { timeOut })
+      break
+    case 'warning':
+      toastr.warning(message, title || 'Avertissement', { timeOut })
+      break
+    case 'info':
+      toastr.info(message, title || 'Information', { timeOut })
+      break
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function showSessionErrors(param: any) {
   if (!param) return

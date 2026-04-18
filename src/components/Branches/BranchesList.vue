@@ -141,6 +141,7 @@
               @edit="handleEdit"
               @delete="handleDelete"
               @toggle-status="handleToggleStatus"
+              @manage-balances="handleManageBalances"
             />
           </tr>
         </tbody>
@@ -236,6 +237,7 @@ const emit = defineEmits<{
   (e: 'edit', branch: BranchType): void
   (e: 'delete', branchId: number): void
   (e: 'toggle-status', branchId: number): void
+  (e: 'manage-balances', branch: BranchType): void
 }>()
 
 const props = defineProps({
@@ -413,5 +415,9 @@ const handleDelete = (branchId: number) => {
 
 const handleToggleStatus = (branchId: number) => {
   emit('toggle-status', branchId)
+}
+
+const handleManageBalances = (branch: BranchType) => {
+  emit('manage-balances', branch)
 }
 </script>

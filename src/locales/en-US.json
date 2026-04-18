@@ -259,6 +259,15 @@
       "cancel": "Cancel",
       "update": "Update",
       "create": "Create"
+    },
+    "manageBalances": "Manage Balances",
+    "balances": {
+      "title": "Manage Branch Balances",
+      "description": "Set the initial cash balance for each currency. This represents the physical cash available at this branch.",
+      "current": "Current balance",
+      "summary": "Balances to be set",
+      "updated": "Branch balances updated successfully",
+      "error": "Failed to update branch balances"
     }
   },
   "wallets": {

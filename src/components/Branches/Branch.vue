@@ -37,6 +37,14 @@
     <div class="d-flex align-items-center justify-content-center gap-1">
       <a
         href="javascript:void(0);"
+        @click="$emit('manage-balances', branch)"
+        class="btn btn-primary btn-icon btn-sm"
+        :title="t('branches.manageBalances') || 'Manage Balances'"
+      >
+        <i class="ti ti-wallet fs-lg"></i>
+      </a>
+      <a
+        href="javascript:void(0);"
         @click="$emit('toggle-status', branch.id)"
         class="btn btn-icon btn-sm"
         :class="branch.is_active ? 'btn-warning' : 'btn-info'"
@@ -79,6 +87,7 @@ defineEmits<{
   (e: 'edit', branch: Branch): void
   (e: 'delete', branchId: number): void
   (e: 'toggle-status', branchId: number): void
+  (e: 'manage-balances', branch: Branch): void
 }>()
 
 const formatDate = (date: string) => {

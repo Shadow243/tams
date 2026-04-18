@@ -469,15 +469,12 @@ const handleCompleteTransaction = async (id: string) => {
         showConfirmButton: false,
       })
 
-      // Extract transaction data from response
+      // Extract transaction data from response (backend returns it with receipt data)
       const transactionData = response.data?.transaction || response.transaction
 
-      // Load full transaction details to display in receipt
-      if (transactionData?.id || transactionData?.uuid) {
-        const fullTransaction = await store.fetchTransaction(
-          transactionData.id || transactionData.uuid
-        )
-        receiptTransaction.value = fullTransaction
+      // Use the transaction data returned by complete endpoint (no need for additional fetch)
+      if (transactionData) {
+        receiptTransaction.value = transactionData
         showReceiptModal.value = true
       }
     } catch (error) {

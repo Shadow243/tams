@@ -30,6 +30,7 @@
             @edit="handleEditBranch"
             @delete="handleDeleteBranch"
             @toggle-status="handleToggleStatus"
+            @manage-balances="handleManageBalances"
           />
         </div>
       </div>
@@ -44,6 +45,14 @@
         @submit="handleSubmitBranch"
         @cancel="handleCancelForm"
       />
+
+      <!-- Branch Balances Modal -->
+      <BranchBalancesModal
+        :show="showBalancesModal"
+        :branch="selectedBranchForBalances"
+        @cancel="handleCancelBalances"
+        @success="handleBalancesSuccess"
+      />
     </div>
   </div>
 </template>
@@ -53,6 +62,7 @@ import { useBranchStore } from '@/stores/branches'
 import { onMounted, computed, ref, reactive } from 'vue'
 import BranchesList from '@/components/Branches/BranchesList.vue'
 import BranchFormModal from '@/components/Branches/BranchFormModal.vue'
+import BranchBalancesModal from '@/components/Branches/BranchBalancesModal.vue'
 import { useI18n } from '@/composables/useI18n'
 import { confirmDialog } from '@/utils/notification'
 import type { Branch, BranchFormData } from '@/types'
@@ -95,6 +105,10 @@ const formData = reactive<BranchFormData>({
   cash_balance: '',
   status: 'active',
 })
+
+// Balances modal state
+const showBalancesModal = ref(false)
+const selectedBranchForBalances = ref<Branch | null>(null)
 
 onMounted(() => {
   store.fetchBranches()
@@ -207,5 +221,23 @@ const handleCancelForm = () => {
   formData.cash_balance = ''
   formData.status = 'active'
   store.setCurrentBranch(null)
+}
+
+// Balances handlers
+const handleManageBalances = (branch: Branch) => {
+  selectedBranchForBalances.value = branch
+  showBalancesModal.value = true
+}
+
+const handleCancelBalances = () => {
+  showBalancesModal.value = false
+  selectedBranchForBalances.value = null
+}
+
+const handleBalancesSuccess = () => {
+  showBalancesModal.value = false
+  selectedBranchForBalances.value = null
+  // Optionally refresh the branch list to show updated balances
+  handleRefresh()
 }
 </script>
