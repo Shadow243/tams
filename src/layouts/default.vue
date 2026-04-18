@@ -31,6 +31,10 @@ import LockScreen from '@/components/Shared/LockScreen.vue'
 import { useHead } from '@vueuse/head'
 
 import { useAuthStore } from '@/stores/auth'
+import { useAutoLock } from '@/composables/useAutoLock'
+
+// Initialize auto-lock functionality
+useAutoLock()
 
 useHead({
   title: 'Accueil',

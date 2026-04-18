@@ -487,6 +487,20 @@
                     <option value="30">30 minutes</option>
                     <option value="60">1 hour</option>
                   </select>
+                  <div class="form-text">
+                    <i class="ti ti-info-circle me-1"></i>
+                    Your screen will be locked automatically after the specified period of
+                    inactivity. You'll need to enter your password to unlock.
+                  </div>
+                  <div
+                    v-if="settings.security.autoLockMinutes > 0"
+                    class="alert alert-info alert-sm mt-2 mb-0"
+                  >
+                    <i class="ti ti-shield-check me-1"></i>
+                    Auto-lock is currently active ({{ settings.security.autoLockMinutes }} minute{{
+                      settings.security.autoLockMinutes !== 1 ? 's' : ''
+                    }})
+                  </div>
                 </div>
 
                 <!-- Require Password -->
@@ -525,7 +539,7 @@
                       refresh the page.
                     </div>
                     <div
-                      v-else-if="sessions.length === 1 && sessions[0].id === currentSessionId"
+                      v-else-if="sessions.length === 1 && sessions[0]?.id === currentSessionId"
                       class="alert alert-info"
                     >
                       <i class="ti ti-info-circle me-2"></i> No other active sessions. Only this
@@ -569,7 +583,7 @@
                     <button
                       v-if="
                         sessions.length > 1 ||
-                        (sessions.length === 1 && sessions[0].id !== currentSessionId)
+                        (sessions.length === 1 && sessions[0]?.id !== currentSessionId)
                       "
                       class="btn btn-sm btn-outline-warning"
                       @click="revokeOtherSessions"
