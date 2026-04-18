@@ -563,9 +563,9 @@
                           ></i>
                           <span class="fw-semibold">{{ session.name || 'Browser Session' }}</span>
                           <div class="text-muted small mt-1">
-                            <span>Created: {{ formatDate(session.created_at) }}</span>
+                            <span>Created: {{ format.dateTime(session.created_at) }}</span>
                             <span v-if="session.last_used_at" class="ms-2"
-                              >Last used: {{ formatDate(session.last_used_at) }}</span
+                              >Last used: {{ format.dateTime(session.last_used_at) }}</span
                             >
                           </div>
                           <span v-if="session.id === currentSessionId" class="badge bg-primary mt-1"
@@ -1034,11 +1034,6 @@ const revokeOtherSessions = async () => {
       })
     }
   }
-}
-
-function formatDate(date: string | null | undefined): string {
-  if (!date) return ''
-  return new Date(date).toLocaleString()
 }
 
 // Load settings from API on mount

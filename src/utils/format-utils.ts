@@ -95,25 +95,19 @@ export function formatNumber(value: number | string | null | undefined, decimals
   
   const { settings } = useUserSettings()
   const sep = settings.value.thousandSeparator || ','
-  const locale = settings.value.language === 'en' ? 'en-US' : 'fr-FR'
   
   try {
-    let formatted = new Intl.NumberFormat(locale, {
+    // Always format with en-US (comma as thousand separator, dot as decimal)
+    let formatted = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
+      useGrouping: true
     }).format(numValue)
     
-    // Replace separator if custom
-    if (sep === ' ') {
-      // Replace both comma and dot with space
-      formatted = formatted.replace(/[,.]/g, (match, offset, str) => {
-        // Check if it's a thousand separator (not decimal separator)
-        const afterMatch = str.substring(offset + 1)
-        if (afterMatch.length > 2 && !afterMatch.includes(',') && !afterMatch.includes('.')) {
-          return match // Keep decimal separator
-        }
-        return ' '
-      })
+    // Replace thousand separator with user's preference
+    // en-US uses comma (,) for thousands, we need to replace it
+    if (sep !== ',') {
+      formatted = formatted.replace(/,/g, sep)
     }
     
     return formatted

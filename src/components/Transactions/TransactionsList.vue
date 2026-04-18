@@ -380,6 +380,7 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
 import { useUserSettings } from '@/composables/useUserSettings'
+import { useFormat } from '@/plugins/format'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 import type { Transaction, Meta } from '@/types'
@@ -387,6 +388,7 @@ import TransactionReceiptModal from '@/components/Transactions/TransactionReceip
 
 const { t } = useI18n()
 const { getItemsPerPage } = useUserSettings()
+const format = useFormat()
 
 interface Props {
   transactions: Transaction[]
@@ -530,21 +532,13 @@ const formatCurrency = (amount: number, transaction?: Transaction) => {
       currencyCode = transaction.currency_code
     }
   }
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: currencyCode,
-    minimumFractionDigits: 0,
-  }).format(amount)
+  // Use global format utility that respects user settings
+  return format.currency(amount, currencyCode, { decimals: 0 })
 }
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleString('fr-FR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  // Use global format utility that respects user settings
+  return format.dateTime(date)
 }
 
 const getFeeModeBadge = (feeMode: string) => {

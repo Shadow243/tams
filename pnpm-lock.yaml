@@ -38,6 +38,9 @@ importers:
       axios:
         specifier: ^1.13.5
         version: 1.13.5
+      dayjs:
+        specifier: ^1.11.20
+        version: 1.11.20
       jquery:
         specifier: ^4.0.0
         version: 4.0.0
@@ -2001,6 +2004,9 @@ packages:
 
   datatables.net@2.3.7:
     resolution: {integrity: sha512-AvsjG/Nkp6OxeyBKYZauemuzQCPogE1kOtKwG4sYjvdqGCSLiGaJagQwXv4YxG+ts5vaJr6qKGG9ec3g6vTo3w==}
+
+  dayjs@1.11.20:
+    resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -5912,6 +5918,8 @@ snapshots:
   datatables.net@2.3.7:
     dependencies:
       jquery: 4.0.0
+
+  dayjs@1.11.20: {}
 
   debug@4.4.3:
     dependencies:
