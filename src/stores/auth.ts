@@ -39,10 +39,12 @@ export const useAuthStore = defineStore('auth', {
         async fetchUser() {
             await axiosInstance
                 .get(`${appConfig.apiUrl}/user`)
-                .then(({ data }) => {
-                    // const { user } = data
-                    if (data) {
-                        this.setUser(data)
+                .then((response) => {
+                    // Check if data is wrapped in a data property
+                    const userData = response.data.data || response.data
+                    
+                    if (userData) {
+                        this.setUser(userData)
                     }
                 })
                 .catch(handleError)
@@ -71,6 +73,17 @@ export const useAuthStore = defineStore('auth', {
                 
                 // Clear axios authorization header
                 delete axiosInstance.defaults.headers.common['Authorization']
+            }
+        },
+        async validatePassword(password: string): Promise<boolean> {
+            try {
+                const response = await axiosInstance.post(`${appConfig.apiUrl}/auth/validate-password`, {
+                    password
+                })
+                return response.data.valid === true
+            } catch (error) {
+                console.error('Password validation failed:', error)
+                return false
             }
         },
     },

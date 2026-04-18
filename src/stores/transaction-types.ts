@@ -20,7 +20,7 @@ export const useTransactionTypeStore = defineStore('transactionType', () => {
   // Filters
   const filters = ref({
     search: '',
-    perPage: 15,
+    perPage: 30,
     code: ''
   })
 
@@ -103,7 +103,7 @@ export const useTransactionTypeStore = defineStore('transactionType', () => {
   function resetFilters() {
     filters.value = {
       search: '',
-      perPage: 15,
+      perPage: 30,
       code: ''
     }
   }

@@ -13,7 +13,9 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createHead } from '@vueuse/head'
 
-
+// Initialize theme from user settings as early as possible
+import { initializeThemeFromSettings } from '@/utils/theme'
+initializeThemeFromSettings()
 
 // import i18n, { mergeApiLocales } from './plugins/i18n'
 import { mergeApiLocales } from '@/plugins/i18n'

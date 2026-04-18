@@ -358,6 +358,7 @@ import { computed, ref, watch, reactive, nextTick, type PropType, onMounted } fr
 import debounce from 'lodash.debounce'
 import type { UsersResponse, UserList } from '@/types'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import { useUserStore } from '@/stores/users'
 import { useBranchStore } from '@/stores/branches'
 import User from '@/components/Users/User.vue'
@@ -368,6 +369,7 @@ import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 const userStore = useUserStore()
 const branchStore = useBranchStore()
 
@@ -598,7 +600,7 @@ const props = defineProps({
 
 const searchQuery = ref('')
 const statusFilter = ref('')
-const perPage = ref(20)
+const perPage = ref(getItemsPerPage())
 const selectedUsers = ref<number[]>([])
 const isExportingPDF = ref(false)
 

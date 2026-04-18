@@ -16,6 +16,11 @@ export interface User {
     email_verified_at: string | null
     permissions: string[]
     roles?: string[]
+    avatar?: {
+        full: string
+        thumbnail: string
+    } | null
+    settings?: Record<string, any>
 }
 
 export interface LoginCredentials {

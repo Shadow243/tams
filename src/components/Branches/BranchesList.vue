@@ -214,6 +214,7 @@ import { computed, ref, watch, onMounted, type PropType } from 'vue'
 import debounce from 'lodash.debounce'
 import type { BranchesResponse, BranchList, Branch as BranchType, CountryList } from '@/types'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import { useCountryStore } from '@/stores/countries'
 import { storeToRefs } from 'pinia'
 import Branch from '@/components/Branches/Branch.vue'
@@ -221,6 +222,7 @@ import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 const countryStore = useCountryStore()
 const { country_list: countries } = storeToRefs(countryStore)
 
@@ -252,7 +254,7 @@ const props = defineProps({
 })
 
 const searchQuery = ref('')
-const perPage = ref(20)
+const perPage = ref(getItemsPerPage())
 const statusFilter = ref('')
 const countryFilter = ref<number | null>(null)
 const isExportingPDF = ref(false)

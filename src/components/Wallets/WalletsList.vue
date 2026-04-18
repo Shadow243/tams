@@ -278,6 +278,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import { useBranchStore } from '@/stores/branches'
 import { useOperatorStore } from '@/stores/operators'
 import { storeToRefs } from 'pinia'
@@ -287,6 +288,7 @@ import { appConfig } from '@/config/app'
 import type { Wallet, Meta } from '@/types'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 const branchStore = useBranchStore()
 const operatorStore = useOperatorStore()
 const { branch_list: branches } = storeToRefs(branchStore)
@@ -316,7 +318,7 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
-const perPage = ref(20)
+const perPage = ref(getItemsPerPage())
 const statusFilter = ref('')
 const branchFilter = ref<number | null>(null)
 const operatorFilter = ref<number | null>(null)

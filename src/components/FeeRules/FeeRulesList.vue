@@ -304,12 +304,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import debounce from 'lodash.debounce'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 import type { FeeRule, Meta } from '@/types'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 
 interface Props {
   feeRules: FeeRule[]
@@ -333,7 +335,7 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
-const perPage = ref(15)
+const perPage = ref(getItemsPerPage())
 const feeMode = ref('')
 const status = ref('')
 const isExportingPDF = ref(false)

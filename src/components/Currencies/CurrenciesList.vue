@@ -179,11 +179,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import debounce from 'lodash.debounce'
 import type { Currency } from '@/stores/currencies'
 import type { Meta } from '@/types'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 
 interface Props {
   currencies: Currency[]
@@ -205,7 +207,7 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
-const perPage = ref(15)
+const perPage = ref(getItemsPerPage())
 
 // Pagination computed properties
 const from = computed(() => props.meta?.from ?? 0)

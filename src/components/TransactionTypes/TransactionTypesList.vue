@@ -212,12 +212,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import debounce from 'lodash.debounce'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 import type { TransactionType, Meta } from '@/types'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 
 interface Props {
   transactionTypes: TransactionType[]
@@ -239,7 +241,7 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
-const perPage = ref(15)
+const perPage = ref(getItemsPerPage())
 const isExportingPDF = ref(false)
 
 const debouncedSearch = debounce(() => {

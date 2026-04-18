@@ -84,3 +84,111 @@
       -0.5em -1em rgba(233, 169, 32, 0.75);
   }
 }
+
+/* Text Size Settings */
+/* Small text size */
+html[data-text-size="small"] {
+  font-size: 13px;
+}
+
+html[data-text-size="small"] body {
+  font-size: 0.813rem;
+}
+
+html[data-text-size="small"] .h1,
+html[data-text-size="small"] h1 {
+  font-size: 1.5rem;
+}
+
+html[data-text-size="small"] .h2,
+html[data-text-size="small"] h2 {
+  font-size: 1.35rem;
+}
+
+html[data-text-size="small"] .h3,
+html[data-text-size="small"] h3 {
+  font-size: 1.2rem;
+}
+
+html[data-text-size="small"] .h4,
+html[data-text-size="small"] h4 {
+  font-size: 1.05rem;
+}
+
+html[data-text-size="small"] .h5,
+html[data-text-size="small"] h5 {
+  font-size: 0.95rem;
+}
+
+html[data-text-size="small"] .h6,
+html[data-text-size="small"] h6 {
+  font-size: 0.85rem;
+}
+
+/* Medium text size (default) */
+html[data-text-size="medium"] {
+  font-size: 14px;
+}
+
+/* Large text size */
+html[data-text-size="large"] {
+  font-size: 16px;
+}
+
+html[data-text-size="large"] body {
+  font-size: 1rem;
+}
+
+html[data-text-size="large"] .h1,
+html[data-text-size="large"] h1 {
+  font-size: 2rem;
+}
+
+html[data-text-size="large"] .h2,
+html[data-text-size="large"] h2 {
+  font-size: 1.75rem;
+}
+
+html[data-text-size="large"] .h3,
+html[data-text-size="large"] h3 {
+  font-size: 1.5rem;
+}
+
+html[data-text-size="large"] .h4,
+html[data-text-size="large"] h4 {
+  font-size: 1.25rem;
+}
+
+html[data-text-size="large"] .h5,
+html[data-text-size="large"] h5 {
+  font-size: 1.1rem;
+}
+
+html[data-text-size="large"] .h6,
+html[data-text-size="large"] h6 {
+  font-size: 1rem;
+}
+
+/* Apply text size to sidebar specifically */
+html[data-text-size="small"] .sidenav-menu,
+html[data-text-size="small"] .sidenav-menu .menu-list,
+html[data-text-size="small"] .app-topbar {
+  font-size: 0.813rem;
+}
+
+html[data-text-size="large"] .sidenav-menu,
+html[data-text-size="large"] .sidenav-menu .menu-list,
+html[data-text-size="large"] .app-topbar {
+  font-size: 1rem;
+}
+
+/* Apply to menu items */
+html[data-text-size="small"] .menu-list .menu-item-text,
+html[data-text-size="small"] .menu-list .menu-header {
+  font-size: 0.813rem !important;
+}
+
+html[data-text-size="large"] .menu-list .menu-item-text,
+html[data-text-size="large"] .menu-list .menu-header {
+  font-size: 1rem !important;
+}

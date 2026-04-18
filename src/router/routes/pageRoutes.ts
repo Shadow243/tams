@@ -14,6 +14,24 @@ const routes: RouteRecordRaw[] = [
         },
         children: [],
     },
+    {
+        path: "/profile",
+        name: "profile",
+        component: () => import("@/views/ProfileView.vue").then((m) => m.default || m),
+        meta: {
+            title: "My Profile",
+            middleware: "auth",
+        },
+    },
+    {
+        path: "/settings",
+        name: "settings",
+        component: () => import("@/views/SettingsView.vue").then((m) => m.default || m),
+        meta: {
+            title: "Account Settings",
+            middleware: "auth",
+        },
+    },
         {
         path: "/users",
         component: () =>

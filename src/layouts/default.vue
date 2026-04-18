@@ -16,6 +16,9 @@
       </router-view>
       <Footer v-if="user" />
     </div>
+
+    <!-- Lock Screen Overlay -->
+    <LockScreen />
   </div>
 </template>
 
@@ -24,6 +27,7 @@ import { computed } from 'vue'
 import TopBar from './partials/TheTopBar.vue'
 import SideBar from './partials/TheSidebar.vue'
 import Footer from './partials/TheFooter.vue'
+import LockScreen from '@/components/Shared/LockScreen.vue'
 import { useHead } from '@vueuse/head'
 
 import { useAuthStore } from '@/stores/auth'

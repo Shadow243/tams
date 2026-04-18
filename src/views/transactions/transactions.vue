@@ -196,6 +196,12 @@
       @close="showStatisticsModal = false"
       @filter-change="handleStatisticsFilterChange"
     />
+
+    <TransactionReceiptModal
+      :show="showReceiptModal"
+      :transaction="receiptTransaction"
+      @close="showReceiptModal = false"
+    />
   </div>
 </template>
 
@@ -212,6 +218,7 @@ import TransactionsList from '@/components/Transactions/TransactionsList.vue'
 import TransactionFormModal from '@/components/Transactions/TransactionFormModal.vue'
 import TransactionDetailsModal from '@/components/Transactions/TransactionDetailsModal.vue'
 import TransactionStatisticsModal from '@/components/Transactions/TransactionStatisticsModal.vue'
+import TransactionReceiptModal from '@/components/Transactions/TransactionReceiptModal.vue'
 import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
@@ -236,8 +243,10 @@ const currencyStore = useCurrencyStore()
 const showModal = ref(false)
 const showDetailsModal = ref(false)
 const showStatisticsModal = ref(false)
+const showReceiptModal = ref(false)
 const isEditing = ref(false)
 const selectedTransaction = ref<Transaction | null>(null)
+const receiptTransaction = ref<Transaction | null>(null)
 const formData = ref<TransactionFormData>({
   transaction_type_id: null,
   branch_id: null,
@@ -430,8 +439,8 @@ const handleCancelTransaction = (id: string) => {
   })
 }
 
-const handleCompleteTransaction = (id: string) => {
-  Swal.fire({
+const handleCompleteTransaction = async (id: string) => {
+  const result = await Swal.fire({
     title: t('transactions.confirm_complete_title') || 'Compléter la transaction?',
     text:
       t('transactions.confirm_complete_text') ||
@@ -442,28 +451,44 @@ const handleCompleteTransaction = (id: string) => {
     cancelButtonColor: '#3085d6',
     confirmButtonText: t('transactions.confirm_complete_button') || 'Oui, compléter!',
     cancelButtonText: t('transactions.cancel') || 'Annuler',
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await store.completeTransaction(id)
-        store.fetchStatistics()
-        Swal.fire({
-          title: t('transactions.success') || 'Succès!',
-          text: t('transactions.complete_success') || 'Transaction complétée avec succès.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false,
-        })
-      } catch (error) {
-        console.error('Error completing transaction:', error)
-        Swal.fire({
-          title: t('transactions.error') || 'Erreur!',
-          text: t('transactions.complete_error') || 'Échec de la complétion.',
-          icon: 'error',
-        })
-      }
-    }
   })
+
+  if (result.isConfirmed) {
+    try {
+      const response = await store.completeTransaction(id)
+
+      // Recharger les statistiques
+      store.fetchStatistics()
+
+      // Show success message
+      await Swal.fire({
+        title: t('transactions.success') || 'Succès!',
+        text: t('transactions.complete_success') || 'Transaction complétée avec succès.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+      })
+
+      // Extract transaction data from response
+      const transactionData = response.data?.transaction || response.transaction
+
+      // Load full transaction details to display in receipt
+      if (transactionData?.id || transactionData?.uuid) {
+        const fullTransaction = await store.fetchTransaction(
+          transactionData.id || transactionData.uuid
+        )
+        receiptTransaction.value = fullTransaction
+        showReceiptModal.value = true
+      }
+    } catch (error) {
+      console.error('Error completing transaction:', error)
+      Swal.fire({
+        title: t('transactions.error') || 'Erreur!',
+        text: t('transactions.complete_error') || 'Échec de la complétion.',
+        icon: 'error',
+      })
+    }
+  }
 }
 
 const handleShowStatistics = async () => {

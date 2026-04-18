@@ -109,8 +109,24 @@
           </div>
         </div>
 
+        <!-- Customer Phone Filter -->
+        <div class="col-md-2">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="ti ti-phone"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              v-model="customerPhone"
+              @input="debouncedFilter"
+              :placeholder="t('transactions.customer_phone') || 'Tél. client'"
+            />
+          </div>
+        </div>
+
         <!-- Date Range -->
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="input-group">
             <span class="input-group-text">
               <i class="ti ti-calendar"></i>
@@ -122,6 +138,11 @@
               @change="handleFilterChange"
               :placeholder="t('transactions.start_date') || 'Date début'"
             />
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="input-group">
             <input
               type="date"
               class="form-control"
@@ -358,12 +379,14 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 import type { Transaction, Meta } from '@/types'
 import TransactionReceiptModal from '@/components/Transactions/TransactionReceiptModal.vue'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 
 interface Props {
   transactions: Transaction[]
@@ -408,9 +431,10 @@ watch(
 const searchQuery = ref('')
 const transactionTypeId = ref<number | null>(null)
 const status = ref('')
+const customerPhone = ref('')
 const startDate = ref('')
 const endDate = ref('')
-const perPage = ref(15)
+const perPage = ref(getItemsPerPage())
 const isExportingPDF = ref(false)
 
 // Receipt modal
@@ -423,6 +447,7 @@ const openReceipt = (transaction: Transaction) => {
 }
 
 let searchTimeout: ReturnType<typeof setTimeout>
+let filterTimeout: ReturnType<typeof setTimeout>
 
 const debouncedSearch = () => {
   clearTimeout(searchTimeout)
@@ -431,10 +456,18 @@ const debouncedSearch = () => {
   }, 500)
 }
 
+const debouncedFilter = () => {
+  clearTimeout(filterTimeout)
+  filterTimeout = setTimeout(() => {
+    handleFilterChange()
+  }, 500)
+}
+
 const handleFilterChange = () => {
   emit('filter-change', {
     transaction_type_id: transactionTypeId.value,
     status: status.value,
+    customer_phone: customerPhone.value,
     start_date: startDate.value,
     end_date: endDate.value,
   })

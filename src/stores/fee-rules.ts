@@ -20,7 +20,7 @@ export const useFeeRuleStore = defineStore('feeRule', () => {
   // Filters
   const filters = ref({
     search: '',
-    perPage: 15,
+    perPage: 30,
     transaction_type_id: null as number | null,
     operator_id: null as number | null,
     branch_id: null as number | null,
@@ -161,7 +161,7 @@ export const useFeeRuleStore = defineStore('feeRule', () => {
   function resetFilters() {
     filters.value = {
       search: '',
-      perPage: 15,
+      perPage: 30,
       transaction_type_id: null,
       operator_id: null,
       branch_id: null,

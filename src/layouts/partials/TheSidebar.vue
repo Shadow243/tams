@@ -32,9 +32,9 @@
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <a href="#!" class="link-reset">
-              <img :src="avatarImage" alt="user-image" class="rounded-circle mb-2 avatar-md" />
-              <span class="sidenav-user-name fw-bold">David Dev</span>
-              <span class="fs-12 fw-semibold" data-lang="user-role">Art Director</span>
+              <img :src="userAvatar" alt="user-image" class="rounded-circle mb-2 avatar-md" />
+              <span class="sidenav-user-name fw-bold">{{ user?.name || 'User' }}</span>
+              <span class="fs-12 fw-semibold" data-lang="user-role">{{ user?.email || '' }}</span>
             </a>
           </div>
           <div>
@@ -92,17 +92,24 @@
 </template>
 
 <script lang="ts" setup>
-import { logoImg, avatarImage, iconImage } from '@/utils/ui-utils'
+import { computed } from 'vue'
+import { logoImg, iconImage } from '@/utils/ui-utils'
 import { useSidebarToggle } from '@/composables/sidebar-toggle'
 import { useI18n } from '@/composables/useI18n'
+import { useAuthStore } from '@/stores/auth'
+import { useUserAvatar } from '@/composables/useUserAvatar'
 import MenuList from '@/components/Menu/MenuList.vue'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
+const { userAvatar } = useUserAvatar()
+const user = computed(() => authStore.user)
 
 // Sidebar toggle
 const { toggleSidebar } = useSidebarToggle()
 
-let appRoutes = [
+// Make appRoutes reactive so it updates when language changes
+const appRoutes = computed(() => [
   {
     label: t('sidebar.dashboard'),
     type: 'header',
@@ -175,5 +182,5 @@ let appRoutes = [
     route: 'users.list',
     type: 'menu',
   },
-]
+])
 </script>

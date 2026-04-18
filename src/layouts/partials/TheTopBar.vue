@@ -295,9 +295,9 @@
               aria-expanded="false"
             >
               <img
-                :src="avatarImage"
+                :src="userAvatar"
                 width="32"
-                class="rounded-circle me-lg-2 d-flex"
+                class="rounded-circle me-lg-2 d-flex avatar-xl img-thumbnail"
                 alt="user-image"
               />
               <div class="d-lg-flex align-items-center gap-1 d-none">
@@ -315,10 +315,10 @@
               </div>
 
               <!-- My Profile -->
-              <a href="#!" class="dropdown-item">
+              <router-link to="/profile" class="dropdown-item">
                 <i class="ti ti-user-circle me-1 fs-lg align-middle"></i>
                 <span class="align-middle">Profile</span>
-              </a>
+              </router-link>
 
               <!-- Notifications -->
               <a href="javascript:void(0);" class="dropdown-item">
@@ -327,16 +327,16 @@
               </a>
 
               <!-- Settings -->
-              <a href="javascript:void(0);" class="dropdown-item">
+              <router-link to="/settings" class="dropdown-item">
                 <i class="ti ti-settings-2 me-1 fs-lg align-middle"></i>
                 <span class="align-middle">Account Settings</span>
-              </a>
+              </router-link>
 
               <!-- Divider -->
               <div class="dropdown-divider"></div>
 
               <!-- Lock -->
-              <a href="" class="dropdown-item">
+              <a href="javascript:void(0);" class="dropdown-item" @click="handleLockScreen">
                 <i class="ti ti-lock me-1 fs-lg align-middle"></i>
                 <span class="align-middle">Lock Screen</span>
               </a>
@@ -355,16 +355,27 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { logoImg, avatarImage, iconImage } from '@/utils/ui-utils'
+import { logoImg, iconImage } from '@/utils/ui-utils'
 import { useI18n } from '@/composables/useI18n'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notifications'
+import { useLockScreenStore } from '@/stores/lockscreen'
+import { useUserAvatar } from '@/composables/useUserAvatar'
 import { useSidebarToggle } from '@/composables/sidebar-toggle'
+import {
+  applyTheme,
+  applyMonochromeMode,
+  getSavedThemeConfig,
+  updateThemeIcon,
+  initializeThemeFromSettings,
+} from '@/utils/theme'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
+const { userAvatar } = useUserAvatar()
 
 const notifStore = useNotificationStore()
+const lockStore = useLockScreenStore()
 
 async function openNotifications() {
   if (notifStore.notifications.length === 0 || notifStore.hasUnread) {
@@ -434,79 +445,24 @@ const handleLogout = async () => {
   }
 }
 
+// Lock screen handler
+const handleLockScreen = () => {
+  lockStore.lock()
+}
+
 // Sidebar toggle
 const { toggleSidebar } = useSidebarToggle()
 
-// Get system theme preference
-const getSystemTheme = () => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
-// Update theme icon visibility
-const updateThemeIcon = (theme: string) => {
-  const lightIcon = document.getElementById('theme-icon-light')
-  const darkIcon = document.getElementById('theme-icon-dark')
-  const systemIcon = document.getElementById('theme-icon-system')
-
-  // Hide all icons first
-  lightIcon?.classList.add('d-none')
-  darkIcon?.classList.add('d-none')
-  systemIcon?.classList.add('d-none')
-
-  // Show the appropriate icon
-  if (theme === 'light') {
-    lightIcon?.classList.remove('d-none')
-  } else if (theme === 'dark') {
-    darkIcon?.classList.remove('d-none')
-  } else if (theme === 'system') {
-    systemIcon?.classList.remove('d-none')
-  }
-}
-
-// Change theme
+// Change theme using centralized utility
 const changeTheme = (theme: string) => {
   currentTheme.value = theme
-
-  // Get window config
-  const config = (window as any).config || {}
-  config.theme = theme
-
-  // Apply theme to HTML element
-  const html = document.documentElement
-  const actualTheme = theme === 'system' ? getSystemTheme() : theme
-  html.setAttribute('data-bs-theme', actualTheme)
-
-  // Save to sessionStorage
-  sessionStorage.setItem('__THEME_CONFIG__', JSON.stringify(config))
-
-  // Update icon
-  updateThemeIcon(theme)
-
-  // Update radio buttons
-  const radios = document.querySelectorAll('input[name="data-bs-theme"]')
-  radios.forEach((radio: any) => {
-    radio.checked = radio.value === theme
-  })
+  applyTheme(theme as any)
 }
 
-// Toggle monochrome mode
+// Toggle monochrome mode using centralized utility
 const toggleMonochrome = () => {
   isMonochrome.value = !isMonochrome.value
-
-  // Get window config
-  const config = (window as any).config || {}
-  config.monochrome = isMonochrome.value
-
-  // Apply monochrome class to HTML element
-  const html = document.documentElement
-  if (isMonochrome.value) {
-    html.classList.add('monochrome')
-  } else {
-    html.classList.remove('monochrome')
-  }
-
-  // Save to sessionStorage
-  sessionStorage.setItem('__THEME_CONFIG__', JSON.stringify(config))
+  applyMonochromeMode(isMonochrome.value)
 }
 
 onUnmounted(() => {
@@ -522,25 +478,18 @@ onMounted(() => {
   }
 
   try {
-    // Get saved theme from config
-    const savedConfig = sessionStorage.getItem('__THEME_CONFIG__')
-    let theme = 'dark'
-    let monochrome = false
-    let sidenavSize = 'on-hover-active'
+    // Initialize theme from user settings first
+    initializeThemeFromSettings()
 
-    if (savedConfig) {
-      const config = JSON.parse(savedConfig)
-      theme = config.theme || 'dark'
-      monochrome = config.monochrome || false
-      sidenavSize = config['sidenav-size'] || 'on-hover-active'
-    } else if ((window as any).config) {
-      theme = (window as any).config.theme || 'dark'
-      monochrome = (window as any).config.monochrome || false
-      sidenavSize = (window as any).config['sidenav-size'] || 'on-hover-active'
-    }
+    // Get the applied theme configuration
+    const config = getSavedThemeConfig()
+    const theme = config.theme || 'light'
+    const monochrome = config.monochrome || false
+    const sidenavSize = config['sidenav-size'] || 'on-hover-active'
 
-    // Initialize theme
+    // Update component state
     currentTheme.value = theme
+    isMonochrome.value = monochrome
     updateThemeIcon(theme)
 
     // Initialize sidebar size (only on desktop)
@@ -559,18 +508,6 @@ onMounted(() => {
       html.classList.remove('sidebar-enable')
       document.body.style.overflow = ''
     }
-
-    // Initialize monochrome
-    isMonochrome.value = monochrome
-    if (monochrome) {
-      document.documentElement.classList.add('monochrome')
-    }
-
-    // Set the correct radio button as checked
-    const radios = document.querySelectorAll('input[name="data-bs-theme"]')
-    radios.forEach((radio: any) => {
-      radio.checked = radio.value === theme
-    })
 
     // Add click event listeners to theme options
     const themeDropdown = document.querySelector('[data-thememode="dropdown"]')
@@ -594,9 +531,10 @@ onMounted(() => {
 
     // Listen for system theme changes when 'system' is selected
     if (theme === 'system') {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (currentTheme.value === 'system') {
-          document.documentElement.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light')
+          // Re-apply theme to pick up system change
+          applyTheme('system')
         }
       })
     }

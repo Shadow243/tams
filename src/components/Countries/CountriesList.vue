@@ -155,9 +155,11 @@ import { computed, ref, watch, type PropType } from 'vue'
 import debounce from 'lodash.debounce'
 import type { CountriesResponse, CountryList, Country as CountryType } from '@/types'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import Country from '@/components/Countries/Country.vue'
 
 const { t } = useI18n()
+const { getItemsPerPage } = useUserSettings()
 
 const emit = defineEmits<{
   (e: 'page-change', page: number): void
@@ -184,7 +186,7 @@ const props = defineProps({
 })
 
 const searchQuery = ref('')
-const perPage = ref(20)
+const perPage = ref(getItemsPerPage())
 
 const from = computed(() => props.meta?.from ?? 0)
 const to = computed(() => props.meta?.to ?? 0)
