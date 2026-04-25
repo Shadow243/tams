@@ -18,7 +18,7 @@ const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1'
 function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
   const output = { ...target }
   for (const key in source) {
-    if (source[key] instanceof Object && key in target && !(source[key] instanceof Array)) {
+    if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key]) && key in target) {
       output[key] = deepMerge(target[key], source[key] as any)
     } else {
       output[key] = source[key] as any
@@ -44,6 +44,9 @@ export const i18n = createI18n<[MessageSchema], 'fr-FR' | 'en-US'>({
   messages,
   globalInjection: true, // Allows using $t in templates
 })
+
+// Export the global instance with proper type
+export const globalI18n = i18n.global
 
 /**
  * Load available locales from API
@@ -114,22 +117,22 @@ export async function mergeApiLocales(): Promise<void> {
     // Load and merge translations for each available locale
     for (const apiLocaleCode in availableLocales) {
       // Map API locale code to internal locale code
-      const internalLocaleCode = localeMapping[apiLocaleCode] || apiLocaleCode
+      const internalLocaleCode = (localeMapping[apiLocaleCode] || apiLocaleCode) as 'fr-FR' | 'en-US'
       
       // Load translations from API
       const apiTranslations = await loadLocaleTranslations(apiLocaleCode)
       
       if (apiTranslations) {
-        // Get current messages
-        const currentMessages = i18n.global.messages.value[internalLocaleCode] as MessageSchema
+        // Get current messages for the locale
+        const currentMessages = globalI18n.getLocaleMessage(internalLocaleCode) as MessageSchema
         
         if (currentMessages) {
           // Merge API translations with local translations
-          const merged = deepMerge(currentMessages, apiTranslations)
-          i18n.global.setLocaleMessage(internalLocaleCode, merged)
+          const merged = deepMerge(currentMessages as MessageSchema, apiTranslations as Partial<MessageSchema>)
+          globalI18n.setLocaleMessage(internalLocaleCode, merged as any)
         } else {
           // Add new locale if not present locally
-          i18n.global.setLocaleMessage(internalLocaleCode, apiTranslations)
+          globalI18n.setLocaleMessage(internalLocaleCode, apiTranslations as any)
         }
       }
     }
@@ -144,7 +147,7 @@ export async function mergeApiLocales(): Promise<void> {
  * Helper function to change locale
  */
 export function changeLocale(locale: 'fr-FR' | 'en-US') {
-  i18n.global.locale.value = locale
+  ;(globalI18n.locale as any).value = locale
   localStorage.setItem(STORAGE_KEY, locale)
 }
 

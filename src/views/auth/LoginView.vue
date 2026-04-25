@@ -285,12 +285,12 @@ watch(data, (response) => {
     console.log('2FA required, temp_token:', response.temp_token)
     requires2FA.value = true
     tempToken.value = response.temp_token || ''
-  } else if (response && response.token) {
+  } else if (response && response.token && response.user) {
     // Login successful
     console.log('Login successful, setting auth data')
     store.setAuthData({
       token: response.token,
-      user: response.user,
+      user: response.user!,
     })
   }
 })

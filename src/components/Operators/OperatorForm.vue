@@ -49,7 +49,7 @@
           <label class="form-label">{{ t('operators.form.logoPreview') || 'Logo Preview' }}</label>
           <div class="position-relative d-inline-block">
             <img
-              :src="logoPreview || formData.logo_url"
+              :src="logoPreview || formData.logo_url || undefined"
               alt="Logo preview"
               class="img-thumbnail"
               style="max-width: 150px; max-height: 150px; object-fit: contain"

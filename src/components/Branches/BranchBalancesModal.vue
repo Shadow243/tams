@@ -64,7 +64,7 @@
                         <small class="text-muted">
                           {{ t('branches.balances.current') }}:
                           <strong>{{
-                            formatCurrency(currentBalances[currency.code], currency.code)
+                            formatCurrency(currentBalances[currency.code] ?? 0, currency.code)
                           }}</strong>
                         </small>
                       </div>

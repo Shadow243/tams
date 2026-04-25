@@ -8,7 +8,7 @@
         </div>
 
         <div class="text-end mt-3 mt-sm-0">
-          <button @click="handleAddBranch" type="button" class="btn btn-primary">
+          <button v-if="canCreate" @click="handleAddBranch" type="button" class="btn btn-primary">
             <i class="ti ti-plus me-1"></i> {{ t('branches.add_new_branch') }}
           </button>
         </div>
@@ -64,10 +64,12 @@ import BranchesList from '@/components/Branches/BranchesList.vue'
 import BranchFormModal from '@/components/Branches/BranchFormModal.vue'
 import BranchBalancesModal from '@/components/Branches/BranchBalancesModal.vue'
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
 import { confirmDialog } from '@/utils/notification'
 import type { Branch, BranchFormData } from '@/types'
 
 const { t } = useI18n()
+const { canCreate } = usePermissions()
 
 const store: ReturnType<typeof useBranchStore> = useBranchStore()
 const branchListRef = ref<InstanceType<typeof BranchesList> | null>(null)
@@ -175,7 +177,7 @@ const handleDeleteBranch = async (branchId: number) => {
     {
       message: t('branches.deleteConfirmMessage') || 'Are you sure you want to delete this branch?',
       title: t('branches.deleteConfirmTitle') || 'Delete Confirmation',
-      type: 'danger',
+      type: 'warning',
       yes: t('branches.yes') || 'Yes, delete',
       no: t('branches.no') || 'Cancel',
     }

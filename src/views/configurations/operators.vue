@@ -128,7 +128,7 @@ const handleDeleteOperator = async (operatorId: number) => {
       message:
         t('operators.deleteConfirmMessage') || 'Are you sure you want to delete this operator?',
       title: t('operators.deleteConfirmTitle') || 'Delete Confirmation',
-      type: 'danger',
+      type: 'error',
       yes: t('operators.yes') || 'Yes, delete',
       no: t('operators.no') || 'Cancel',
     }

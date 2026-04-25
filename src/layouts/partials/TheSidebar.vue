@@ -98,89 +98,41 @@ import { useSidebarToggle } from '@/composables/sidebar-toggle'
 import { useI18n } from '@/composables/useI18n'
 import { useAuthStore } from '@/stores/auth'
 import { useUserAvatar } from '@/composables/useUserAvatar'
+import { usePermissions } from '@/composables/usePermissions'
 import MenuList from '@/components/Menu/MenuList.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
 const { userAvatar } = useUserAvatar()
 const user = computed(() => authStore.user)
+const { canSeeConfigurations } = usePermissions()
 
 // Sidebar toggle
 const { toggleSidebar } = useSidebarToggle()
 
-// Make appRoutes reactive so it updates when language changes
-const appRoutes = computed(() => [
-  {
-    label: t('sidebar.dashboard'),
-    type: 'header',
-  },
-  {
-    icon: 'home',
-    label: t('sidebar.home'),
-    route: 'home',
-    type: 'menu',
-  },
-  {
-    label: t('sidebar.apps'),
-    type: 'header',
-  },
-  {
-    icon: 'receipt-2',
-    label: t('sidebar.transactions'),
-    route: 'transactions.list',
-    type: 'menu',
-  },
-  {
-    icon: 'device-desktop',
-    label: t('sidebar.operators'),
-    route: 'operators.list',
-    type: 'menu',
-  },
-  {
-    icon: 'building-store',
-    label: t('sidebar.branches'),
-    route: 'branches.list',
-    type: 'menu',
-  },
-  {
-    icon: 'wallet',
-    label: t('sidebar.wallets'),
-    route: 'wallets.list',
-    type: 'menu',
-  },
-  {
-    icon: 'arrows-exchange',
-    label: t('sidebar.transaction_types'),
-    route: 'transaction-types.list',
-    type: 'menu',
-  },
-  {
-    label: t('sidebar.params'),
-    type: 'header',
-  },
-  {
-    icon: 'receipt',
-    label: t('sidebar.fee_rules'),
-    route: 'fee-rules.list',
-    type: 'menu',
-  },
-  {
-    icon: 'currency-dollar',
-    label: t('sidebar.currencies'),
-    route: 'currencies.list',
-    type: 'menu',
-  },
-  {
-    icon: 'globe',
-    label: t('sidebar.countries'),
-    route: 'countries.list',
-    type: 'menu',
-  },
-  {
-    icon: 'users',
-    label: t('sidebar.users'),
-    route: 'users.list',
-    type: 'menu',
-  },
-])
+// Make appRoutes reactive so it updates when language changes or role changes
+const appRoutes = computed(() => {
+  const routes: any[] = [
+    { label: t('sidebar.dashboard'), type: 'header' },
+    { icon: 'home', label: t('sidebar.home'), route: 'home', type: 'menu' },
+    { label: t('sidebar.apps'), type: 'header' },
+    { icon: 'receipt-2',      label: t('sidebar.transactions'),      route: 'transactions.list',      type: 'menu' },
+    { icon: 'device-desktop', label: t('sidebar.operators'),         route: 'operators.list',         type: 'menu' },
+    { icon: 'building-store', label: t('sidebar.branches'),          route: 'branches.list',          type: 'menu' },
+    { icon: 'wallet',         label: t('sidebar.wallets'),           route: 'wallets.list',           type: 'menu' },
+    { icon: 'arrows-exchange',label: t('sidebar.transaction_types'), route: 'transaction-types.list', type: 'menu' },
+  ]
+
+  if (canSeeConfigurations.value) {
+    routes.push(
+      { label: t('sidebar.params'), type: 'header' },
+      { icon: 'receipt',          label: t('sidebar.fee_rules'),  route: 'fee-rules.list',   type: 'menu' },
+      { icon: 'currency-dollar',  label: t('sidebar.currencies'), route: 'currencies.list',  type: 'menu' },
+      { icon: 'globe',            label: t('sidebar.countries'),  route: 'countries.list',   type: 'menu' },
+      { icon: 'users',            label: t('sidebar.users'),      route: 'users.list',       type: 'menu' },
+    )
+  }
+
+  return routes
+})
 </script>

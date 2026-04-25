@@ -54,6 +54,8 @@ export interface FeeRuleList {
   min_fee: number | null
   max_fee: number | null
   is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface FeeRulesResponse {

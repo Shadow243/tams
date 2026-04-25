@@ -449,10 +449,7 @@ const resetPasswordForm = () => {
 const handleUpdateProfile = async () => {
   updating.value = true
   try {
-    const response = await axiosInstance.put(
-      `${appConfig.apiUrl}/users/${user.value?.id}`,
-      profileForm.value
-    )
+    const response = await axiosInstance.put(`${appConfig.apiUrl}/user/profile`, profileForm.value)
 
     // Update user in store
     await authStore.fetchUser()
@@ -487,7 +484,7 @@ const handleChangePassword = async () => {
 
   changingPassword.value = true
   try {
-    await axiosInstance.put(`${appConfig.apiUrl}/users/${user.value?.id}/password`, {
+    await axiosInstance.put(`${appConfig.apiUrl}/user/password`, {
       current_password: passwordForm.value.current_password,
       password: passwordForm.value.new_password,
       password_confirmation: passwordForm.value.new_password_confirmation,

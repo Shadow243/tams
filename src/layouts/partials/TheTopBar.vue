@@ -302,8 +302,8 @@
               />
               <div class="d-lg-flex align-items-center gap-1 d-none">
                 <span>
-                  <h5 class="my-0 lh-1 pro-username">{{ user.name }}</h5>
-                  <span class="fs-xs lh-1">{{ user.username }}</span>
+                  <h5 class="my-0 lh-1 pro-username">{{ user?.name }}</h5>
+                  <span class="fs-xs lh-1">{{ user?.username }}</span>
                 </span>
                 <i class="ti ti-chevron-down align-middle"></i>
               </div>
@@ -427,7 +427,7 @@ const availableLanguages: Language[] = [
 ]
 
 const currentLanguage = computed(() => {
-  return availableLanguages.find((lang) => lang.locale === locale.value) || availableLanguages[0]
+  return availableLanguages.find((lang) => lang.locale === locale.value) || availableLanguages[0]!
 })
 
 const switchLanguage = (newLocale: 'en-US' | 'fr-FR') => {

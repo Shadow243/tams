@@ -98,7 +98,7 @@ const modalStyle = computed(() => ({
 
 const bodyStyle = computed(() => ({
   maxHeight: props.maxHeight,
-  overflowY: 'auto',
+  overflowY: 'auto' as const,
 }))
 
 watch(

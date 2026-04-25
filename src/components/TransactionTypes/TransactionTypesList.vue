@@ -43,7 +43,7 @@
         </div>
 
         <!-- Add Button -->
-        <button class="btn btn-primary" @click="$emit('add')">
+        <button v-if="canCreate" class="btn btn-primary" @click="$emit('add')">
           <i class="ti ti-plus me-1"></i>
           {{ t('transaction_types.add_transaction_type') }}
         </button>
@@ -129,7 +129,7 @@
                     <i class="ti ti-dots-vertical"></i>
                   </button>
                   <ul class="dropdown-menu">
-                    <li>
+                    <li v-if="canEdit">
                       <a
                         class="dropdown-item"
                         href="#"
@@ -139,8 +139,8 @@
                         {{ t('transaction_types.edit') || 'Edit' }}
                       </a>
                     </li>
-                    <li><hr class="dropdown-divider" /></li>
-                    <li>
+                    <li v-if="canEdit"><hr class="dropdown-divider" /></li>
+                    <li v-if="canDelete">
                       <a
                         class="dropdown-item text-danger"
                         href="#"
@@ -212,6 +212,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
 import { useUserSettings } from '@/composables/useUserSettings'
 import debounce from 'lodash.debounce'
 import { axiosInstance } from '@/plugins/axios'
@@ -219,6 +220,7 @@ import { appConfig } from '@/config/app'
 import type { TransactionType, Meta } from '@/types'
 
 const { t } = useI18n()
+const { canCreate, canEdit, canDelete } = usePermissions()
 const { getItemsPerPage } = useUserSettings()
 
 interface Props {

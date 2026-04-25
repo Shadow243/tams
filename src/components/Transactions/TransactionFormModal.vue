@@ -308,6 +308,36 @@
               </div>
 
               <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  {{ t('transactions.dest_wallet') || 'Wallet destination' }}
+                  <small class="text-muted"
+                    >({{ t('transactions.optional') || 'optionnel' }})</small
+                  >
+                </label>
+                <SearchableSelect
+                  v-model="localForm.dest_wallet_id"
+                  :options="availableDestWallets"
+                  :option-label="
+                    (w) =>
+                      `${w.wallet_number} - ${w.operator?.name || 'N/A'} (${
+                        w.currency?.code || 'N/A'
+                      })`
+                  "
+                  option-value="id"
+                  :placeholder="t('transactions.select_wallet') || 'Sélectionnez un wallet'"
+                  :disabled="processing || !localForm.destination_branch_id"
+                  :clearable="true"
+                />
+                <small v-if="!localForm.destination_branch_id" class="text-muted">
+                  <i class="ti ti-info-circle me-1"></i>
+                  {{
+                    t('transactions.select_dest_branch_first') ||
+                    "Sélectionnez d'abord une agence destination"
+                  }}
+                </small>
+              </div>
+
+              <div class="col-md-6 mb-3">
                 <label for="withdrawal_code" class="form-label">
                   {{ t('transactions.withdrawal_code') || 'Code de retrait' }}
                   <small class="text-muted"
@@ -474,9 +504,13 @@ const props = withDefaults(defineProps<Props>(), {
     customer_id: null,
     customer_phone: '',
     wallet_id: null,
+    dest_wallet_id: null,
     currency_code: 'CDF',
     gross_amount: 0,
     fee_amount: 0,
+    fee_mode_applied: null,
+    fee_rule_id: null,
+    parent_transaction_id: null,
     destination_branch_id: null,
     withdrawal_code: '',
     expires_at: '',
@@ -606,13 +640,21 @@ watch(
 watch(
   () => localForm.value.branch_id,
   (newBranchId, oldBranchId) => {
-    // Only reset if branch actually changed and wallet is selected
     if (oldBranchId !== undefined && newBranchId !== oldBranchId && localForm.value.wallet_id) {
       const selectedWallet = props.wallets.find((w) => w.id === localForm.value.wallet_id)
-      // If selected wallet doesn't belong to new branch, clear it
       if (selectedWallet && selectedWallet.branch_id !== newBranchId) {
         localForm.value.wallet_id = null
       }
+    }
+  }
+)
+
+// Reset dest_wallet when destination branch changes
+watch(
+  () => localForm.value.destination_branch_id,
+  (newId, oldId) => {
+    if (oldId !== undefined && newId !== oldId) {
+      localForm.value.dest_wallet_id = null
     }
   }
 )
@@ -623,6 +665,11 @@ const isEditing = computed(() => !!localForm.value.id)
 const availableWallets = computed(() => {
   if (!localForm.value.branch_id) return []
   return props.wallets.filter((w) => w.branch_id === localForm.value.branch_id)
+})
+
+const availableDestWallets = computed(() => {
+  if (!localForm.value.destination_branch_id) return []
+  return props.wallets.filter((w) => w.branch_id === localForm.value.destination_branch_id)
 })
 
 const activeCurrencies = computed(() => currencyStore.activeCurrencies)
@@ -657,8 +704,8 @@ const isFormValid = computed(() => {
   return (
     localForm.value.transaction_type_id &&
     localForm.value.branch_id &&
-    localForm.value.gross_amount > 0 &&
-    localForm.value.fee_amount >= 0 &&
+    (localForm.value.gross_amount ?? 0) > 0 &&
+    (localForm.value.fee_amount ?? 0) >= 0 &&
     (!localForm.value.withdrawal_code || localForm.value.expires_at)
   )
 })

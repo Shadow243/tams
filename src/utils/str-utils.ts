@@ -1,3 +1,4 @@
+// @ts-ignore - lodash subpath import lacks declaration file
 import _isEmpty from 'lodash/isEmpty'
 
 let UUID = 1

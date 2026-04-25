@@ -76,7 +76,7 @@ const t = (key: string, defaultValue?: string): string => {
  * Mock i18n composable
  */
 export const mockI18n = {
-  t,
+  t: vi.fn((key: string, defaultValue?: string): string => translations[key] || defaultValue || key),
   locale: { value: 'en' },
   availableLocales: ['en', 'fr'],
   changeLocale: vi.fn(),

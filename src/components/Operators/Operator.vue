@@ -25,6 +25,7 @@
   <td>
     <div class="d-flex align-items-center justify-content-center gap-1">
       <a
+        v-if="canEdit"
         href="javascript:void(0);"
         @click="$emit('edit', operator)"
         class="btn btn-success btn-icon btn-sm"
@@ -33,6 +34,7 @@
         <i class="ti ti-edit fs-lg"></i>
       </a>
       <a
+        v-if="canDelete"
         href="javascript:void(0);"
         @click="$emit('delete', operator.id)"
         class="btn btn-danger btn-icon btn-sm"
@@ -46,7 +48,9 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
 import type { Operator } from '@/types'
+const { canEdit, canDelete } = usePermissions()
 
 const { t } = useI18n()
 

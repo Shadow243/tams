@@ -27,7 +27,7 @@ export default {
       const defaultLayout = 'default'
 
       return new Promise((resolve) => {
-        resolve(layouts[layout ?? defaultLayout])
+        resolve(layouts[layout ?? defaultLayout] || layouts[defaultLayout]!)
       })
     }
 

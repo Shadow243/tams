@@ -66,6 +66,7 @@
         <i class="ti" :class="branch.is_active ? 'ti-ban' : 'ti-check'"></i>
       </a>
       <a
+        v-if="canEdit"
         href="javascript:void(0);"
         @click="$emit('edit', branch)"
         class="btn btn-success btn-icon btn-sm"
@@ -74,6 +75,7 @@
         <i class="ti ti-edit fs-lg"></i>
       </a>
       <a
+        v-if="canDelete"
         href="javascript:void(0);"
         @click="$emit('delete', branch.id)"
         class="btn btn-danger btn-icon btn-sm"
@@ -87,6 +89,8 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
+const { canEdit, canDelete } = usePermissions()
 import type { Branch } from '@/types'
 
 const { t } = useI18n()

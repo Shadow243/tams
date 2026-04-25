@@ -605,6 +605,238 @@
         </div>
       </div>
 
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- Balance Report Section                                            -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+      <!-- Balance section header -->
+      <div class="d-flex align-items-center justify-content-between my-3">
+        <div>
+          <h5 class="mb-1 fw-semibold">
+            <i class="ti ti-scale me-2 text-primary"></i>
+            {{ t('dashboard.balance_report') || 'Rapport des soldes' }}
+          </h5>
+          <p class="text-muted mb-0 small">
+            {{
+              t('dashboard.balance_report_desc') ||
+              'Soldes cash par agence et soldes virtuels par wallet'
+            }}
+          </p>
+        </div>
+        <button
+          @click="fetchBalanceReport"
+          class="btn btn-sm btn-outline-secondary"
+          :disabled="loadingBalances"
+        >
+          <i class="ti ti-refresh" :class="{ spin: loadingBalances }"></i>
+        </button>
+      </div>
+
+      <!-- Balance Skeleton -->
+      <template v-if="loadingBalances">
+        <div class="row g-3 mb-3">
+          <div v-for="i in 2" :key="'bs-' + i" class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm placeholder-glow">
+              <div class="card-body p-3">
+                <span class="placeholder col-4 mb-2 d-block"></span>
+                <span class="placeholder col-8 d-block mb-1" style="height: 1.5rem"></span>
+                <span class="placeholder col-6"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div v-for="i in 2" :key="'bt-' + i" class="col-lg-6">
+            <div class="card border-0 shadow-sm placeholder-glow">
+              <div class="card-header py-3"><span class="placeholder col-5"></span></div>
+              <div class="card-body p-0">
+                <div v-for="j in 5" :key="j" class="d-flex gap-3 px-3 py-2 border-bottom">
+                  <span class="placeholder col-3"></span>
+                  <span class="placeholder col-2"></span>
+                  <span class="placeholder col-3 ms-auto"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Summary cards by currency (only currencies with non-zero balances) -->
+      <div v-if="!loadingBalances && balanceReport?.summary.length" class="row g-3 mb-3">
+        <div
+          v-for="item in balanceReport.summary.filter(
+            (s) => s.total_branch_cash > 0 || s.total_wallet_virtual > 0
+          )"
+          :key="item.currency_code"
+          class="col-md-6 col-xl-3"
+        >
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="badge bg-primary-subtle text-primary fw-semibold fs-6">
+                  {{ item.currency_code }}
+                </span>
+                <i class="ti ti-currency-dollar text-muted fs-5"></i>
+              </div>
+              <div class="mb-2">
+                <div class="text-muted small mb-1">
+                  <i class="ti ti-building-bank me-1"></i>
+                  {{ t('dashboard.total_branch_cash') || 'Cash agences' }}
+                </div>
+                <div class="fw-bold fs-5 text-success">
+                  {{ formatBalanceAmount(item.total_branch_cash, item.currency_symbol) }}
+                </div>
+              </div>
+              <div>
+                <div class="text-muted small mb-1">
+                  <i class="ti ti-wallet me-1"></i>
+                  {{ t('dashboard.total_wallet_virtual') || 'Virtuel wallets' }}
+                </div>
+                <div class="fw-bold fs-5 text-info">
+                  {{ formatBalanceAmount(item.total_wallet_virtual, item.currency_symbol) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branch + Wallet tables -->
+      <div v-if="!loadingBalances && balanceReport" class="row g-3 mb-4">
+        <!-- Branch balances -->
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div
+              class="card-header py-3 border-bottom d-flex align-items-center justify-content-between"
+            >
+              <h5 class="card-title mb-0 fw-semibold">
+                <i class="ti ti-building-bank me-2 text-success"></i>
+                {{ t('dashboard.branch_balances') || 'Soldes agences (Cash)' }}
+              </h5>
+              <span class="badge bg-secondary-subtle text-secondary">
+                {{ balanceReport.branches.length }}
+              </span>
+            </div>
+            <div class="card-body p-0">
+              <div
+                v-if="!balanceReport.branches.some((b) => b.balances.length)"
+                class="text-center py-4 text-muted"
+              >
+                <i class="ti ti-building-bank" style="font-size: 2rem"></i>
+                <p class="mt-2 small">
+                  {{ t('dashboard.no_balance_data') || 'Aucun solde enregistré' }}
+                </p>
+              </div>
+              <div v-else class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-3">{{ t('dashboard.branch') || 'Agence' }}</th>
+                      <th>{{ t('dashboard.currency') || 'Devise' }}</th>
+                      <th class="text-end pe-3">
+                        {{ t('dashboard.cash_balance') || 'Solde Cash' }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template v-for="branch in balanceReport.branches" :key="branch.id">
+                      <tr v-if="!branch.balances.length">
+                        <td class="ps-3 text-muted small" colspan="3">
+                          {{ branch.name }}
+                          <span class="ms-2 text-muted fst-italic">— aucun solde</span>
+                        </td>
+                      </tr>
+                      <tr
+                        v-for="(bal, idx) in branch.balances"
+                        :key="branch.id + '-' + bal.currency_code"
+                      >
+                        <td class="ps-3 small">
+                          <span v-if="idx === 0" class="fw-medium">{{ branch.name }}</span>
+                          <span v-else class="text-muted ms-3">↳</span>
+                        </td>
+                        <td>
+                          <span class="badge bg-light text-dark border">{{
+                            bal.currency_code
+                          }}</span>
+                        </td>
+                        <td
+                          class="text-end pe-3 fw-semibold"
+                          :class="bal.cash_balance > 0 ? 'text-success' : 'text-muted'"
+                        >
+                          {{ formatBalanceAmount(bal.cash_balance, bal.currency_symbol) }}
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet balances -->
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div
+              class="card-header py-3 border-bottom d-flex align-items-center justify-content-between"
+            >
+              <h5 class="card-title mb-0 fw-semibold">
+                <i class="ti ti-wallet me-2 text-info"></i>
+                {{ t('dashboard.wallet_balances') || 'Soldes wallets (Virtuel)' }}
+              </h5>
+              <span class="badge bg-secondary-subtle text-secondary">
+                {{ balanceReport.wallets.length }}
+              </span>
+            </div>
+            <div class="card-body p-0">
+              <div v-if="!balanceReport.wallets.length" class="text-center py-4 text-muted">
+                <i class="ti ti-wallet" style="font-size: 2rem"></i>
+                <p class="mt-2 small">{{ t('dashboard.no_wallets') || 'Aucun wallet' }}</p>
+              </div>
+              <div v-else class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-3">{{ t('dashboard.wallet') || 'Numéro' }}</th>
+                      <th>{{ t('dashboard.operator') || 'Opérateur' }}</th>
+                      <th class="text-end pe-3">
+                        {{ t('dashboard.virtual_balance') || 'Solde Virtuel' }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="wallet in balanceReport.wallets" :key="wallet.id">
+                      <td class="ps-3">
+                        <div class="small fw-medium">{{ wallet.wallet_number }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem">
+                          {{ wallet.branch_name }}
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge bg-primary-subtle text-primary small">
+                          {{ wallet.operator_name || '—' }}
+                        </span>
+                      </td>
+                      <td class="text-end pe-3">
+                        <div
+                          class="fw-semibold"
+                          :class="wallet.virtual_balance > 0 ? 'text-info' : 'text-muted'"
+                        >
+                          {{ formatBalanceAmount(wallet.virtual_balance, wallet.currency_symbol) }}
+                        </div>
+                        <div class="text-muted" style="font-size: 0.7rem">
+                          {{ wallet.currency_code }}
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Empty state (no data, not loading) -->
       <div v-if="!store.loadingDashboard && !data" class="row">
         <div class="col-12">
@@ -638,6 +870,7 @@ import { useTransactionTypeStore } from '@/stores/transaction-types'
 import { useBranchStore } from '@/stores/branches'
 import { useCurrencyStore } from '@/stores/currencies'
 import { useI18n } from '@/composables/useI18n'
+import { useBalanceReport } from '@/composables/useBalanceReport'
 import type { DashboardFilters, DashboardStatistics } from '@/types'
 
 const { t } = useI18n()
@@ -648,6 +881,11 @@ const store = useTransactionStore()
 const typeStore = useTransactionTypeStore()
 const branchStore = useBranchStore()
 const currencyStore = useCurrencyStore()
+const {
+  report: balanceReport,
+  loading: loadingBalances,
+  fetchReport: fetchBalanceReport,
+} = useBalanceReport()
 
 // ── Filters ──────────────────────────────────────────────────────────────────
 const filters = ref<DashboardFilters>({
@@ -675,7 +913,7 @@ const activeFilterCount = computed(() => {
 // ── Date helpers ──────────────────────────────────────────────────────────────
 function getDateRange(period: string): { start: string | null; end: string | null } {
   const now = new Date()
-  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  const fmt = (d: Date): string => d.toISOString().split('T')[0]!
 
   switch (period) {
     case 'today':
@@ -859,6 +1097,10 @@ const successRateBadge = computed(() => {
     ? 'bg-warning-subtle text-warning'
     : 'bg-danger-subtle text-danger'
 })
+const successRateClass = computed(() => {
+  const r = data.value?.overview.success_rate ?? 0
+  return r >= 80 ? 'border-success' : r >= 50 ? 'border-warning' : 'border-danger'
+})
 
 // ── Type / Branch rank percent ────────────────────────────────────────────────
 function getTypePercent(count: number) {
@@ -940,13 +1182,14 @@ const TREND_PALETTE = ['#198754', '#0dcaf0', '#f0ad4e', '#6f42c1', '#dc3545', '#
 /** All unique sorted dates across all currencies */
 const trendDates = computed<string[]>(() => {
   if (!data.value?.trend.length) return []
-  return [...new Set(data.value.trend.map((i) => i.date))].sort()
+  const dates: string[] = data.value.trend.map((i) => i.date)
+  return Array.from(new Set(dates)).sort()
 })
 
 /** All unique currency codes present in trend data */
 const trendCurrencies = computed<string[]>(() => {
   if (!data.value?.trend.length) return []
-  return [...new Set(data.value.trend.map((i) => i.currency_code))]
+  return Array.from(new Set(data.value.trend.map((i) => i.currency_code)))
 })
 
 const trendChartSeries = computed(() => {
@@ -1040,18 +1283,27 @@ const trendChartOptions = computed(() => ({
 
 const trendDateRange = computed(() => {
   if (!trendDates.value.length) return ''
-  const first = formatAxisDate(trendDates.value[0])
-  const last = formatAxisDate(trendDates.value[trendDates.value.length - 1])
+  const first = formatAxisDate(trendDates.value[0]!)
+  const last = formatAxisDate(trendDates.value[trendDates.value.length - 1]!)
   return first === last ? first : `${first} → ${last}`
 })
 
 // ── onMounted ─────────────────────────────────────────────────────────────────
+function formatBalanceAmount(n: number, symbol?: string) {
+  const formatted = new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n)
+  return symbol ? `${formatted} ${symbol}` : formatted
+}
+
 onMounted(async () => {
   await Promise.all([
     branchStore.fetchBranches(1, undefined, 100),
     currencyStore.fetchAllCurrencies(),
     typeStore.fetchTransactionTypes(),
     loadDashboard(),
+    fetchBalanceReport(),
   ])
 })
 </script>

@@ -221,7 +221,7 @@
                       <a
                         class="dropdown-item"
                         href="#"
-                        @click.prevent="$emit('toggle-status', feeRule.id)"
+                        @click.prevent="$emit('toggleStatus', feeRule.id)"
                       >
                         <i class="ti ti-toggle-left me-2"></i>
                         {{

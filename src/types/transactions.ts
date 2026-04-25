@@ -46,10 +46,22 @@ export interface Transaction {
   wallet_id: number | null
   wallet?: {
     id: number
-    name: string
-    code: string
+    wallet_number: string
+    virtual_balance: number
+  }
+  dest_wallet_id: number | null
+  dest_wallet?: {
+    id: number
+    wallet_number: string
+    virtual_balance: number
   }
   customer_phone: string | null
+  currency_code: string
+  currency?: {
+    id: number
+    code: string
+    name: string
+  }
   gross_amount: number
   fee_amount: number
   net_amount: number
@@ -84,11 +96,13 @@ export interface Transaction {
 }
 
 export interface TransactionFormData {
+  id?: string
   transaction_type_id: number | null
   branch_id: number | null
   destination_branch_id: number | null
   customer_id: string | null
   wallet_id: number | null
+  dest_wallet_id?: number | null
   customer_phone: string | null
   currency_code: string
   currency_id?: number | null

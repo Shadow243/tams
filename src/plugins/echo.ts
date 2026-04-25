@@ -3,6 +3,7 @@ import Pusher from 'pusher-js'
 import type { App } from 'vue'
 import type { ChannelAuthorizationCallback } from 'pusher-js'
 import { axiosInstance } from '@/plugins/axios'
+import { appConfig } from '@/config/app'
 
 declare global {
   interface Window {
@@ -28,7 +29,7 @@ const echo = new Echo({
   authorizer: (channel: { name: string }) => ({
     authorize: (socketId: string, callback: ChannelAuthorizationCallback) => {
       axiosInstance
-        .post('/broadcasting/auth', {
+        .post(`${appConfig.apiUrl}/broadcasting/auth`, {
           socket_id: socketId,
           channel_name: channel.name,
         })

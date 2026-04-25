@@ -31,7 +31,7 @@
   <td>{{ user.gender || 'N/A' }}</td>
   <td>
     <span
-      v-if="user.active === 1 || user.active === true"
+      v-if="user.active === 1 || !!user.active"
       class="badge bg-success-subtle text-success badge-label"
     >
       Active

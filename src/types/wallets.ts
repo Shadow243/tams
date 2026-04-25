@@ -11,7 +11,7 @@ export interface Wallet {
     operator_id: number;
     operator?: Operator;
     wallet_number: string;
-    balance: string | number;
+    virtual_balance: string | number;
     currency_id: number;
     currency?: Currency;
     formatted_balance: string;
@@ -41,7 +41,7 @@ export interface WalletFormData {
     branch_id: number | null;
     operator_id: number | null;
     wallet_number: string;
-    balance?: number | string;
+    virtual_balance?: number | string;
     currency_id?: number | null;
     status?: 'active' | 'inactive';
 }

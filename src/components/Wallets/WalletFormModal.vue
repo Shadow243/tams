@@ -77,14 +77,14 @@
 
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">{{ t('wallets.form.balance') || 'Balance' }}</label>
+                <label class="form-label">{{ t('wallets.form.virtual_balance') || 'Solde Virtuel' }}</label>
                 <input
-                  v-model="localForm.balance"
+                  v-model="localForm.virtual_balance"
                   type="number"
                   step="0.01"
                   min="0"
                   class="form-control"
-                  :placeholder="t('wallets.form.balancePlaceholder') || '0.00'"
+                  :placeholder="t('wallets.form.virtual_balancePlaceholder') || '0.00'"
                 />
               </div>
 
@@ -162,7 +162,7 @@ const localForm = reactive<WalletFormData>({
   branch_id: null,
   operator_id: null,
   wallet_number: '',
-  balance: '',
+  virtual_balance: '',
   currency_id: null,
   status: 'active',
 })
@@ -187,7 +187,7 @@ watch(
     localForm.branch_id = newData.branch_id
     localForm.operator_id = newData.operator_id
     localForm.wallet_number = newData.wallet_number
-    localForm.balance = newData.balance || ''
+    localForm.virtual_balance = newData.virtual_balance || ''
     localForm.currency_id = newData.currency_id || null
     localForm.status = newData.status || 'active'
   },
@@ -202,7 +202,7 @@ watch(
       localForm.branch_id = null
       localForm.operator_id = null
       localForm.wallet_number = ''
-      localForm.balance = ''
+      localForm.virtual_balance = ''
       localForm.currency_id = null
       localForm.status = 'active'
     }
@@ -218,8 +218,8 @@ const handleSubmit = () => {
     status: localForm.status,
   }
 
-  if (localForm.balance) {
-    submitData.balance = localForm.balance
+  if (localForm.virtual_balance) {
+    submitData.virtual_balance = localForm.virtual_balance
   }
 
   emit('submit', submitData)

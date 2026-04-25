@@ -8,7 +8,7 @@
         </div>
 
         <div class="text-end mt-3 mt-sm-0">
-          <button @click="handleAddWallet" type="button" class="btn btn-primary">
+          <button v-if="canCreate" @click="handleAddWallet" type="button" class="btn btn-primary">
             <i class="ti ti-plus me-1"></i> {{ t('wallets.add_new_wallet') }}
           </button>
         </div>
@@ -55,10 +55,12 @@ import { onMounted, computed, ref, reactive } from 'vue'
 import WalletsList from '@/components/Wallets/WalletsList.vue'
 import WalletFormModal from '@/components/Wallets/WalletFormModal.vue'
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
 import { confirmDialog } from '@/utils/notification'
 import type { Wallet, WalletFormData } from '@/types'
 
 const { t } = useI18n()
+const { canCreate } = usePermissions()
 
 const store: ReturnType<typeof useWalletStore> = useWalletStore()
 const walletListRef = ref<InstanceType<typeof WalletsList> | null>(null)
@@ -92,7 +94,7 @@ const formData = reactive<WalletFormData>({
   branch_id: null,
   operator_id: null,
   wallet_number: '',
-  balance: '',
+  virtual_balance: '',
   currency_id: null,
   status: 'active',
 })
@@ -106,7 +108,7 @@ const handleAddWallet = () => {
   formData.branch_id = null
   formData.operator_id = null
   formData.wallet_number = ''
-  formData.balance = ''
+  formData.virtual_balance = ''
   formData.currency_id = null
   formData.status = 'active'
   store.setCurrentWallet(null)
@@ -149,7 +151,7 @@ const handleEditWallet = (wallet: Wallet) => {
   formData.branch_id = wallet.branch_id
   formData.operator_id = wallet.operator_id
   formData.wallet_number = wallet.wallet_number
-  formData.balance = wallet.balance
+  formData.virtual_balance = wallet.virtual_balance
   formData.currency_id = wallet.currency_id
   formData.status = wallet.status
   store.setCurrentWallet(wallet)
@@ -169,7 +171,7 @@ const handleDeleteWallet = async (walletId: number) => {
     {
       message: t('wallets.deleteConfirmMessage') || 'Are you sure you want to delete this wallet?',
       title: t('wallets.deleteConfirmTitle') || 'Delete Confirmation',
-      type: 'danger',
+      type: 'error',
       yes: t('wallets.yes') || 'Yes, delete',
       no: t('wallets.no') || 'Cancel',
     }

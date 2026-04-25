@@ -78,6 +78,198 @@
                 :disabled="processing"
               ></textarea>
             </div>
+
+            <!-- Balance Configuration -->
+            <hr />
+            <h6 class="fw-semibold mb-3">
+              {{ t('transaction_types.balance_config') || 'Balance Configuration' }}
+            </h6>
+            <small class="text-muted d-block mb-3">
+              {{
+                t('transaction_types.balance_config_hint') ||
+                'Define how balances are affected when this transaction is completed.'
+              }}
+            </small>
+
+            <!-- Branch (source) -->
+            <div class="row g-2 mb-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">{{
+                  t('transaction_types.branch_source') || 'Source Branch'
+                }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.effect') || 'Effect'
+                }}</label>
+                <select
+                  v-model="localForm.branch_effect"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="none">{{ t('transaction_types.effect_none') || 'None' }}</option>
+                  <option value="debit">
+                    {{ t('transaction_types.effect_debit') || 'Debit (loses cash)' }}
+                  </option>
+                  <option value="credit">
+                    {{ t('transaction_types.effect_credit') || 'Credit (gains cash)' }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6" v-if="localForm.branch_effect !== 'none'">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.amount') || 'Amount'
+                }}</label>
+                <select
+                  v-model="localForm.branch_amount"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="gross">
+                    {{ t('transaction_types.amount_gross') || 'Gross amount' }}
+                  </option>
+                  <option value="net">
+                    {{ t('transaction_types.amount_net') || 'Net amount (after fees)' }}
+                  </option>
+                  <option value="fee">{{ t('transaction_types.amount_fee') || 'Fee only' }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Wallet -->
+            <div class="row g-2 mb-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">{{
+                  t('transaction_types.wallet') || 'Wallet'
+                }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.effect') || 'Effect'
+                }}</label>
+                <select
+                  v-model="localForm.wallet_effect"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="none">{{ t('transaction_types.effect_none') || 'None' }}</option>
+                  <option value="debit">
+                    {{ t('transaction_types.effect_debit') || 'Debit (loses balance)' }}
+                  </option>
+                  <option value="credit">
+                    {{ t('transaction_types.effect_credit') || 'Credit (gains balance)' }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6" v-if="localForm.wallet_effect !== 'none'">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.amount') || 'Amount'
+                }}</label>
+                <select
+                  v-model="localForm.wallet_amount"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="gross">
+                    {{ t('transaction_types.amount_gross') || 'Gross amount' }}
+                  </option>
+                  <option value="net">
+                    {{ t('transaction_types.amount_net') || 'Net amount (after fees)' }}
+                  </option>
+                  <option value="fee">{{ t('transaction_types.amount_fee') || 'Fee only' }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Destination Wallet -->
+            <div class="row g-2 mb-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">{{
+                  t('transaction_types.wallet_destination') || 'Wallet destination'
+                }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.effect') || 'Effect'
+                }}</label>
+                <select
+                  v-model="localForm.dest_wallet_effect"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="none">{{ t('transaction_types.effect_none') || 'None' }}</option>
+                  <option value="debit">
+                    {{ t('transaction_types.effect_debit') || 'Debit (loses balance)' }}
+                  </option>
+                  <option value="credit">
+                    {{ t('transaction_types.effect_credit') || 'Credit (gains balance)' }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6" v-if="localForm.dest_wallet_effect !== 'none'">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.amount') || 'Amount'
+                }}</label>
+                <select
+                  v-model="localForm.dest_wallet_amount"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="gross">
+                    {{ t('transaction_types.amount_gross') || 'Gross amount' }}
+                  </option>
+                  <option value="net">
+                    {{ t('transaction_types.amount_net') || 'Net amount (after fees)' }}
+                  </option>
+                  <option value="fee">{{ t('transaction_types.amount_fee') || 'Fee only' }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Destination Branch -->
+            <div class="row g-2 mb-2">
+              <div class="col-12">
+                <label class="form-label fw-semibold">{{
+                  t('transaction_types.branch_destination') || 'Destination Branch'
+                }}</label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.effect') || 'Effect'
+                }}</label>
+                <select
+                  v-model="localForm.dest_branch_effect"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="none">{{ t('transaction_types.effect_none') || 'None' }}</option>
+                  <option value="debit">
+                    {{ t('transaction_types.effect_debit') || 'Debit (loses cash)' }}
+                  </option>
+                  <option value="credit">
+                    {{ t('transaction_types.effect_credit') || 'Credit (gains cash)' }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6" v-if="localForm.dest_branch_effect !== 'none'">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.amount') || 'Amount'
+                }}</label>
+                <select
+                  v-model="localForm.dest_branch_amount"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="gross">
+                    {{ t('transaction_types.amount_gross') || 'Gross amount' }}
+                  </option>
+                  <option value="net">
+                    {{ t('transaction_types.amount_net') || 'Net amount (after fees)' }}
+                  </option>
+                  <option value="fee">{{ t('transaction_types.amount_fee') || 'Fee only' }}</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -112,7 +304,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, watchEffect } from 'vue'
 import { useI18n } from '@/composables/useI18n'
 import type { TransactionTypeFormData } from '@/types'
 
@@ -139,16 +331,23 @@ const localForm = ref<TransactionTypeFormData>({
   code: '',
   name: '',
   description: '',
+  branch_effect: 'none',
+  branch_amount: 'gross',
+  wallet_effect: 'none',
+  wallet_amount: 'gross',
+  dest_wallet_effect: 'none',
+  dest_wallet_amount: 'gross',
+  dest_branch_effect: 'none',
+  dest_branch_amount: 'gross',
 })
 
-// Watch formData prop to update local form
-watch(
-  () => props.formData,
-  (newData) => {
-    localForm.value = { ...newData }
-  },
-  { deep: true, immediate: true }
-)
+// Sync formData prop → localForm whenever any property changes.
+// watchEffect tracks every reactive property accessed inside, so it
+// re-runs reliably when the parent mutates individual fields of a
+// reactive formData object (deep watch on a reactive ref is unreliable).
+watchEffect(() => {
+  localForm.value = { ...props.formData }
+})
 
 // Watch show prop to reset form when closed
 watch(
@@ -159,6 +358,14 @@ watch(
         code: '',
         name: '',
         description: '',
+        branch_effect: 'none',
+        branch_amount: 'gross',
+        wallet_effect: 'none',
+        wallet_amount: 'gross',
+        dest_wallet_effect: 'none',
+        dest_wallet_amount: 'gross',
+        dest_branch_effect: 'none',
+        dest_branch_amount: 'gross',
       }
     }
   }
@@ -173,6 +380,14 @@ const handleSubmit = () => {
     code: localForm.value.code.toLowerCase().trim(),
     name: localForm.value.name.trim(),
     description: localForm.value.description.trim(),
+    branch_effect: localForm.value.branch_effect,
+    branch_amount: localForm.value.branch_amount,
+    wallet_effect: localForm.value.wallet_effect,
+    wallet_amount: localForm.value.wallet_amount,
+    dest_wallet_effect: localForm.value.dest_wallet_effect,
+    dest_wallet_amount: localForm.value.dest_wallet_amount,
+    dest_branch_effect: localForm.value.dest_branch_effect,
+    dest_branch_amount: localForm.value.dest_branch_amount,
   })
 }
 </script>

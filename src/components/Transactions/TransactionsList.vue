@@ -282,6 +282,7 @@
                     <i class="ti ti-eye"></i>
                   </button>
                   <button
+                    v-if="canEditTransaction"
                     type="button"
                     class="btn btn-sm btn-primary"
                     @click.prevent.stop="handleEdit(transaction)"
@@ -355,7 +356,7 @@
               class="page-item"
               :class="{ active: page === meta.current_page }"
             >
-              <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
+              <a class="page-link" href="#" @click.prevent="changePage(Number(page))">{{ page }}</a>
             </li>
             <li class="page-item" :class="{ disabled: meta.current_page === meta.last_page }">
               <a class="page-link" href="#" @click.prevent="changePage(meta.current_page + 1)">
@@ -379,6 +380,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { useFormat } from '@/plugins/format'
 import { axiosInstance } from '@/plugins/axios'
@@ -387,6 +389,7 @@ import type { Transaction, Meta } from '@/types'
 import TransactionReceiptModal from '@/components/Transactions/TransactionReceiptModal.vue'
 
 const { t } = useI18n()
+const { canEditTransaction } = usePermissions()
 const { getItemsPerPage } = useUserSettings()
 const format = useFormat()
 
@@ -422,8 +425,8 @@ watch(
   (newTransactions) => {
     if (newTransactions.length > 0) {
       console.log('✅ Sample transaction from API:', newTransactions[0])
-      console.log('✅ Transaction ID:', newTransactions[0].id)
-      console.log('✅ Transaction UUID:', newTransactions[0].uuid)
+      console.log('✅ Transaction ID:', newTransactions[0]?.id)
+      console.log('✅ Transaction UUID:', newTransactions[0]?.uuid)
     }
   },
   { immediate: true }

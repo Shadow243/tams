@@ -120,7 +120,7 @@ const handleDeleteCountry = async (countryId: number) => {
       message:
         t('countries.deleteConfirmMessage') || 'Are you sure you want to delete this country?',
       title: t('countries.deleteConfirmTitle') || 'Delete Confirmation',
-      type: 'danger',
+      type: 'warning',
       yes: t('countries.yes') || 'Yes, delete',
       no: t('countries.no') || 'Cancel',
     }

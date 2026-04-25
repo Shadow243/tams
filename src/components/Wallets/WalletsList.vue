@@ -115,7 +115,7 @@
             <th>{{ t('wallets.table.wallet_number') || 'Wallet Number' }}</th>
             <th>{{ t('wallets.table.branch') || 'Branch' }}</th>
             <th>{{ t('wallets.table.operator') || 'Operator' }}</th>
-            <th class="text-end">{{ t('wallets.table.balance') || 'Balance' }}</th>
+            <th class="text-end">{{ t('wallets.table.virtual_balance') || 'Solde Virtuel' }}</th>
             <th class="text-center">{{ t('wallets.table.currency') || 'Currency' }}</th>
             <th class="text-center">{{ t('wallets.table.status') || 'Status' }}</th>
             <th class="text-center">{{ t('wallets.table.actions') || 'Actions' }}</th>
@@ -153,7 +153,7 @@
             <td>{{ wallet.branch?.name || 'N/A' }}</td>
             <td>{{ wallet.operator?.name || 'N/A' }}</td>
             <td class="text-end">
-              <span class="fw-semibold">{{ Number(wallet.balance).toFixed(2) }}</span>
+              <span class="fw-semibold">{{ Number(wallet.virtual_balance ?? 0).toFixed(2) }}</span>
             </td>
             <td class="text-center">
               <span class="badge bg-secondary">{{ wallet.currency?.code || 'N/A' }}</span>
@@ -180,7 +180,7 @@
                   <i class="ti ti-dots-vertical"></i>
                 </button>
                 <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButton' + wallet.id">
-                  <li>
+                  <li v-if="canEdit">
                     <a class="dropdown-item" href="#" @click.prevent="$emit('edit', wallet)">
                       <i class="ti ti-edit me-2 text-info"></i>
                       {{ t('wallets.edit') || 'Edit' }}
@@ -207,8 +207,8 @@
                       }}
                     </a>
                   </li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li>
+                  <li v-if="canDelete"><hr class="dropdown-divider" /></li>
+                  <li v-if="canDelete">
                     <a
                       class="dropdown-item text-danger"
                       href="#"
@@ -278,6 +278,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { usePermissions } from '@/composables/usePermissions'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { useBranchStore } from '@/stores/branches'
 import { useOperatorStore } from '@/stores/operators'
@@ -288,6 +289,7 @@ import { appConfig } from '@/config/app'
 import type { Wallet, Meta } from '@/types'
 
 const { t } = useI18n()
+const { canEdit, canDelete } = usePermissions()
 const { getItemsPerPage } = useUserSettings()
 const branchStore = useBranchStore()
 const operatorStore = useOperatorStore()
@@ -405,7 +407,7 @@ const exportCSV = () => {
     t('wallets.table.wallet_number'),
     t('wallets.table.branch'),
     t('wallets.table.operator'),
-    t('wallets.table.balance'),
+    t('wallets.table.virtual_balance') || 'Solde Virtuel',
     t('wallets.table.currency'),
     t('wallets.table.status'),
   ]
@@ -414,8 +416,8 @@ const exportCSV = () => {
     wallet.wallet_number || '',
     wallet.branch?.name || '',
     wallet.operator?.name || '',
-    wallet.balance?.toString() || '0',
-    wallet.currency || '',
+    Number(wallet.virtual_balance ?? 0).toFixed(2),
+    wallet.currency?.code || '',
     wallet.status === 'active' ? t('wallets.status.active') : t('wallets.status.inactive'),
   ])
 

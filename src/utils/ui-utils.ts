@@ -1,23 +1,18 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-// import { useCrudStore } from "@/stores/crud";
 import logo from "@/assets/images/logo.png";
 import icon from "@/assets/images/icon-small.png";
-
-// import facebook from "@/assets/images/facebook-icon.svg";
-// import google from "@/assets/images/google-icon.svg";
-// import breadcrumbImg from "@/assets/images/money.png";
+import authImage from '@/assets/images/auth.jpg'
 import avatarDefault from "@/assets/images/avatar_default.png";
-// import welcomeImg from "@/assets/images/welcome-bg.svg";
 import $ from "jquery";
 
+// Image exports
 export const logoImg = logo;
-// export const facebookImg = facebook;
-// export const googleImg = google;
-// export const breadcrumbImage = breadcrumbImg;
+export const facebookImg = '/images/facebook.png' // Placeholder
+export const googleImg = '/images/google.png' // Placeholder
+export const breadcrumbImage = authImage;
 export const avatarImage = avatarDefault;
 export const iconImage = icon;
-// export const welcomeImage = welcomeImg;
 
 export const hidePreloader = (): void => {
   const preloader = $("#preloader");

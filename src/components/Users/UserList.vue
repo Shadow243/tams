@@ -563,10 +563,11 @@ const editUser = async (user: any) => {
   form.gender = normalizedGender
   form.country_code = user.country_code || ''
   form.branch_id = user.branch_id || null
-  form.role_id =
+  const foundRole =
     user.roles && user.roles.length > 0
-      ? roles.value.find((r) => r.name === user.roles[0])?.id || null
-      : null
+      ? roles.value.find((r) => r.name === user.roles[0])?.id
+      : undefined
+  form.role_id = (foundRole !== undefined ? foundRole : null) as any
   form.password = ''
   form.password_confirmation = ''
   // Convertir les valeurs en booléens - vérifier si les dates existent ET ne sont pas null
@@ -598,7 +599,7 @@ const deleteUser = async (userId: number) => {
     {
       message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
       title: 'Confirmation de suppression',
-      type: 'danger',
+      type: 'warning',
       yes: 'Oui, supprimer',
       no: 'Annuler',
     }
@@ -678,7 +679,7 @@ const handleBulkDelete = async () => {
     {
       message: `Êtes-vous sûr de vouloir supprimer ${count} utilisateur(s) ?`,
       title: 'Confirmation de suppression multiple',
-      type: 'danger',
+      type: 'warning',
       yes: 'Oui, supprimer',
       no: 'Annuler',
     }

@@ -132,7 +132,7 @@
                     "
                     step="0.01"
                     min="0"
-                    :required="localForm.fee_mode !== 'negotiable'"
+                    :required="String(localForm.fee_mode) !== 'negotiable'"
                     :disabled="processing"
                   />
                   <span class="input-group-text" v-if="localForm.fee_mode === 'percentage'">%</span>

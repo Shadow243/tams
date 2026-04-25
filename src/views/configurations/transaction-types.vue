@@ -61,6 +61,14 @@ const formData = reactive<TransactionTypeFormData>({
   code: '',
   name: '',
   description: '',
+  branch_effect: 'none',
+  branch_amount: 'gross',
+  wallet_effect: 'none',
+  wallet_amount: 'gross',
+  dest_wallet_effect: 'none',
+  dest_wallet_amount: 'gross',
+  dest_branch_effect: 'none',
+  dest_branch_amount: 'gross',
 })
 
 const meta = computed(() => store.transactionTypes?.meta || null)
@@ -74,6 +82,14 @@ const handleAddTransactionType = () => {
   formData.code = ''
   formData.name = ''
   formData.description = ''
+  formData.branch_effect = 'none'
+  formData.branch_amount = 'gross'
+  formData.wallet_effect = 'none'
+  formData.wallet_amount = 'gross'
+  formData.dest_wallet_effect = 'none'
+  formData.dest_wallet_amount = 'gross'
+  formData.dest_branch_effect = 'none'
+  formData.dest_branch_amount = 'gross'
   store.setCurrentTransactionType(null)
   showModal.value = true
 }
@@ -83,6 +99,14 @@ const handleEditTransactionType = (transactionType: any) => {
   formData.code = transactionType.code
   formData.name = transactionType.name
   formData.description = transactionType.description || ''
+  formData.branch_effect = transactionType.branch_effect ?? 'none'
+  formData.branch_amount = transactionType.branch_amount ?? 'gross'
+  formData.wallet_effect = transactionType.wallet_effect ?? 'none'
+  formData.wallet_amount = transactionType.wallet_amount ?? 'gross'
+  formData.dest_wallet_effect = transactionType.dest_wallet_effect ?? 'none'
+  formData.dest_wallet_amount = transactionType.dest_wallet_amount ?? 'gross'
+  formData.dest_branch_effect = transactionType.dest_branch_effect ?? 'none'
+  formData.dest_branch_amount = transactionType.dest_branch_amount ?? 'gross'
   store.setCurrentTransactionType(transactionType)
   showModal.value = true
 }

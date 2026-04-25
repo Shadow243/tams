@@ -3,10 +3,14 @@ import { useUserSettings } from '@/composables/useUserSettings'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/fr'
+import 'dayjs/locale/en'
 
-// Extend dayjs with timezone support
+// Extend dayjs with plugins
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.extend(relativeTime)
 
 /**
  * Format a date according to user settings
@@ -78,7 +82,7 @@ export function formatDateRelative(date: Date | string | number | null | undefin
   const locale = settings.value.language === 'en' ? 'en' : 'fr'
   
   try {
-    return dayjs(date).locale(locale).fromNow()
+    return (dayjs(date).locale(locale) as any).fromNow()
   } catch (error) {
     return formatDate(date)
   }

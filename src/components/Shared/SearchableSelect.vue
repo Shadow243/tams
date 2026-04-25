@@ -175,6 +175,16 @@ watch(
   { immediate: true }
 )
 
+// Re-evaluate label when options load asynchronously (e.g. currencies fetched after modal opens)
+watch(
+  () => props.options,
+  () => {
+    if (props.modelValue && selectedOption.value) {
+      searchQuery.value = getOptionLabel(selectedOption.value)
+    }
+  }
+)
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })

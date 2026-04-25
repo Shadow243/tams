@@ -44,6 +44,46 @@ export interface BranchesResponse {
     total: number;
 }
 
+export interface BranchBalanceReportItem {
+    currency_code: string
+    currency_name?: string
+    currency_symbol?: string
+    cash_balance: number
+}
+
+export interface BranchBalanceReport {
+    id: number
+    name: string
+    code: string
+    status: string
+    balances: BranchBalanceReportItem[]
+}
+
+export interface WalletBalanceReport {
+    id: number
+    wallet_number: string
+    operator_name?: string
+    branch_name?: string
+    currency_code?: string
+    currency_symbol?: string
+    balance: number
+    virtual_balance: number
+    status: string
+}
+
+export interface BalanceSummaryItem {
+    currency_code: string
+    currency_symbol?: string
+    total_branch_cash: number
+    total_wallet_virtual: number
+}
+
+export interface BalanceReport {
+    branches: BranchBalanceReport[]
+    wallets: WalletBalanceReport[]
+    summary: BalanceSummaryItem[]
+}
+
 export interface BranchFormData {
     code: string;
     name: string;

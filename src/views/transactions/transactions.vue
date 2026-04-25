@@ -10,7 +10,7 @@
         </div>
 
         <div class="text-end mt-3 mt-sm-0">
-          <button @click.prevent="handleAddTransaction" type="button" class="btn btn-primary me-2">
+          <button v-if="canCreateTransaction" @click.prevent="handleAddTransaction" type="button" class="btn btn-primary me-2">
             <i class="ti ti-plus me-1"></i> {{ t('transactions.add_transaction') }}
           </button>
           <button @click.prevent="handleShowStatistics" type="button" class="btn btn-info">
@@ -209,6 +209,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useHead } from '@vueuse/head'
+import { usePermissions } from '@/composables/usePermissions'
 import { useTransactionStore } from '@/stores/transactions'
 import { useTransactionTypeStore } from '@/stores/transaction-types'
 import { useBranchStore } from '@/stores/branches'
@@ -224,6 +225,7 @@ import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
+const { canCreateTransaction, canEditTransaction } = usePermissions()
 
 useHead({
   title: t('transactions.page_title'),
@@ -256,6 +258,7 @@ const formData = ref<TransactionFormData>({
   customer_id: null,
   wallet_id: null,
   customer_phone: null,
+  currency_code: 'CDF',
   gross_amount: null,
   fee_amount: null,
   fee_mode_applied: null,
@@ -292,6 +295,7 @@ const handleAddTransaction = () => {
     customer_id: null,
     wallet_id: null,
     customer_phone: null,
+    currency_code: 'CDF',
     gross_amount: null,
     fee_amount: null,
     fee_mode_applied: null,
@@ -314,6 +318,7 @@ const handleEditTransaction = (transaction: Transaction) => {
     customer_id: transaction.customer_id,
     wallet_id: transaction.wallet_id,
     customer_phone: transaction.customer_phone,
+    currency_code: transaction.currency_code ?? 'CDF',
     gross_amount: transaction.gross_amount,
     fee_amount: transaction.fee_amount,
     fee_mode_applied: transaction.fee_mode_applied,

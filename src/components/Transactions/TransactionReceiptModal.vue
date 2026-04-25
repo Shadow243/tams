@@ -19,7 +19,7 @@
           <div id="receipt-content" ref="receiptContent" class="receipt-container p-4">
             <!-- Header -->
             <div class="text-center mb-4 border-bottom pb-3">
-              <h3 class="fw-bold mb-1">{{ appConfig.name }}</h3>
+              <h3 class="fw-bold mb-1">{{ appConfig.appName }}</h3>
               <p class="text-muted mb-0 small">
                 {{ t('transactions.transaction_receipt') || 'REÇU DE TRANSACTION' }}
               </p>

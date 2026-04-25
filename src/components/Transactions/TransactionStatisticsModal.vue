@@ -265,8 +265,8 @@ onMounted(async () => {
     selectedCurrency.value = currencyStore.defaultCurrency.id
     selectedCurrencyCode.value = currencyStore.defaultCurrency.code
   } else if (currencyStore.activeCurrencies.length > 0) {
-    selectedCurrency.value = currencyStore.activeCurrencies[0].id
-    selectedCurrencyCode.value = currencyStore.activeCurrencies[0].code
+    selectedCurrency.value = currencyStore.activeCurrencies[0]!.id
+    selectedCurrencyCode.value = currencyStore.activeCurrencies[0]!.code
   }
 })
 
@@ -277,10 +277,10 @@ watch(
     if (isShown) {
       if (!customStartDate.value) {
         const today = new Date()
-        customEndDate.value = today.toISOString().split('T')[0]
+        customEndDate.value = today.toISOString().split('T')[0]!
         const weekAgo = new Date(today)
         weekAgo.setDate(weekAgo.getDate() - 7)
-        customStartDate.value = weekAgo.toISOString().split('T')[0]
+        customStartDate.value = weekAgo.toISOString().split('T')[0]!
       }
 
       // Set default currency if not already set
@@ -289,8 +289,8 @@ watch(
           selectedCurrency.value = currencyStore.defaultCurrency.id
           selectedCurrencyCode.value = currencyStore.defaultCurrency.code
         } else if (currencyStore.activeCurrencies.length > 0) {
-          selectedCurrency.value = currencyStore.activeCurrencies[0].id
-          selectedCurrencyCode.value = currencyStore.activeCurrencies[0].code
+          selectedCurrency.value = currencyStore.activeCurrencies[0]!.id
+          selectedCurrencyCode.value = currencyStore.activeCurrencies[0]!.code
         }
       }
     }
