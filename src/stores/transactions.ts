@@ -258,14 +258,14 @@ export const useTransactionStore = defineStore('transaction', () => {
     currentTransaction.value = transaction
   }
 
-  async function fetchDashboardStatistics(dashboardFilters?: Partial<DashboardFilters>) {
+  async function fetchDashboardStatistics(dashboardFilters?: Partial<DashboardFilters>, silent = false) {
     // Cancel any in-flight dashboard request
     if (dashboardAbortController) {
       dashboardAbortController.abort()
     }
     dashboardAbortController = new AbortController()
 
-    loadingDashboard.value = true
+    if (!silent) loadingDashboard.value = true
     try {
       const params: Record<string, string | number> = {}
 
@@ -307,7 +307,7 @@ export const useTransactionStore = defineStore('transaction', () => {
       }
       throw error
     } finally {
-      loadingDashboard.value = false
+      if (!silent) loadingDashboard.value = false
     }
   }
 

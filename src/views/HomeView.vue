@@ -1017,11 +1017,14 @@ import { useTransactionStore } from '@/stores/transactions'
 import { useTransactionTypeStore } from '@/stores/transaction-types'
 import { useBranchStore } from '@/stores/branches'
 import { useCurrencyStore } from '@/stores/currencies'
+import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/composables/useI18n'
 import { useBalanceReport } from '@/composables/useBalanceReport'
+import { echo } from '@/plugins/echo'
 import type { DashboardFilters, DashboardStatistics } from '@/types'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 useHead({ title: t('dashboard.title') || 'Tableau de bord' })
 
@@ -1110,6 +1113,21 @@ async function loadDashboard() {
     currency_id: filters.value.currency_id ?? undefined,
     transaction_type_id: filters.value.transaction_type_id ?? undefined,
   })
+}
+
+// Silent version for real-time updates (no loader shown)
+async function loadDashboardSilent() {
+  const { start, end } = getDateRange(filters.value.period)
+  await store.fetchDashboardStatistics(
+    {
+      start_date: start ?? undefined,
+      end_date: end ?? undefined,
+      branch_id: filters.value.branch_id ?? undefined,
+      currency_id: filters.value.currency_id ?? undefined,
+      transaction_type_id: filters.value.transaction_type_id ?? undefined,
+    },
+    true
+  ) // silent = true
 }
 
 // Debounced wrapper — prevents burst API calls when filters change rapidly
@@ -1445,6 +1463,9 @@ function formatBalanceAmount(n: number, symbol?: string) {
   return symbol ? `${formatted} ${symbol}` : formatted
 }
 
+// ── Real-time updates ─────────────────────────────────────────────────────────
+let echoChannel: ReturnType<typeof echo.private> | null = null
+
 onMounted(async () => {
   await Promise.all([
     branchStore.fetchBranches(1, undefined, 100),
@@ -1453,6 +1474,43 @@ onMounted(async () => {
     loadDashboard(),
     fetchBalanceReport(),
   ])
+
+  // Listen for balance update notifications in real-time
+  const userId = authStore.user?.id
+  if (userId) {
+    echoChannel = echo.private(`App.Models.User.${userId}`)
+
+    echoChannel.notification((payload: Record<string, unknown>) => {
+      const notifType = payload.notification_type as string
+
+      // Refresh balance report when branch or wallet balances are updated
+      if (notifType === 'branch_balance_updated' || notifType === 'wallet_balance_updated') {
+        console.log('🔄 Balance updated in real-time, refreshing report...')
+        fetchBalanceReport(true) // silent refresh
+      }
+
+      // Refresh dashboard statistics when transactions change
+      if (
+        notifType === 'transaction_created' ||
+        notifType === 'transaction_completed' ||
+        notifType === 'transaction_cancelled' ||
+        notifType === 'transaction_available' ||
+        notifType === 'transaction_failed' ||
+        notifType === 'transaction_expired'
+      ) {
+        console.log('🔄 Transaction updated in real-time, refreshing dashboard...')
+        loadDashboardSilent() // silent refresh
+        fetchBalanceReport(true) // silent refresh for pending impact
+      }
+    })
+  }
+})
+
+onUnmounted(() => {
+  if (echoChannel) {
+    echoChannel.stopListening('.notification')
+    echoChannel = null
+  }
 })
 </script>
 

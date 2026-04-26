@@ -7,15 +7,15 @@ export function useBalanceReport() {
   const report = ref<BalanceReport | null>(null)
   const loading = ref(false)
 
-  async function fetchReport() {
-    loading.value = true
+  async function fetchReport(silent = false) {
+    if (!silent) loading.value = true
     try {
       const { data } = await axiosInstance.get(`${appConfig.apiUrl}/reports/balances`)
       report.value = data
     } catch (e) {
       console.error(e)
     } finally {
-      loading.value = false
+      if (!silent) loading.value = false
     }
   }
 
