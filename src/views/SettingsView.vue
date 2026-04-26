@@ -574,6 +574,7 @@
                         </div>
                         <button
                           v-if="session.id !== currentSessionId"
+                          type="button"
                           class="btn btn-sm btn-outline-danger"
                           @click="revokeSession(session.id)"
                         >
@@ -586,6 +587,7 @@
                         sessions.length > 1 ||
                         (sessions.length === 1 && sessions[0]?.id !== currentSessionId)
                       "
+                      type="button"
                       class="btn btn-sm btn-outline-warning"
                       @click="revokeOtherSessions"
                     >
