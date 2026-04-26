@@ -624,7 +624,7 @@
           </p>
         </div>
         <button
-          @click="fetchBalanceReport"
+          @click="handleRefreshBalance"
           class="btn btn-sm btn-outline-secondary"
           :disabled="loadingBalances"
         >
@@ -1035,8 +1035,14 @@ const currencyStore = useCurrencyStore()
 const {
   report: balanceReport,
   loading: loadingBalances,
-  fetchReport: fetchBalanceReport,
+  fetchReport: _fetchBalanceReport,
 } = useBalanceReport()
+
+// Typed wrapper — avoids TS2345 caused by vue-tsc inferring (silent?: boolean) on @click
+function fetchBalanceReport(silent = false) {
+  return _fetchBalanceReport(silent)
+}
+const handleRefreshBalance = () => fetchBalanceReport()
 
 // ── Filters ──────────────────────────────────────────────────────────────────
 const filters = ref<DashboardFilters>({
@@ -1117,17 +1123,21 @@ async function loadDashboard() {
 
 // Silent version for real-time updates (no loader shown)
 async function loadDashboardSilent() {
-  const { start, end } = getDateRange(filters.value.period)
-  await store.fetchDashboardStatistics(
-    {
-      start_date: start ?? undefined,
-      end_date: end ?? undefined,
-      branch_id: filters.value.branch_id ?? undefined,
-      currency_id: filters.value.currency_id ?? undefined,
-      transaction_type_id: filters.value.transaction_type_id ?? undefined,
-    },
-    true
-  ) // silent = true
+  try {
+    const { start, end } = getDateRange(filters.value.period)
+    await store.fetchDashboardStatistics(
+      {
+        start_date: start ?? undefined,
+        end_date: end ?? undefined,
+        branch_id: filters.value.branch_id ?? undefined,
+        currency_id: filters.value.currency_id ?? undefined,
+        transaction_type_id: filters.value.transaction_type_id ?? undefined,
+      },
+      true, // silent = true
+    )
+  } catch (e) {
+    console.warn('[realtime] dashboard silent refresh failed:', e)
+  }
 }
 
 // Debounced wrapper — prevents burst API calls when filters change rapidly
@@ -1483,24 +1493,20 @@ onMounted(async () => {
     echoChannel.notification((payload: Record<string, unknown>) => {
       const notifType = payload.notification_type as string
 
-      // Refresh balance report when branch or wallet balances are updated
-      if (notifType === 'branch_balance_updated' || notifType === 'wallet_balance_updated') {
-        console.log('🔄 Balance updated in real-time, refreshing report...')
-        fetchBalanceReport(true) // silent refresh
-      }
-
-      // Refresh dashboard statistics when transactions change
-      if (
+      const isBalanceEvent =
+        notifType === 'branch_balance_updated' || notifType === 'wallet_balance_updated'
+      const isTransactionEvent =
         notifType === 'transaction_created' ||
         notifType === 'transaction_completed' ||
         notifType === 'transaction_cancelled' ||
         notifType === 'transaction_available' ||
         notifType === 'transaction_failed' ||
         notifType === 'transaction_expired'
-      ) {
-        console.log('🔄 Transaction updated in real-time, refreshing dashboard...')
-        loadDashboardSilent() // silent refresh
-        fetchBalanceReport(true) // silent refresh for pending impact
+
+      if (isBalanceEvent || isTransactionEvent) {
+        // Always refresh both: KPI stats + balance report
+        loadDashboardSilent()
+        fetchBalanceReport(true)
       }
     })
   }
