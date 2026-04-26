@@ -48,7 +48,9 @@ export interface BranchBalanceReportItem {
     currency_code: string
     currency_name?: string
     currency_symbol?: string
-    cash_balance: number
+    balance_confirmed: number
+    balance_pending: number
+    balance_projected: number
 }
 
 export interface BranchBalanceReport {
@@ -66,22 +68,31 @@ export interface WalletBalanceReport {
     branch_name?: string
     currency_code?: string
     currency_symbol?: string
-    balance: number
-    virtual_balance: number
+    balance_confirmed: number
+    balance_pending: number
+    balance_projected: number
     status: string
 }
 
 export interface BalanceSummaryItem {
     currency_code: string
     currency_symbol?: string
-    total_branch_cash: number
-    total_wallet_virtual: number
+    total_branch_confirmed: number
+    total_branch_pending: number
+    total_branch_projected: number
+    total_wallet_confirmed: number
+    total_wallet_pending: number
+    total_wallet_projected: number
+    total_system_confirmed: number
+    total_system_pending: number
+    total_system_projected: number
 }
 
 export interface BalanceReport {
     branches: BranchBalanceReport[]
     wallets: WalletBalanceReport[]
     summary: BalanceSummaryItem[]
+    pending_transactions_count: number
 }
 
 export interface BranchFormData {

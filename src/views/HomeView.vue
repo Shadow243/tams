@@ -662,40 +662,144 @@
       </template>
 
       <!-- Summary cards by currency (only currencies with non-zero balances) -->
-      <div v-if="!loadingBalances && balanceReport?.summary.length" class="row g-3 mb-3">
-        <div
-          v-for="item in balanceReport.summary.filter(
-            (s) => s.total_branch_cash > 0 || s.total_wallet_virtual > 0
-          )"
-          :key="item.currency_code"
-          class="col-md-6 col-xl-3"
-        >
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-3">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="badge bg-primary-subtle text-primary fw-semibold fs-6">
-                  {{ item.currency_code }}
-                </span>
-                <i class="ti ti-currency-dollar text-muted fs-5"></i>
+      <div v-if="!loadingBalances && balanceReport?.summary.length">
+        <!-- Section header -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="mb-0 fw-semibold">
+            <i class="ti ti-chart-pie me-2 text-primary"></i>
+            {{ t('dashboard.system_totals') || 'Totaux Système' }}
+          </h5>
+          <span class="badge bg-light text-dark border">
+            {{ t('dashboard.all_branches') || 'Toutes les branches' }}
+          </span>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div
+            v-for="item in balanceReport.summary.filter(
+              (s) => s.total_system_confirmed > 0 || s.total_system_pending !== 0
+            )"
+            :key="item.currency_code"
+            class="col-md-6 col-xl-4"
+          >
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="badge bg-primary-subtle text-primary fw-semibold fs-6">
+                    {{ item.currency_code }}
+                  </span>
+                  <i class="ti ti-currency-dollar text-muted fs-5"></i>
+                </div>
+
+                <!-- Branch totals -->
+                <div class="mb-3 pb-2 border-bottom">
+                  <div class="text-muted small mb-1">
+                    <i class="ti ti-building-bank me-1"></i>
+                    {{ t('dashboard.total_branch_cash') || 'Cash agences' }}
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">Confirmé:</span>
+                    <span class="fw-semibold text-success">
+                      {{ formatBalanceAmount(item.total_branch_confirmed, item.currency_symbol) }}
+                    </span>
+                  </div>
+                  <div
+                    v-if="item.total_branch_pending !== 0"
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <span class="small text-muted">En attente:</span>
+                    <span
+                      class="fw-semibold"
+                      :class="item.total_branch_pending >= 0 ? 'text-info' : 'text-warning'"
+                    >
+                      {{ formatBalanceAmount(item.total_branch_pending, item.currency_symbol) }}
+                    </span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between align-items-center mt-1 pt-1 border-top"
+                  >
+                    <span class="small fw-medium">Projeté:</span>
+                    <span class="fw-bold text-primary">
+                      {{ formatBalanceAmount(item.total_branch_projected, item.currency_symbol) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Wallet totals -->
+                <div class="mb-3 pb-2 border-bottom">
+                  <div class="text-muted small mb-1">
+                    <i class="ti ti-wallet me-1"></i>
+                    {{ t('dashboard.total_wallet_virtual') || 'Virtuel wallets' }}
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">Confirmé:</span>
+                    <span class="fw-semibold text-info">
+                      {{ formatBalanceAmount(item.total_wallet_confirmed, item.currency_symbol) }}
+                    </span>
+                  </div>
+                  <div
+                    v-if="item.total_wallet_pending !== 0"
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <span class="small text-muted">En attente:</span>
+                    <span
+                      class="fw-semibold"
+                      :class="item.total_wallet_pending >= 0 ? 'text-info' : 'text-warning'"
+                    >
+                      {{ formatBalanceAmount(item.total_wallet_pending, item.currency_symbol) }}
+                    </span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between align-items-center mt-1 pt-1 border-top"
+                  >
+                    <span class="small fw-medium">Projeté:</span>
+                    <span class="fw-bold text-primary">
+                      {{ formatBalanceAmount(item.total_wallet_projected, item.currency_symbol) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- System total (branches + wallets) -->
+                <div class="bg-light rounded p-2">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                    :class="item.total_system_pending !== 0 ? 'mb-1' : 'mb-0'"
+                  >
+                    <span class="small fw-bold text-dark">
+                      <i class="ti ti-sum me-1"></i>
+                      Total Système:
+                    </span>
+                    <span class="fw-bold fs-5 text-dark">
+                      {{ formatBalanceAmount(item.total_system_confirmed, item.currency_symbol) }}
+                    </span>
+                  </div>
+                  <div
+                    v-if="item.total_system_pending !== 0"
+                    class="d-flex justify-content-between align-items-center mb-0"
+                  >
+                    <span class="small text-muted">Avec en attente:</span>
+                    <span class="fw-bold text-success">
+                      {{ formatBalanceAmount(item.total_system_projected, item.currency_symbol) }}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div class="mb-2">
-                <div class="text-muted small mb-1">
-                  <i class="ti ti-building-bank me-1"></i>
-                  {{ t('dashboard.total_branch_cash') || 'Cash agences' }}
-                </div>
-                <div class="fw-bold fs-5 text-success">
-                  {{ formatBalanceAmount(item.total_branch_cash, item.currency_symbol) }}
-                </div>
-              </div>
-              <div>
-                <div class="text-muted small mb-1">
-                  <i class="ti ti-wallet me-1"></i>
-                  {{ t('dashboard.total_wallet_virtual') || 'Virtuel wallets' }}
-                </div>
-                <div class="fw-bold fs-5 text-info">
-                  {{ formatBalanceAmount(item.total_wallet_virtual, item.currency_symbol) }}
-                </div>
-              </div>
+            </div>
+          </div>
+
+          <!-- Pending transactions indicator -->
+          <div v-if="balanceReport.pending_transactions_count > 0" class="col-12">
+            <div class="alert alert-info d-flex align-items-center mb-0">
+              <i class="ti ti-clock me-2"></i>
+              <span>
+                <strong>{{ balanceReport.pending_transactions_count }}</strong>
+                {{
+                  balanceReport.pending_transactions_count === 1
+                    ? 'transaction en attente'
+                    : 'transactions en attente'
+                }}
+                — Les montants projetés incluent l'impact de ces transactions.
+              </span>
             </div>
           </div>
         </div>
@@ -733,15 +837,15 @@
                     <tr>
                       <th class="ps-3">{{ t('dashboard.branch') || 'Agence' }}</th>
                       <th>{{ t('dashboard.currency') || 'Devise' }}</th>
-                      <th class="text-end pe-3">
-                        {{ t('dashboard.cash_balance') || 'Solde Cash' }}
-                      </th>
+                      <th class="text-end">{{ t('dashboard.confirmed') || 'Confirmé' }}</th>
+                      <th class="text-end">{{ t('dashboard.pending') || 'En attente' }}</th>
+                      <th class="text-end pe-3">{{ t('dashboard.projected') || 'Projeté' }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <template v-for="branch in balanceReport.branches" :key="branch.id">
                       <tr v-if="!branch.balances.length">
-                        <td class="ps-3 text-muted small" colspan="3">
+                        <td class="ps-3 text-muted small" colspan="5">
                           {{ branch.name }}
                           <span class="ms-2 text-muted fst-italic">— aucun solde</span>
                         </td>
@@ -760,10 +864,28 @@
                           }}</span>
                         </td>
                         <td
-                          class="text-end pe-3 fw-semibold"
-                          :class="bal.cash_balance > 0 ? 'text-success' : 'text-muted'"
+                          class="text-end fw-semibold"
+                          :class="bal.balance_confirmed > 0 ? 'text-success' : 'text-muted'"
                         >
-                          {{ formatBalanceAmount(bal.cash_balance, bal.currency_symbol) }}
+                          {{ formatBalanceAmount(bal.balance_confirmed, bal.currency_symbol) }}
+                        </td>
+                        <td
+                          class="text-end fw-semibold"
+                          :class="
+                            bal.balance_pending > 0
+                              ? 'text-info'
+                              : bal.balance_pending < 0
+                              ? 'text-warning'
+                              : 'text-muted'
+                          "
+                        >
+                          {{ formatBalanceAmount(bal.balance_pending, bal.currency_symbol) }}
+                        </td>
+                        <td
+                          class="text-end pe-3 fw-bold"
+                          :class="bal.balance_projected > 0 ? 'text-primary' : 'text-muted'"
+                        >
+                          {{ formatBalanceAmount(bal.balance_projected, bal.currency_symbol) }}
                         </td>
                       </tr>
                     </template>
@@ -799,9 +921,9 @@
                     <tr>
                       <th class="ps-3">{{ t('dashboard.wallet') || 'Numéro' }}</th>
                       <th>{{ t('dashboard.operator') || 'Opérateur' }}</th>
-                      <th class="text-end pe-3">
-                        {{ t('dashboard.virtual_balance') || 'Solde Virtuel' }}
-                      </th>
+                      <th class="text-end">{{ t('dashboard.confirmed') || 'Confirmé' }}</th>
+                      <th class="text-end">{{ t('dashboard.pending') || 'En attente' }}</th>
+                      <th class="text-end pe-3">{{ t('dashboard.projected') || 'Projeté' }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -816,16 +938,42 @@
                         <span class="badge bg-primary-subtle text-primary small">
                           {{ wallet.operator_name || '—' }}
                         </span>
+                        <div class="text-muted" style="font-size: 0.7rem">
+                          {{ wallet.currency_code }}
+                        </div>
+                      </td>
+                      <td class="text-end">
+                        <div
+                          class="fw-semibold"
+                          :class="wallet.balance_confirmed > 0 ? 'text-success' : 'text-muted'"
+                        >
+                          {{
+                            formatBalanceAmount(wallet.balance_confirmed, wallet.currency_symbol)
+                          }}
+                        </div>
+                      </td>
+                      <td class="text-end">
+                        <div
+                          class="fw-semibold"
+                          :class="
+                            wallet.balance_pending > 0
+                              ? 'text-info'
+                              : wallet.balance_pending < 0
+                              ? 'text-warning'
+                              : 'text-muted'
+                          "
+                        >
+                          {{ formatBalanceAmount(wallet.balance_pending, wallet.currency_symbol) }}
+                        </div>
                       </td>
                       <td class="text-end pe-3">
                         <div
-                          class="fw-semibold"
-                          :class="wallet.virtual_balance > 0 ? 'text-info' : 'text-muted'"
+                          class="fw-bold"
+                          :class="wallet.balance_projected > 0 ? 'text-primary' : 'text-muted'"
                         >
-                          {{ formatBalanceAmount(wallet.virtual_balance, wallet.currency_symbol) }}
-                        </div>
-                        <div class="text-muted" style="font-size: 0.7rem">
-                          {{ wallet.currency_code }}
+                          {{
+                            formatBalanceAmount(wallet.balance_projected, wallet.currency_symbol)
+                          }}
                         </div>
                       </td>
                     </tr>
