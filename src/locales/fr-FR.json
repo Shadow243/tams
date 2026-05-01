@@ -82,7 +82,13 @@
     "showing": "Affichage de",
     "to": "à",
     "of": "sur",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "reset": "Réinitialiser",
+    "save_changes": "Enregistrer",
+    "never": "Jamais",
+    "minutes": "minutes",
+    "minute": "minute",
+    "hour": "heure"
   },
   "users": {
     "page_title": "Gestion des Utilisateurs",
@@ -562,7 +568,6 @@
     "page_description": "Gérer toutes les transactions, créer et suivre les opérations",
     "add_transaction": "Nouvelle Transaction",
     "edit_transaction": "Modifier la Transaction",
-    "transaction_details": "Détails de la Transaction",
     "statistics": "Statistiques",
     "search_placeholder": "Rechercher par référence, téléphone, code...",
     "all_types": "Tous les types",
@@ -751,6 +756,7 @@
   },
   "settings": {
     "pageTitle": "Paramètres",
+    "page_description": "Gérer vos préférences, notifications et paramètres de sécurité",
     "tabs": {
       "display": "Affichage",
       "regional": "Régional",
@@ -798,6 +804,9 @@
         "title": "Demander le mot de passe pour les actions sensibles",
         "description": "Vous devrez confirmer votre identité pour les opérations sensibles"
       },
+      "saveButton": "Enregistrer les Paramètres de Sécurité",
+      "saved": "Paramètres de sécurité enregistrés",
+      "title": "Paramètres de sécurité",
       "sessions": {
         "title": "Sessions Actives",
         "description": "Gérez vos sessions actives à travers différents appareils",
@@ -813,10 +822,70 @@
         "revokeOthersWarning": "Tous les autres appareils seront déconnectés.",
         "sessionRevoked": "Session révoquée",
         "sessionsRevoked": "Toutes les autres sessions ont été révoquées",
-        "failedToLoad": "Échec du chargement des sessions actives"
-      },
-      "saveButton": "Enregistrer les Paramètres de Sécurité",
-      "saved": "Paramètres de sécurité enregistrés"
+        "failedToLoad": "Échec du chargement des sessions actives",
+        "loading": "Chargement des sessions...",
+        "browserSession": "Session navigateur",
+        "created": "Créée le :",
+        "lastUsed": "Dernière utilisation :",
+        "currentDevice": "Cet appareil",
+        "revokeBtn": "Révoquer",
+        "revokeAllOthers": "Révoquer toutes les autres sessions",
+        "cannotLoad": "Impossible de charger les sessions. Veuillez rafraîchir la page."
+      }
+    },
+    "display": {
+      "title": "Préférences d'affichage",
+      "theme_mode": "Mode d'affichage",
+      "theme_light": "Clair",
+      "theme_light_desc": "Thème lumineux",
+      "theme_dark": "Sombre",
+      "theme_dark_desc": "Thème sombre",
+      "theme_system": "Système",
+      "theme_system_desc": "Détection automatique",
+      "items_per_page": "Éléments par page",
+      "items_per_page_hint": "Nombre d'éléments à afficher par page dans les tableaux",
+      "text_size": "Taille du texte",
+      "text_small": "Petit",
+      "text_medium": "Moyen",
+      "text_large": "Grand",
+      "monochrome": "Mode Monochrome",
+      "monochrome_desc": "Affichage en noir et blanc à fort contraste"
+    },
+    "regional": {
+      "title": "Préférences régionales",
+      "language": "Langue",
+      "timezone": "Fuseau horaire",
+      "date_format": "Format de date",
+      "currency_position": "Position du symbole monétaire",
+      "currency_before": "$100.00 (Avant)",
+      "currency_after": "100.00$ (Après)",
+      "thousand_separator": "Séparateur de milliers",
+      "sep_comma": "Virgule (1,000,000)",
+      "sep_period": "Point (1.000.000)",
+      "sep_space": "Espace (1 000 000)"
+    },
+    "notifications": {
+      "title": "Notifications & Alertes",
+      "email_title": "Notifications par email",
+      "transaction_notif": "Notifications de transactions",
+      "validation_requests": "Demandes de validation",
+      "daily_reports": "Rapports quotidiens",
+      "push_title": "Notifications push",
+      "alerts_title": "Alertes de transactions",
+      "large_tx_alert": "Alerte pour les grandes transactions",
+      "alert_threshold": "Montant seuil d'alerte",
+      "alert_threshold_hint": "Vous recevrez une alerte pour les transactions dépassant ce montant"
+    },
+    "tx": {
+      "title": "Paramètres des transactions",
+      "default_currency": "Devise par défaut",
+      "default_branch": "Agence par défaut",
+      "no_branch": "Aucune (sélectionner à chaque fois)",
+      "default_branch_hint": "Cette agence sera pré-sélectionnée lors de la création de transactions",
+      "auto_print": "Impression automatique des reçus",
+      "auto_print_desc": "Ouvrir automatiquement le dialogue d'impression après une transaction",
+      "receipt_format": "Format du reçu",
+      "receipt_language": "Langue du reçu"
     }
   }
 }

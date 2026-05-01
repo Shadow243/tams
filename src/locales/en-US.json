@@ -82,7 +82,13 @@
     "showing": "Showing",
     "to": "to",
     "of": "of",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "reset": "Reset",
+    "save_changes": "Save Changes",
+    "never": "Never",
+    "minutes": "minutes",
+    "minute": "minute",
+    "hour": "hour"
   },
   "users": {
     "page_title": "Users Management",
@@ -564,7 +570,6 @@
     "page_description": "Manage all transactions, create and track operations",
     "add_transaction": "New Transaction",
     "edit_transaction": "Edit Transaction",
-    "transaction_details": "Transaction Details",
     "statistics": "Statistics",
     "search_placeholder": "Search by reference, phone, code...",
     "all_types": "All types",
@@ -753,6 +758,7 @@
   },
   "settings": {
     "pageTitle": "Settings",
+    "page_description": "Manage your preferences, notifications, and security settings",
     "tabs": {
       "display": "Display",
       "regional": "Regional",
@@ -800,6 +806,9 @@
         "title": "Require password for sensitive actions",
         "description": "You'll need to confirm your identity for sensitive operations"
       },
+      "saveButton": "Save Security Settings",
+      "saved": "Security settings saved",
+      "title": "Security Settings",
       "sessions": {
         "title": "Active Sessions",
         "description": "Manage your active sessions across different devices",
@@ -815,10 +824,70 @@
         "revokeOthersWarning": "All other devices will be logged out.",
         "sessionRevoked": "Session revoked",
         "sessionsRevoked": "All other sessions have been revoked",
-        "failedToLoad": "Failed to load active sessions"
-      },
-      "saveButton": "Save Security Settings",
-      "saved": "Security settings saved"
+        "failedToLoad": "Failed to load active sessions",
+        "loading": "Loading sessions...",
+        "browserSession": "Browser Session",
+        "created": "Created:",
+        "lastUsed": "Last used:",
+        "currentDevice": "Current Device",
+        "revokeBtn": "Revoke",
+        "revokeAllOthers": "Revoke all other sessions",
+        "cannotLoad": "Unable to load sessions. Please refresh the page."
+      }
+    },
+    "display": {
+      "title": "Display Preferences",
+      "theme_mode": "Theme Mode",
+      "theme_light": "Light",
+      "theme_light_desc": "Bright theme",
+      "theme_dark": "Dark",
+      "theme_dark_desc": "Dark theme",
+      "theme_system": "System",
+      "theme_system_desc": "Auto detect",
+      "items_per_page": "Items per page",
+      "items_per_page_hint": "Number of items to display per page in tables",
+      "text_size": "Text Size",
+      "text_small": "Small",
+      "text_medium": "Medium",
+      "text_large": "Large",
+      "monochrome": "Monochrome Mode",
+      "monochrome_desc": "High contrast black and white display"
+    },
+    "regional": {
+      "title": "Regional Preferences",
+      "language": "Language",
+      "timezone": "Timezone",
+      "date_format": "Date Format",
+      "currency_position": "Currency Symbol Position",
+      "currency_before": "$100.00 (Before)",
+      "currency_after": "100.00$ (After)",
+      "thousand_separator": "Thousand Separator",
+      "sep_comma": "Comma (1,000,000)",
+      "sep_period": "Period (1.000.000)",
+      "sep_space": "Space (1 000 000)"
+    },
+    "notifications": {
+      "title": "Notifications & Alerts",
+      "email_title": "Email Notifications",
+      "transaction_notif": "Transaction notifications",
+      "validation_requests": "Validation requests",
+      "daily_reports": "Daily reports",
+      "push_title": "Push Notifications",
+      "alerts_title": "Transaction Alerts",
+      "large_tx_alert": "Alert for large transactions",
+      "alert_threshold": "Alert threshold amount",
+      "alert_threshold_hint": "You'll receive an alert for transactions above this amount"
+    },
+    "tx": {
+      "title": "Transaction Settings",
+      "default_currency": "Default Currency",
+      "default_branch": "Default Branch",
+      "no_branch": "None (Select each time)",
+      "default_branch_hint": "This branch will be pre-selected when creating transactions",
+      "auto_print": "Auto-print receipts",
+      "auto_print_desc": "Automatically open print dialog after completing a transaction",
+      "receipt_format": "Receipt Format",
+      "receipt_language": "Receipt Language"
     }
   }
 }

@@ -6,10 +6,10 @@
         <div class="flex-grow-1">
           <h4 class="fs-xl mb-1">
             <i class="ti ti-settings-2 me-2"></i>
-            Account Settings
+            {{ t('sidebar.account_settings') || 'Paramètres du compte' }}
           </h4>
           <p class="text-muted mb-0">
-            Manage your preferences, notifications, and security settings
+            {{ t('settings.page_description') || 'Gérer vos préférences, notifications et paramètres de sécurité' }}
           </p>
         </div>
       </div>
@@ -40,30 +40,23 @@
             <div class="card-body">
               <h5 class="card-title mb-4">
                 <i class="ti ti-palette me-2"></i>
-                Display Preferences
+                {{ t('settings.display.title') }}
               </h5>
 
               <form @submit.prevent="saveDisplaySettings">
                 <!-- Theme Mode -->
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Theme Mode</label>
+                  <label class="form-label fw-semibold">{{ t('settings.display.theme_mode') }}</label>
                   <div class="row g-3">
                     <div class="col-md-4">
                       <div class="form-check card-radio">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="theme"
-                          id="theme-light"
-                          value="light"
-                          v-model="settings.theme"
-                        />
+                        <input class="form-check-input" type="radio" name="theme" id="theme-light" value="light" v-model="settings.theme" />
                         <label class="form-check-label" for="theme-light">
                           <div class="d-flex align-items-center">
                             <i class="ti ti-sun fs-3 me-2"></i>
                             <div>
-                              <div class="fw-semibold">Light</div>
-                              <small class="text-muted">Bright theme</small>
+                              <div class="fw-semibold">{{ t('settings.display.theme_light') }}</div>
+                              <small class="text-muted">{{ t('settings.display.theme_light_desc') }}</small>
                             </div>
                           </div>
                         </label>
@@ -71,20 +64,13 @@
                     </div>
                     <div class="col-md-4">
                       <div class="form-check card-radio">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="theme"
-                          id="theme-dark"
-                          value="dark"
-                          v-model="settings.theme"
-                        />
+                        <input class="form-check-input" type="radio" name="theme" id="theme-dark" value="dark" v-model="settings.theme" />
                         <label class="form-check-label" for="theme-dark">
                           <div class="d-flex align-items-center">
                             <i class="ti ti-moon fs-3 me-2"></i>
                             <div>
-                              <div class="fw-semibold">Dark</div>
-                              <small class="text-muted">Dark theme</small>
+                              <div class="fw-semibold">{{ t('settings.display.theme_dark') }}</div>
+                              <small class="text-muted">{{ t('settings.display.theme_dark_desc') }}</small>
                             </div>
                           </div>
                         </label>
@@ -92,20 +78,13 @@
                     </div>
                     <div class="col-md-4">
                       <div class="form-check card-radio">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="theme"
-                          id="theme-system"
-                          value="system"
-                          v-model="settings.theme"
-                        />
+                        <input class="form-check-input" type="radio" name="theme" id="theme-system" value="system" v-model="settings.theme" />
                         <label class="form-check-label" for="theme-system">
                           <div class="d-flex align-items-center">
                             <i class="ti ti-sun-moon fs-3 me-2"></i>
                             <div>
-                              <div class="fw-semibold">System</div>
-                              <small class="text-muted">Auto detect</small>
+                              <div class="fw-semibold">{{ t('settings.display.theme_system') }}</div>
+                              <small class="text-muted">{{ t('settings.display.theme_system_desc') }}</small>
                             </div>
                           </div>
                         </label>
@@ -116,76 +95,46 @@
 
                 <!-- Pagination -->
                 <div class="mb-4">
-                  <label for="items-per-page" class="form-label fw-semibold">Items per page</label>
+                  <label for="items-per-page" class="form-label fw-semibold">{{ t('settings.display.items_per_page') }}</label>
                   <select id="items-per-page" class="form-select" v-model="settings.itemsPerPage">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
                   </select>
-                  <div class="form-text">Number of items to display per page in tables</div>
+                  <div class="form-text">{{ t('settings.display.items_per_page_hint') }}</div>
                 </div>
 
                 <!-- Text Size -->
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Text Size</label>
+                  <label class="form-label fw-semibold">{{ t('settings.display.text_size') }}</label>
                   <div class="btn-group w-100" role="group">
-                    <input
-                      type="radio"
-                      class="btn-check"
-                      name="text-size"
-                      id="text-small"
-                      value="small"
-                      v-model="settings.textSize"
-                    />
-                    <label class="btn btn-outline-primary" for="text-small">Small</label>
-
-                    <input
-                      type="radio"
-                      class="btn-check"
-                      name="text-size"
-                      id="text-medium"
-                      value="medium"
-                      v-model="settings.textSize"
-                    />
-                    <label class="btn btn-outline-primary" for="text-medium">Medium</label>
-
-                    <input
-                      type="radio"
-                      class="btn-check"
-                      name="text-size"
-                      id="text-large"
-                      value="large"
-                      v-model="settings.textSize"
-                    />
-                    <label class="btn btn-outline-primary" for="text-large">Large</label>
+                    <input type="radio" class="btn-check" name="text-size" id="text-small" value="small" v-model="settings.textSize" />
+                    <label class="btn btn-outline-primary" for="text-small">{{ t('settings.display.text_small') }}</label>
+                    <input type="radio" class="btn-check" name="text-size" id="text-medium" value="medium" v-model="settings.textSize" />
+                    <label class="btn btn-outline-primary" for="text-medium">{{ t('settings.display.text_medium') }}</label>
+                    <input type="radio" class="btn-check" name="text-size" id="text-large" value="large" v-model="settings.textSize" />
+                    <label class="btn btn-outline-primary" for="text-large">{{ t('settings.display.text_large') }}</label>
                   </div>
                 </div>
 
                 <!-- Monochrome Mode -->
                 <div class="mb-4">
                   <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      id="monochrome"
-                      v-model="settings.monochromeMode"
-                    />
+                    <input class="form-check-input" type="checkbox" id="monochrome" v-model="settings.monochromeMode" />
                     <label class="form-check-label" for="monochrome">
-                      <span class="fw-semibold">Monochrome Mode</span>
-                      <div class="text-muted small">High contrast black and white display</div>
+                      <span class="fw-semibold">{{ t('settings.display.monochrome') }}</span>
+                      <div class="text-muted small">{{ t('settings.display.monochrome_desc') }}</div>
                     </label>
                   </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="button" class="btn btn-secondary" @click="resetDisplaySettings">
-                    Reset
-                  </button>
+                  <button type="button" class="btn btn-secondary" @click="resetDisplaySettings">{{ t('common.reset') }}</button>
                   <button type="submit" class="btn btn-primary" :disabled="saving">
                     <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="ti ti-check me-2"></i>
-                    Save Changes
+                    {{ t('common.save_changes') }}
                   </button>
                 </div>
               </form>
@@ -197,13 +146,13 @@
             <div class="card-body">
               <h5 class="card-title mb-4">
                 <i class="ti ti-world me-2"></i>
-                Regional Preferences
+                {{ t('settings.regional.title') }}
               </h5>
 
               <form @submit.prevent="saveRegionalSettings">
                 <!-- Language -->
                 <div class="mb-4">
-                  <label for="language" class="form-label fw-semibold">Language</label>
+                  <label for="language" class="form-label fw-semibold">{{ t('settings.regional.language') }}</label>
                   <select id="language" class="form-select" v-model="settings.language">
                     <option value="en">English</option>
                     <option value="fr">Français</option>
@@ -212,7 +161,7 @@
 
                 <!-- Timezone -->
                 <div class="mb-4">
-                  <label for="timezone" class="form-label fw-semibold">Timezone</label>
+                  <label for="timezone" class="form-label fw-semibold">{{ t('settings.regional.timezone') }}</label>
                   <select id="timezone" class="form-select" v-model="settings.timezone">
                     <option value="Africa/Kinshasa">Africa/Kinshasa (GMT+1)</option>
                     <option value="Africa/Lubumbashi">Africa/Lubumbashi (GMT+2)</option>
@@ -226,7 +175,7 @@
 
                 <!-- Date Format -->
                 <div class="mb-4">
-                  <label for="date-format" class="form-label fw-semibold">Date Format</label>
+                  <label for="date-format" class="form-label fw-semibold">{{ t('settings.regional.date_format') }}</label>
                   <select id="date-format" class="form-select" v-model="settings.dateFormat">
                     <option value="DD/MM/YYYY">DD/MM/YYYY (31/12/2026)</option>
                     <option value="MM/DD/YYYY">MM/DD/YYYY (12/31/2026)</option>
@@ -236,58 +185,31 @@
 
                 <!-- Currency Format -->
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Currency Symbol Position</label>
+                  <label class="form-label fw-semibold">{{ t('settings.regional.currency_position') }}</label>
                   <div class="btn-group w-100" role="group">
-                    <input
-                      type="radio"
-                      class="btn-check"
-                      name="currency-position"
-                      id="currency-before"
-                      value="before"
-                      v-model="settings.currencyPosition"
-                    />
-                    <label class="btn btn-outline-primary" for="currency-before"
-                      >$100.00 (Before)</label
-                    >
-
-                    <input
-                      type="radio"
-                      class="btn-check"
-                      name="currency-position"
-                      id="currency-after"
-                      value="after"
-                      v-model="settings.currencyPosition"
-                    />
-                    <label class="btn btn-outline-primary" for="currency-after"
-                      >100.00$ (After)</label
-                    >
+                    <input type="radio" class="btn-check" name="currency-position" id="currency-before" value="before" v-model="settings.currencyPosition" />
+                    <label class="btn btn-outline-primary" for="currency-before">{{ t('settings.regional.currency_before') }}</label>
+                    <input type="radio" class="btn-check" name="currency-position" id="currency-after" value="after" v-model="settings.currencyPosition" />
+                    <label class="btn btn-outline-primary" for="currency-after">{{ t('settings.regional.currency_after') }}</label>
                   </div>
                 </div>
 
                 <!-- Number Format -->
                 <div class="mb-4">
-                  <label for="number-separator" class="form-label fw-semibold"
-                    >Thousand Separator</label
-                  >
-                  <select
-                    id="number-separator"
-                    class="form-select"
-                    v-model="settings.thousandSeparator"
-                  >
-                    <option value=",">Comma (1,000,000)</option>
-                    <option value=".">Period (1.000.000)</option>
-                    <option value=" ">Space (1 000 000)</option>
+                  <label for="number-separator" class="form-label fw-semibold">{{ t('settings.regional.thousand_separator') }}</label>
+                  <select id="number-separator" class="form-select" v-model="settings.thousandSeparator">
+                    <option value=",">{{ t('settings.regional.sep_comma') }}</option>
+                    <option value=".">{{ t('settings.regional.sep_period') }}</option>
+                    <option value=" ">{{ t('settings.regional.sep_space') }}</option>
                   </select>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="button" class="btn btn-secondary" @click="resetRegionalSettings">
-                    Reset
-                  </button>
+                  <button type="button" class="btn btn-secondary" @click="resetRegionalSettings">{{ t('common.reset') }}</button>
                   <button type="submit" class="btn btn-primary" :disabled="saving">
                     <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="ti ti-check me-2"></i>
-                    Save Changes
+                    {{ t('common.save_changes') }}
                   </button>
                 </div>
               </form>
@@ -299,13 +221,13 @@
             <div class="card-body">
               <h5 class="card-title mb-4">
                 <i class="ti ti-bell me-2"></i>
-                Notifications & Alerts
+                {{ t('settings.notifications.title') }}
               </h5>
 
               <form @submit.prevent="saveNotificationSettings">
                 <!-- Email Notifications -->
                 <div class="mb-4">
-                  <h6 class="fw-semibold mb-3">Email Notifications</h6>
+                  <h6 class="fw-semibold mb-3">{{ t('settings.notifications.email_title') }}</h6>
                   <div class="form-check form-switch mb-2">
                     <input
                       class="form-check-input"
@@ -313,9 +235,7 @@
                       id="email-transactions"
                       v-model="settings.notifications.email.transactions"
                     />
-                    <label class="form-check-label" for="email-transactions">
-                      Transaction notifications
-                    </label>
+                    <label class="form-check-label" for="email-transactions">{{ t('settings.notifications.transaction_notif') }}</label>
                   </div>
                   <div class="form-check form-switch mb-2">
                     <input
@@ -324,9 +244,7 @@
                       id="email-validations"
                       v-model="settings.notifications.email.validations"
                     />
-                    <label class="form-check-label" for="email-validations">
-                      Validation requests
-                    </label>
+                    <label class="form-check-label" for="email-validations">{{ t('settings.notifications.validation_requests') }}</label>
                   </div>
                   <div class="form-check form-switch mb-2">
                     <input
@@ -335,13 +253,13 @@
                       id="email-reports"
                       v-model="settings.notifications.email.reports"
                     />
-                    <label class="form-check-label" for="email-reports"> Daily reports </label>
+                    <label class="form-check-label" for="email-reports">{{ t('settings.notifications.daily_reports') }}</label>
                   </div>
                 </div>
 
                 <!-- Push Notifications -->
                 <div class="mb-4">
-                  <h6 class="fw-semibold mb-3">Push Notifications</h6>
+                  <h6 class="fw-semibold mb-3">{{ t('settings.notifications.push_title') }}</h6>
                   <div class="form-check form-switch mb-2">
                     <input
                       class="form-check-input"
@@ -349,9 +267,7 @@
                       id="push-transactions"
                       v-model="settings.notifications.push.transactions"
                     />
-                    <label class="form-check-label" for="push-transactions">
-                      Transaction notifications
-                    </label>
+                    <label class="form-check-label" for="push-transactions">{{ t('settings.notifications.transaction_notif') }}</label>
                   </div>
                   <div class="form-check form-switch mb-2">
                     <input
@@ -360,15 +276,13 @@
                       id="push-validations"
                       v-model="settings.notifications.push.validations"
                     />
-                    <label class="form-check-label" for="push-validations">
-                      Validation requests
-                    </label>
+                    <label class="form-check-label" for="push-validations">{{ t('settings.notifications.validation_requests') }}</label>
                   </div>
                 </div>
 
                 <!-- Transaction Alerts -->
                 <div class="mb-4">
-                  <h6 class="fw-semibold mb-3">Transaction Alerts</h6>
+                  <h6 class="fw-semibold mb-3">{{ t('settings.notifications.alerts_title') }}</h6>
                   <div class="form-check form-switch mb-3">
                     <input
                       class="form-check-input"
@@ -376,13 +290,11 @@
                       id="alert-large-transactions"
                       v-model="settings.notifications.alertLargeTransactions"
                     />
-                    <label class="form-check-label" for="alert-large-transactions">
-                      Alert for large transactions
-                    </label>
+                    <label class="form-check-label" for="alert-large-transactions">{{ t('settings.notifications.large_tx_alert') }}</label>
                   </div>
 
                   <div v-if="settings.notifications.alertLargeTransactions">
-                    <label for="alert-threshold" class="form-label">Alert threshold amount</label>
+                    <label for="alert-threshold" class="form-label">{{ t('settings.notifications.alert_threshold') }}</label>
                     <div class="input-group">
                       <span class="input-group-text">$</span>
                       <input
@@ -394,24 +306,16 @@
                         step="100"
                       />
                     </div>
-                    <div class="form-text">
-                      You'll receive an alert for transactions above this amount
-                    </div>
+                    <div class="form-text">{{ t('settings.notifications.alert_threshold_hint') }}</div>
                   </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                  <button
-                    type="button"
-                    class="btn btn-secondary"
-                    @click="resetNotificationSettings"
-                  >
-                    Reset
-                  </button>
+                  <button type="button" class="btn btn-secondary" @click="resetNotificationSettings">{{ t('common.reset') }}</button>
                   <button type="submit" class="btn btn-primary" :disabled="saving">
                     <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="ti ti-check me-2"></i>
-                    Save Changes
+                    {{ t('common.save_changes') }}
                   </button>
                 </div>
               </form>
@@ -423,7 +327,7 @@
             <div class="card-body">
               <h5 class="card-title mb-4">
                 <i class="ti ti-shield-lock me-2"></i>
-                Security Settings
+                {{ t('settings.security.title') }}
               </h5>
 
               <form @submit.prevent="saveSecuritySettings">
@@ -475,35 +379,23 @@
 
                 <!-- Auto-lock -->
                 <div class="mb-4">
-                  <h6 class="fw-semibold mb-3">Auto-lock</h6>
-                  <label for="auto-lock-time" class="form-label"
-                    >Lock screen after inactivity</label
-                  >
-                  <select
-                    id="auto-lock-time"
-                    class="form-select"
-                    v-model="settings.security.autoLockMinutes"
-                  >
-                    <option value="0">Never</option>
-                    <option value="5">5 minutes</option>
-                    <option value="10">10 minutes</option>
-                    <option value="15">15 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="60">1 hour</option>
+                  <h6 class="fw-semibold mb-3">{{ t('settings.security.autoLock.title') }}</h6>
+                  <label for="auto-lock-time" class="form-label">{{ t('settings.security.autoLock.label') }}</label>
+                  <select id="auto-lock-time" class="form-select" v-model="settings.security.autoLockMinutes">
+                    <option value="0">{{ t('common.never') }}</option>
+                    <option value="5">5 {{ t('common.minutes') }}</option>
+                    <option value="10">10 {{ t('common.minutes') }}</option>
+                    <option value="15">15 {{ t('common.minutes') }}</option>
+                    <option value="30">30 {{ t('common.minutes') }}</option>
+                    <option value="60">1 {{ t('common.hour') }}</option>
                   </select>
                   <div class="form-text">
                     <i class="ti ti-info-circle me-1"></i>
-                    Your screen will be locked automatically after the specified period of
-                    inactivity. You'll need to enter your password to unlock.
+                    {{ t('settings.security.autoLock.help') }}
                   </div>
-                  <div
-                    v-if="settings.security.autoLockMinutes > 0"
-                    class="alert alert-info alert-sm mt-2 mb-0"
-                  >
+                  <div v-if="settings.security.autoLockMinutes > 0" class="alert alert-info alert-sm mt-2 mb-0">
                     <i class="ti ti-shield-check me-1"></i>
-                    Auto-lock is currently active ({{ settings.security.autoLockMinutes }} minute{{
-                      settings.security.autoLockMinutes !== 1 ? 's' : ''
-                    }})
+                    {{ t('settings.security.autoLock.active', { minutes: settings.security.autoLockMinutes, plural: settings.security.autoLockMinutes !== 1 ? 's' : '' }) }}
                   </div>
                 </div>
 
@@ -517,10 +409,8 @@
                       v-model="settings.security.requirePasswordForSensitive"
                     />
                     <label class="form-check-label" for="require-password">
-                      <span class="fw-semibold">Require password for sensitive actions</span>
-                      <div class="text-muted small">
-                        Re-enter password before deleting or approving transactions
-                      </div>
+                      <span class="fw-semibold">{{ t('settings.security.requirePassword.title') }}</span>
+                      <div class="text-muted small">{{ t('settings.security.requirePassword.description') }}</div>
                     </label>
                   </div>
                 </div>
@@ -529,25 +419,21 @@
 
                 <!-- Active Sessions -->
                 <div class="mb-4">
-                  <h6 class="fw-semibold mb-3">Active Sessions</h6>
-                  <p class="text-muted small mb-3">
-                    Manage devices where you're currently logged in
-                  </p>
+                  <h6 class="fw-semibold mb-3">{{ t('settings.security.sessions.title') }}</h6>
+                  <p class="text-muted small mb-3">{{ t('settings.security.sessions.description') }}</p>
 
                   <div v-if="sessionsLoading" class="text-center my-3">
-                    <span class="spinner-border spinner-border-sm"></span> Loading sessions...
+                    <span class="spinner-border spinner-border-sm"></span> {{ t('settings.security.sessions.loading') }}
                   </div>
                   <div v-else>
                     <div v-if="sessions.length === 0" class="alert alert-warning">
-                      <i class="ti ti-alert-circle me-2"></i> Unable to load sessions. Please
-                      refresh the page.
+                      <i class="ti ti-alert-circle me-2"></i> {{ t('settings.security.sessions.cannotLoad') }}
                     </div>
                     <div
                       v-else-if="sessions.length === 1 && sessions[0]?.id === currentSessionId"
                       class="alert alert-info"
                     >
-                      <i class="ti ti-info-circle me-2"></i> No other active sessions. Only this
-                      device is signed in.
+                      <i class="ti ti-info-circle me-2"></i> {{ t('settings.security.sessions.noOtherSessions') }}
                     </div>
                     <ul v-else class="list-group mb-2">
                       <li
@@ -564,16 +450,12 @@
                                 : 'ti ti-device-laptop me-2'
                             "
                           ></i>
-                          <span class="fw-semibold">{{ session.name || 'Browser Session' }}</span>
+                          <span class="fw-semibold">{{ session.name || t('settings.security.sessions.browserSession') }}</span>
                           <div class="text-muted small mt-1">
-                            <span>Created: {{ format.dateTime(session.created_at) }}</span>
-                            <span v-if="session.last_used_at" class="ms-2"
-                              >Last used: {{ format.dateTime(session.last_used_at) }}</span
-                            >
+                            <span>{{ t('settings.security.sessions.created') }} {{ format.dateTime(session.created_at) }}</span>
+                            <span v-if="session.last_used_at" class="ms-2">{{ t('settings.security.sessions.lastUsed') }} {{ format.dateTime(session.last_used_at) }}</span>
                           </div>
-                          <span v-if="session.id === currentSessionId" class="badge bg-primary mt-1"
-                            >Current Device</span
-                          >
+                          <span v-if="session.id === currentSessionId" class="badge bg-primary mt-1">{{ t('settings.security.sessions.currentDevice') }}</span>
                         </div>
                         <button
                           v-if="session.id !== currentSessionId"
@@ -581,7 +463,7 @@
                           class="btn btn-sm btn-outline-danger"
                           @click="revokeSession(session.id)"
                         >
-                          <i class="ti ti-logout me-1"></i> Revoke
+                          <i class="ti ti-logout me-1"></i> {{ t('settings.security.sessions.revokeBtn') }}
                         </button>
                       </li>
                     </ul>
@@ -594,19 +476,17 @@
                       class="btn btn-sm btn-outline-warning"
                       @click="revokeOtherSessions"
                     >
-                      <i class="ti ti-logout me-1"></i> Revoke all other sessions
+                      <i class="ti ti-logout me-1"></i> {{ t('settings.security.sessions.revokeAllOthers') }}
                     </button>
                   </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="button" class="btn btn-secondary" @click="resetSecuritySettings">
-                    Reset
-                  </button>
+                  <button type="button" class="btn btn-secondary" @click="resetSecuritySettings">{{ t('common.reset') }}</button>
                   <button type="submit" class="btn btn-primary" :disabled="saving">
                     <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="ti ti-check me-2"></i>
-                    Save Changes
+                    {{ t('settings.security.saveButton') }}
                   </button>
                 </div>
               </form>
@@ -618,15 +498,13 @@
             <div class="card-body">
               <h5 class="card-title mb-4">
                 <i class="ti ti-receipt me-2"></i>
-                Transaction Settings
+                {{ t('settings.tx.title') }}
               </h5>
 
               <form @submit.prevent="saveTransactionSettings">
                 <!-- Default Currency -->
                 <div class="mb-4">
-                  <label for="default-currency" class="form-label fw-semibold"
-                    >Default Currency</label
-                  >
+                  <label for="default-currency" class="form-label fw-semibold">{{ t('settings.tx.default_currency') }}</label>
                   <select
                     id="default-currency"
                     class="form-select"
@@ -640,18 +518,11 @@
 
                 <!-- Default Branch -->
                 <div class="mb-4">
-                  <label for="default-branch" class="form-label fw-semibold">Default Branch</label>
-                  <select
-                    id="default-branch"
-                    class="form-select"
-                    v-model="settings.transactions.defaultBranchId"
-                  >
-                    <option :value="null">None (Select each time)</option>
-                    <!-- Will be populated dynamically -->
+                  <label for="default-branch" class="form-label fw-semibold">{{ t('settings.tx.default_branch') }}</label>
+                  <select id="default-branch" class="form-select" v-model="settings.transactions.defaultBranchId">
+                    <option :value="null">{{ t('settings.tx.no_branch') }}</option>
                   </select>
-                  <div class="form-text">
-                    This branch will be pre-selected when creating transactions
-                  </div>
+                  <div class="form-text">{{ t('settings.tx.default_branch_hint') }}</div>
                 </div>
 
                 <!-- Auto-print Receipt -->
@@ -664,46 +535,26 @@
                       v-model="settings.transactions.autoPrintReceipt"
                     />
                     <label class="form-check-label" for="auto-print">
-                      <span class="fw-semibold">Auto-print receipts</span>
-                      <div class="text-muted small">
-                        Automatically open print dialog after completing a transaction
-                      </div>
+                      <span class="fw-semibold">{{ t('settings.tx.auto_print') }}</span>
+                      <div class="text-muted small">{{ t('settings.tx.auto_print_desc') }}</div>
                     </label>
                   </div>
                 </div>
 
                 <!-- Receipt Format -->
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Receipt Format</label>
+                  <label class="form-label fw-semibold">{{ t('settings.tx.receipt_format') }}</label>
                   <div class="row g-3">
                     <div class="col-md-6">
                       <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="receipt-format"
-                          id="receipt-a4"
-                          value="A4"
-                          v-model="settings.transactions.receiptFormat"
-                        />
-                        <label class="form-check-label" for="receipt-a4">
-                          A4 (210mm x 297mm)
-                        </label>
+                        <input class="form-check-input" type="radio" name="receipt-format" id="receipt-a4" value="A4" v-model="settings.transactions.receiptFormat" />
+                        <label class="form-check-label" for="receipt-a4">A4 (210mm x 297mm)</label>
                       </div>
                     </div>
                     <div class="col-md-6">
                       <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="receipt-format"
-                          id="receipt-thermal"
-                          value="thermal"
-                          v-model="settings.transactions.receiptFormat"
-                        />
-                        <label class="form-check-label" for="receipt-thermal">
-                          Thermal (80mm)
-                        </label>
+                        <input class="form-check-input" type="radio" name="receipt-format" id="receipt-thermal" value="thermal" v-model="settings.transactions.receiptFormat" />
+                        <label class="form-check-label" for="receipt-thermal">Thermal (80mm)</label>
                       </div>
                     </div>
                   </div>
@@ -711,27 +562,19 @@
 
                 <!-- Receipt Language -->
                 <div class="mb-4">
-                  <label for="receipt-language" class="form-label fw-semibold"
-                    >Receipt Language</label
-                  >
-                  <select
-                    id="receipt-language"
-                    class="form-select"
-                    v-model="settings.transactions.receiptLanguage"
-                  >
+                  <label for="receipt-language" class="form-label fw-semibold">{{ t('settings.tx.receipt_language') }}</label>
+                  <select id="receipt-language" class="form-select" v-model="settings.transactions.receiptLanguage">
                     <option value="en">English</option>
                     <option value="fr">Français</option>
                   </select>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="button" class="btn btn-secondary" @click="resetTransactionSettings">
-                    Reset
-                  </button>
+                  <button type="button" class="btn btn-secondary" @click="resetTransactionSettings">{{ t('common.reset') }}</button>
                   <button type="submit" class="btn btn-primary" :disabled="saving">
                     <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="ti ti-check me-2"></i>
-                    Save Changes
+                    {{ t('common.save_changes') }}
                   </button>
                 </div>
               </form>
@@ -844,7 +687,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
@@ -864,14 +707,14 @@ const authStore = useAuthStore()
 // Active tab
 const activeTab = ref('display')
 
-// Tabs
-const tabs = [
-  { id: 'display', label: 'Display', icon: 'ti-palette' },
-  { id: 'regional', label: 'Regional', icon: 'ti-world' },
-  { id: 'notifications', label: 'Notifications', icon: 'ti-bell' },
-  { id: 'security', label: 'Security', icon: 'ti-shield-lock' },
-  { id: 'transactions', label: 'Transactions', icon: 'ti-receipt' },
-]
+// Tabs — computed so labels update when language changes
+const tabs = computed(() => [
+  { id: 'display',       label: t('settings.tabs.display'),       icon: 'ti-palette' },
+  { id: 'regional',      label: t('settings.tabs.regional'),      icon: 'ti-world' },
+  { id: 'notifications', label: t('settings.tabs.notifications'), icon: 'ti-bell' },
+  { id: 'security',      label: t('settings.tabs.security'),      icon: 'ti-shield-lock' },
+  { id: 'transactions',  label: t('settings.tabs.transactions'),  icon: 'ti-receipt' },
+])
 
 // Saving state
 const saving = ref(false)
