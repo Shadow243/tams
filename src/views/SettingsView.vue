@@ -395,7 +395,13 @@
                   </div>
                   <div v-if="settings.security.autoLockMinutes > 0" class="alert alert-info alert-sm mt-2 mb-0">
                     <i class="ti ti-shield-check me-1"></i>
-                    {{ t('settings.security.autoLock.active', { minutes: settings.security.autoLockMinutes, plural: settings.security.autoLockMinutes !== 1 ? 's' : '' }) }}
+                    {{ t('settings.security.autoLock.title') }} —
+                    {{ settings.security.autoLockMinutes }}
+                    {{ settings.security.autoLockMinutes === 60
+                        ? t('common.hour')
+                        : settings.security.autoLockMinutes !== 1
+                          ? t('common.minutes')
+                          : t('common.minute') }}
                   </div>
                 </div>
 

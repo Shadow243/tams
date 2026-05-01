@@ -799,8 +799,7 @@
         "minutes": "minutes",
         "minute": "minute",
         "hour": "hour",
-        "help": "Your screen will be locked automatically after the specified period of inactivity. You'll need to enter your password to unlock.",
-        "active": "Auto-lock is currently active ({minutes} minute{plural})"
+        "help": "Your screen will be locked automatically after the specified period of inactivity. You'll need to enter your password to unlock."
       },
       "requirePassword": {
         "title": "Require password for sensitive actions",
