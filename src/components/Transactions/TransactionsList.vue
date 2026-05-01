@@ -535,8 +535,9 @@ const formatCurrency = (amount: number, transaction?: Transaction) => {
       currencyCode = transaction.currency_code
     }
   }
-  // Use global format utility that respects user settings
-  return format.currency(amount, currencyCode, { decimals: 0 })
+  // Show decimals only when the amount has a fractional part (e.g. 98.5 → 2, 100 → 0)
+  const decimals = amount % 1 === 0 ? 0 : 2
+  return format.currency(amount, currencyCode, { decimals })
 }
 
 const formatDate = (date: string) => {
