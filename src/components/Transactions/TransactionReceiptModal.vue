@@ -114,12 +114,31 @@
                 </div>
               </div>
 
+              <div v-if="transaction.dest_customer" class="row mb-2">
+                <div class="col-6">
+                  <strong>{{ t('transactions.dest_customer') || 'Bénéficiaire' }}:</strong>
+                </div>
+                <div class="col-6 text-end">
+                  <div>{{ transaction.dest_customer.full_name }}</div>
+                  <div class="small text-muted">{{ transaction.dest_customer.phone }}</div>
+                </div>
+              </div>
+
               <div class="row mb-2">
                 <div class="col-6">
                   <strong>{{ t('transactions.cashier') }}:</strong>
                 </div>
                 <div class="col-6 text-end">
                   {{ transaction.user?.name }}
+                </div>
+              </div>
+
+              <div v-if="transaction.description" class="row mb-2">
+                <div class="col-6">
+                  <strong>{{ t('transactions.description') || 'Note' }}:</strong>
+                </div>
+                <div class="col-6 text-end text-muted small" style="word-break:break-word">
+                  {{ transaction.description }}
                 </div>
               </div>
             </div>
@@ -333,6 +352,22 @@ const printReceipt = () => {
     ? `<tr><td class="label">Agence destination</td><td class="value">${tx.destination_branch.name}</td></tr>`
     : ''
 
+  const destCustomerRow = tx.dest_customer
+    ? `<tr>
+        <td class="label">Bénéficiaire</td>
+        <td class="value">${tx.dest_customer.full_name}<br>
+          <span style="color:#6b7280;font-size:9px">${tx.dest_customer.phone ?? ''}</span>
+        </td>
+       </tr>`
+    : ''
+
+  const descriptionRow = tx.description
+    ? `<tr>
+        <td class="label">Note</td>
+        <td class="value" style="font-weight:400;color:#555;font-size:9.5px;word-break:break-word">${tx.description}</td>
+       </tr>`
+    : ''
+
   const expiryRow =
     tx.expires_at && tx.status === 'available'
       ? `<div class="expiry-alert">⚠ Expire le ${fmtDate(tx.expires_at)}</div>`
@@ -526,10 +561,12 @@ const printReceipt = () => {
           ? `<tr><td class="label">Téléphone</td><td class="value">${tx.customer_phone}</td></tr>`
           : ''
       }
+      ${destCustomerRow}
       <tr>
         <td class="label">Caissier</td>
         <td class="value">${tx.user?.name ?? '-'}</td>
       </tr>
+      ${descriptionRow}
     </table>
   </div>
 
