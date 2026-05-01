@@ -210,6 +210,7 @@
 import { ref, onMounted } from 'vue'
 import { useHead } from '@vueuse/head'
 import { usePermissions } from '@/composables/usePermissions'
+import { useUserSettings } from '@/composables/useUserSettings'
 import { useTransactionStore } from '@/stores/transactions'
 import { useTransactionTypeStore } from '@/stores/transaction-types'
 import { useBranchStore } from '@/stores/branches'
@@ -244,6 +245,9 @@ const walletStore = useWalletStore()
 const currencyStore = useCurrencyStore()
 
 const transactionFormModalRef = ref<InstanceType<typeof TransactionFormModal>>()
+const { settings: userSettings } = useUserSettings()
+const autoPrintReceipt = () => userSettings.value.transactions?.autoPrintReceipt === true
+
 const showModal = ref(false)
 const showDetailsModal = ref(false)
 const showStatisticsModal = ref(false)
@@ -483,8 +487,8 @@ const handleCompleteTransaction = async (id: string) => {
       // Extract transaction data from response (backend returns it with receipt data)
       const transactionData = response.data?.transaction || response.transaction
 
-      // Use the transaction data returned by complete endpoint (no need for additional fetch)
-      if (transactionData) {
+      // Afficher le reçu uniquement si "Impression automatique" est activé
+      if (transactionData && autoPrintReceipt()) {
         receiptTransaction.value = transactionData
         showReceiptModal.value = true
       }
@@ -644,8 +648,8 @@ const handleSubmit = async (data: TransactionFormData) => {
       showConfirmButton: false,
     })
 
-    // Show receipt modal after creation
-    if (!isEditing.value) {
+    // Afficher le reçu uniquement si "Impression automatique" est activé
+    if (!isEditing.value && autoPrintReceipt()) {
       const transactionData = response?.data
       if (transactionData) {
         receiptTransaction.value = transactionData

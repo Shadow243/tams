@@ -804,6 +804,9 @@ const onTransactionTypeChange = () => {
 
 const onCurrencyChange = () => {
   showPreview.value = true
+  if (autoCalculateFee.value) {
+    calculateAutomaticFee()
+  }
 }
 
 const onAmountChange = () => {
