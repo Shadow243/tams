@@ -165,6 +165,53 @@
               </div>
             </div>
 
+            <!-- Destination Customer (optional, filled by cashier when needed) -->
+            <div class="card mb-3 border-info">
+              <div class="card-header bg-info bg-opacity-10">
+                <h6 class="mb-0 text-info">
+                  <i class="ti ti-user-check me-2"></i>
+                  {{ t('transactions.dest_customer_info') || 'Bénéficiaire' }}
+                  <small class="text-muted ms-2">({{ t('transactions.optional') || 'optionnel' }})</small>
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12 mb-2">
+                    <label class="form-label">
+                      {{ t('transactions.dest_customer') || 'Client bénéficiaire' }}
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        :value="selectedDestCustomerDisplay"
+                        readonly
+                        :placeholder="t('transactions.no_dest_customer_selected') || 'Aucun bénéficiaire sélectionné'"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-info"
+                        @click="showDestCustomerSearch = true"
+                        :disabled="processing"
+                      >
+                        <i class="ti ti-search me-1"></i>
+                        {{ t('transactions.search_customer') || 'Rechercher' }}
+                      </button>
+                      <button
+                        v-if="selectedDestCustomer"
+                        type="button"
+                        class="btn btn-outline-danger"
+                        @click="clearDestCustomer"
+                        :disabled="processing"
+                      >
+                        <i class="ti ti-x"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Amount & Fees -->
             <div class="card mb-3">
               <div class="card-header bg-light">
@@ -471,6 +518,13 @@
     @close="showCustomerSearch = false"
     @select="onCustomerSelected"
   />
+
+  <!-- Destination Customer Search Modal -->
+  <CustomerSearchModal
+    :show="showDestCustomerSearch"
+    @close="showDestCustomerSearch = false"
+    @select="onDestCustomerSelected"
+  />
 </template>
 
 <script setup lang="ts">
@@ -502,6 +556,7 @@ const props = withDefaults(defineProps<Props>(), {
     transaction_type_id: null,
     branch_id: null,
     customer_id: null,
+    dest_customer_id: null,
     customer_phone: '',
     wallet_id: null,
     dest_wallet_id: null,
@@ -533,6 +588,8 @@ const autoCalculateFee = ref(true)
 const calculatingFee = ref(false)
 const showCustomerSearch = ref(false)
 const selectedCustomer = ref<any>(null)
+const showDestCustomerSearch = ref(false)
+const selectedDestCustomer = ref<any>(null)
 const showPreview = ref(false)
 const loadingCurrencies = ref(false)
 
@@ -614,6 +671,7 @@ watch(
         localForm.value.currency_code = currencyStore.defaultCurrency.code
       }
       selectedCustomer.value = null
+      selectedDestCustomer.value = null
       showPreview.value = false
     }
   }
@@ -696,6 +754,13 @@ const minExpirationDate = computed(() => {
 const selectedCustomerDisplay = computed(() => {
   if (selectedCustomer.value) {
     return `${selectedCustomer.value.full_name} (${selectedCustomer.value.phone})`
+  }
+  return ''
+})
+
+const selectedDestCustomerDisplay = computed(() => {
+  if (selectedDestCustomer.value) {
+    return `${selectedDestCustomer.value.full_name} (${selectedDestCustomer.value.phone})`
   }
   return ''
 })
@@ -800,6 +865,16 @@ const clearCustomer = () => {
   selectedCustomer.value = null
   localForm.value.customer_id = null
   localForm.value.customer_phone = ''
+}
+
+const onDestCustomerSelected = (customer: any) => {
+  selectedDestCustomer.value = customer
+  localForm.value.dest_customer_id = customer.id
+}
+
+const clearDestCustomer = () => {
+  selectedDestCustomer.value = null
+  localForm.value.dest_customer_id = null
 }
 
 const handleSubmit = () => {

@@ -43,6 +43,13 @@ export interface Transaction {
     phone: string
     national_id: string | null
   }
+  dest_customer_id: string | null
+  dest_customer?: {
+    id: string
+    full_name: string
+    phone: string
+    national_id: string | null
+  }
   wallet_id: number | null
   wallet?: {
     id: number
@@ -101,6 +108,7 @@ export interface TransactionFormData {
   branch_id: number | null
   destination_branch_id: number | null
   customer_id: string | null
+  dest_customer_id?: string | null
   wallet_id: number | null
   dest_wallet_id?: number | null
   customer_phone: string | null
