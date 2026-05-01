@@ -297,6 +297,7 @@ const printReceipt = () => {
         style: 'currency',
         currency: txCurrency,
         minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
       }).format(n)
     } catch {
       return (
@@ -655,6 +656,7 @@ const formatCurrency = (amount: number, code?: string) => {
       style: 'currency',
       currency,
       minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
     }).format(amount)
   } catch {
     // Fallback for unsupported currency codes

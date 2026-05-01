@@ -130,33 +130,36 @@ export function formatCurrency(
   options?: { decimals?: number; showSymbol?: boolean }
 ): string {
   if (amount === null || amount === undefined || amount === '') return ''
-  
+
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
   if (isNaN(numAmount)) return ''
-  
+
   const { settings } = useUserSettings()
   const position = settings.value.currencyPosition || 'before'
-  const decimals = options?.decimals ?? 2
+  const maxDecimals = options?.decimals ?? 2
   const showSymbol = options?.showSymbol ?? true
-  
+  const sep = settings.value.thousandSeparator || ','
+
   // Determine currency symbol
   const curr = currency || settings.value.transactions?.defaultCurrency || 'USD'
   const currencySymbols: Record<string, string> = {
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'CDF': 'FC',
-    'XAF': 'FCFA',
-    'XOF': 'FCFA',
+    'USD': '$', 'EUR': '€', 'GBP': '£', 'CDF': 'FC', 'XAF': 'FCFA', 'XOF': 'FCFA',
   }
   const symbol = currencySymbols[curr] || curr
-  
-  // Format the number
-  const formatted = formatNumber(numAmount, decimals)
-  
+
+  // min=0 max=maxDecimals : affiche les décimales exactes, jamais d'arrondi, pas de zéros superflus
+  let formatted = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+    useGrouping: true,
+  }).format(numAmount)
+
+  if (sep !== ',') {
+    formatted = formatted.replace(/,/g, sep)
+  }
+
   if (!showSymbol) return formatted
-  
-  // Apply symbol position
+
   return position === 'before' ? `${symbol} ${formatted}` : `${formatted} ${symbol}`
 }
 

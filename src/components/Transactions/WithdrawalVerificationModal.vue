@@ -308,6 +308,7 @@ const formatCurrency = (amount: number) => {
     style: 'currency',
     currency: 'XAF',
     minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(amount)
 }
 

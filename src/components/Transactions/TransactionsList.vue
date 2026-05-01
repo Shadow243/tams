@@ -535,9 +535,7 @@ const formatCurrency = (amount: number, transaction?: Transaction) => {
       currencyCode = transaction.currency_code
     }
   }
-  // Show decimals only when the amount has a fractional part (e.g. 98.5 → 2, 100 → 0)
-  const decimals = amount % 1 === 0 ? 0 : 2
-  return format.currency(amount, currencyCode, { decimals })
+  return format.currency(amount, currencyCode)
 }
 
 const formatDate = (date: string) => {

@@ -1177,7 +1177,7 @@ function formatAmount(n: number) {
     const c = currencyStore.allCurrencies.find((x) => x.id === filters.value.currency_id)
     if (c) return currencyStore.formatAmount(n, c.code)
   }
-  return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(n)
+  return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n)
 }
 
 function formatDate(d: string) {
@@ -1436,7 +1436,7 @@ const trendChartOptions = computed(() => ({
     y: {
       formatter: (val: number, opts: { seriesIndex: number }) => {
         const code = trendCurrencies.value[opts.seriesIndex] ?? ''
-        return `${new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(val)} ${code}`
+        return `${new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val)} ${code}`
       },
     },
   },

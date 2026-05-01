@@ -615,6 +615,7 @@ const formatCurrency = (amount: number) => {
     style: 'currency',
     currency: 'CDF',
     minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(amount)
 }
 
