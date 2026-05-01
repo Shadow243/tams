@@ -94,6 +94,7 @@ export interface Transaction {
   status: TransactionStatus
   status_label: string
   status_color: string
+  description: string | null
   can_be_modified: boolean
   can_be_cancelled: boolean
   is_expired: boolean
@@ -128,6 +129,7 @@ export interface TransactionFormData {
   withdrawal_code: string | null
   expires_at: string | null
   status: TransactionStatus
+  description?: string | null
 }
 
 export interface TransactionFilters {

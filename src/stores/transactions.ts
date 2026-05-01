@@ -157,10 +157,13 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   }
 
-  async function cancelTransaction(id: string) {
+  async function cancelTransaction(id: string, description?: string) {
     processing.value = true
     try {
-      const response = await axiosInstance.patch(`${appConfig.apiUrl}/transactions/${id}/cancel`)
+      const response = await axiosInstance.patch(
+        `${appConfig.apiUrl}/transactions/${id}/cancel`,
+        description ? { description } : {}
+      )
       await fetchTransactions()
       return response.data
     } catch (error) {
@@ -170,11 +173,12 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   }
 
-  async function completeTransaction(id: string) {
+  async function completeTransaction(id: string, description?: string) {
     processing.value = true
     try {
       const response = await axiosInstance.patch(
-        `${appConfig.apiUrl}/transactions/${id}/complete`
+        `${appConfig.apiUrl}/transactions/${id}/complete`,
+        description ? { description } : {}
       )
       await fetchTransactions()
       return response.data

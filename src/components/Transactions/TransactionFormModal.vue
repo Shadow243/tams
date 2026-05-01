@@ -458,6 +458,27 @@
               </div>
             </div>
 
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label">
+                <i class="ti ti-notes me-1"></i>
+                {{ t('transactions.description') || 'Note / Description' }}
+                <small class="text-muted">({{ t('transactions.optional') || 'optionnel' }})</small>
+              </label>
+              <textarea
+                id="description"
+                class="form-control"
+                v-model="localForm.description"
+                rows="2"
+                maxlength="1000"
+                :placeholder="t('transactions.description_placeholder') || 'Ex: code Airtel Money, référence externe, motif...'"
+                :disabled="processing"
+              ></textarea>
+              <div class="form-text text-end">
+                {{ (localForm.description || '').length }} / 1000
+              </div>
+            </div>
+
             <!-- Preview Card -->
             <div v-if="showPreview" class="card border-info">
               <div class="card-body">
@@ -570,6 +591,7 @@ const props = withDefaults(defineProps<Props>(), {
     withdrawal_code: '',
     expires_at: '',
     status: 'pending',
+    description: null,
   }),
   transactionTypes: () => [],
   branches: () => [],

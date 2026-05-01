@@ -724,7 +724,20 @@
     "created_at": "Créé le",
     "updated_at": "Modifié le",
     "start_date": "Date début",
-    "end_date": "Date fin"
+    "end_date": "Date fin",
+    "dest_wallet": "Wallet destination",
+    "select_dest_branch_first": "Sélectionnez d'abord une agence destination",
+    "select_branch_first": "Sélectionnez d'abord une agence",
+    "currency_from_wallet": "Devise définie par le portefeuille sélectionné",
+    "dest_customer_info": "Bénéficiaire",
+    "dest_customer": "Client bénéficiaire",
+    "no_dest_customer_selected": "Aucun bénéficiaire sélectionné",
+    "description": "Note / Description",
+    "description_placeholder": "Ex: code Airtel Money, référence externe, motif...",
+    "cancel_reason_label": "Raison de l'annulation (optionnel)",
+    "cancel_reason_placeholder": "Ex: doublon, erreur de saisie, demande client...",
+    "complete_note_label": "Note / Code externe (optionnel)",
+    "complete_note_placeholder": "Ex: code Airtel Money, référence partenaire..."
   },
   "settings": {
     "pageTitle": "Paramètres",

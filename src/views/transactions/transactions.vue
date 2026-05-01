@@ -412,47 +412,51 @@ const handleDeleteTransaction = (id: string) => {
   })
 }
 
-const handleCancelTransaction = (id: string) => {
-  Swal.fire({
+const handleCancelTransaction = async (id: string) => {
+  const result = await Swal.fire({
     title: t('transactions.confirm_cancel_title') || 'Annuler la transaction?',
-    text: t('transactions.confirm_cancel_text') || 'Cette action ne peut pas être annulée!',
     icon: 'warning',
+    input: 'textarea',
+    inputLabel: t('transactions.cancel_reason_label') || 'Raison (optionnel)',
+    inputPlaceholder: t('transactions.cancel_reason_placeholder') || 'Ex: doublon, erreur de saisie...',
+    inputAttributes: { maxlength: '1000', rows: '3' },
     showCancelButton: true,
-    confirmButtonColor: '#orange',
+    confirmButtonColor: '#d33',
     cancelButtonColor: '#3085d6',
     confirmButtonText: t('transactions.confirm_cancel_button') || 'Oui, annuler!',
     cancelButtonText: t('transactions.cancel') || 'Non',
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await store.cancelTransaction(id)
-        store.fetchStatistics()
-        Swal.fire({
-          title: t('transactions.success') || 'Succès!',
-          text: t('transactions.cancel_success') || 'Transaction annulée avec succès.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false,
-        })
-      } catch (error) {
-        console.error('Error cancelling transaction:', error)
-        Swal.fire({
-          title: t('transactions.error') || 'Erreur!',
-          text: t('transactions.cancel_error') || "Échec de l'annulation.",
-          icon: 'error',
-        })
-      }
-    }
   })
+
+  if (result.isConfirmed) {
+    try {
+      await store.cancelTransaction(id, result.value || undefined)
+      store.fetchStatistics()
+      Swal.fire({
+        title: t('transactions.success') || 'Succès!',
+        text: t('transactions.cancel_success') || 'Transaction annulée avec succès.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+      })
+    } catch (error) {
+      console.error('Error cancelling transaction:', error)
+      Swal.fire({
+        title: t('transactions.error') || 'Erreur!',
+        text: t('transactions.cancel_error') || "Échec de l'annulation.",
+        icon: 'error',
+      })
+    }
+  }
 }
 
 const handleCompleteTransaction = async (id: string) => {
   const result = await Swal.fire({
     title: t('transactions.confirm_complete_title') || 'Compléter la transaction?',
-    text:
-      t('transactions.confirm_complete_text') ||
-      'Cette action marquera la transaction comme complétée.',
     icon: 'question',
+    input: 'textarea',
+    inputLabel: t('transactions.complete_note_label') || 'Note / Code externe (optionnel)',
+    inputPlaceholder: t('transactions.complete_note_placeholder') || 'Ex: code Airtel Money, référence externe...',
+    inputAttributes: { maxlength: '1000', rows: '3' },
     showCancelButton: true,
     confirmButtonColor: '#28a745',
     cancelButtonColor: '#3085d6',
@@ -462,7 +466,7 @@ const handleCompleteTransaction = async (id: string) => {
 
   if (result.isConfirmed) {
     try {
-      const response = await store.completeTransaction(id)
+      const response = await store.completeTransaction(id, result.value || undefined)
 
       // Recharger les statistiques
       store.fetchStatistics()

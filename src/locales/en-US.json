@@ -726,7 +726,20 @@
     "created_at": "Created at",
     "updated_at": "Updated at",
     "start_date": "Start date",
-    "end_date": "End date"
+    "end_date": "End date",
+    "dest_wallet": "Destination Wallet",
+    "select_dest_branch_first": "Select a destination branch first",
+    "select_branch_first": "Select a branch first",
+    "currency_from_wallet": "Currency set by the selected wallet",
+    "dest_customer_info": "Beneficiary",
+    "dest_customer": "Beneficiary Customer",
+    "no_dest_customer_selected": "No beneficiary selected",
+    "description": "Note / Description",
+    "description_placeholder": "e.g: Airtel Money code, external reference, reason...",
+    "cancel_reason_label": "Cancellation reason (optional)",
+    "cancel_reason_placeholder": "e.g: duplicate, data entry error, customer request...",
+    "complete_note_label": "Note / External code (optional)",
+    "complete_note_placeholder": "e.g: Airtel Money code, partner reference..."
   },
   "settings": {
     "pageTitle": "Settings",
