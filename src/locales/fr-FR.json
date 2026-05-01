@@ -798,7 +798,7 @@
         "minute": "minute",
         "hour": "heure",
         "help": "Votre écran sera automatiquement verrouillé après la période d'inactivité spécifiée. Vous devrez entrer votre mot de passe pour déverrouiller.",
-        "active": "Le verrouillage automatique est actuellement actif ({{minutes}} minute{{plural}})"
+        "active": "Le verrouillage automatique est actuellement actif ({minutes} minute{plural})"
       },
       "requirePassword": {
         "title": "Demander le mot de passe pour les actions sensibles",
