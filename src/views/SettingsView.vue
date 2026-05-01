@@ -217,6 +217,9 @@
                     <option value="Africa/Kinshasa">Africa/Kinshasa (GMT+1)</option>
                     <option value="Africa/Lubumbashi">Africa/Lubumbashi (GMT+2)</option>
                     <option value="Africa/Harare">Africa/Harare (GMT+2)</option>
+                    <option value="Africa/Nairobi">Africa/Nairobi (GMT+3)</option>
+                    <option value="Africa/Dar_es_Salaam">Africa/Dar_es_Salaam (GMT+3)</option>
+                    <option value="Africa/Kampala">Africa/Kampala (GMT+3)</option>
                     <option value="UTC">UTC (GMT+0)</option>
                   </select>
                 </div>
