@@ -28,7 +28,14 @@
     "fee_rules": "Fee Rules",
     "currencies": "Currencies",
     "countries": "Countries",
-    "users": "Users"
+    "users": "Users",
+    "profile": "My Profile",
+    "account_settings": "Account Settings",
+    "lock_screen": "Lock Screen"
+  },
+  "profile": {
+    "page_title": "My Profile",
+    "page_description": "Manage your account and preferences"
   },
   "auth": {
     "login": {
@@ -727,6 +734,9 @@
     "updated_at": "Updated at",
     "start_date": "Start date",
     "end_date": "End date",
+    "general_info": "General Information",
+    "amounts_info": "Amount Details",
+    "type": "Type",
     "dest_wallet": "Destination Wallet",
     "select_dest_branch_first": "Select a destination branch first",
     "select_branch_first": "Select a branch first",

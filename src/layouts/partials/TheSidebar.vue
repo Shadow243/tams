@@ -58,25 +58,25 @@
               <!-- My Profile -->
               <a href="#!" class="dropdown-item">
                 <i class="ti ti-user-circle me-1 fs-lg align-middle"></i>
-                <span class="align-middle">Profile</span>
+                <span class="align-middle">{{ t('sidebar.profile') || 'Mon Profil' }}</span>
               </a>
 
               <!-- Settings -->
               <a href="javascript:void(0);" class="dropdown-item">
                 <i class="ti ti-settings-2 me-1 fs-lg align-middle"></i>
-                <span class="align-middle">Account Settings</span>
+                <span class="align-middle">{{ t('sidebar.account_settings') || 'Paramètres du compte' }}</span>
               </a>
 
               <!-- Lock -->
               <a href="auth-lock-screen.html" class="dropdown-item">
                 <i class="ti ti-lock me-1 fs-lg align-middle"></i>
-                <span class="align-middle">Lock Screen</span>
+                <span class="align-middle">{{ t('sidebar.lock_screen') || 'Verrouiller' }}</span>
               </a>
 
               <!-- Logout -->
               <a href="javascript:void(0);" class="dropdown-item text-danger fw-semibold">
                 <i class="ti ti-logout me-1 fs-lg align-middle"></i>
-                <span class="align-middle">Log Out</span>
+                <span class="align-middle">{{ t('auth.logout') || 'Déconnexion' }}</span>
               </a>
             </div>
           </div>

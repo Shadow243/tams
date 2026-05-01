@@ -28,7 +28,14 @@
     "fee_rules": "Règles de frais",
     "currencies": "Devises",
     "countries": "Pays",
-    "users": "Utilisateurs"
+    "users": "Utilisateurs",
+    "profile": "Mon Profil",
+    "account_settings": "Paramètres du compte",
+    "lock_screen": "Verrouiller l'écran"
+  },
+  "profile": {
+    "page_title": "Mon Profil",
+    "page_description": "Gérer votre compte et vos préférences"
   },
   "auth": {
     "login": {
@@ -725,6 +732,9 @@
     "updated_at": "Modifié le",
     "start_date": "Date début",
     "end_date": "Date fin",
+    "general_info": "Informations générales",
+    "amounts_info": "Détails des montants",
+    "type": "Type",
     "dest_wallet": "Wallet destination",
     "select_dest_branch_first": "Sélectionnez d'abord une agence destination",
     "select_branch_first": "Sélectionnez d'abord une agence",
