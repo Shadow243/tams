@@ -169,6 +169,12 @@
                     <strong>{{ transaction.customer_phone }}</strong>
                   </div>
 
+                  <div class="info-item" v-if="transaction.dest_customer">
+                    <label><i class="ti ti-user-check me-1"></i>{{ t('transactions.dest_customer') || 'Bénéficiaire' }}</label>
+                    <strong>{{ transaction.dest_customer.full_name }}</strong>
+                    <small class="text-muted d-block">{{ transaction.dest_customer.phone }}</small>
+                  </div>
+
                   <div class="info-item" v-if="transaction.withdrawal_code">
                     <label
                       ><i class="ti ti-key me-1"></i>{{ t('transactions.withdrawal_code') }}</label
