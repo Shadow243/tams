@@ -251,14 +251,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useUserSettings } from '@/composables/useUserSettings'
 import { axiosInstance } from '@/plugins/axios'
 import { appConfig } from '@/config/app'
 import type { Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
+const { settings } = useUserSettings()
+
+// Locale dérivée du paramètre receiptLanguage (fr → fr-FR, en → en-US)
+const receiptLocale = computed(() => {
+  const lang = settings.value.transactions?.receiptLanguage || settings.value.language || 'fr'
+  return lang === 'en' ? 'en-US' : 'fr-FR'
+})
 
 interface Props {
   show: boolean
@@ -273,6 +281,14 @@ const emit = defineEmits<{
 
 const downloading = ref(false)
 const receiptContent = ref<HTMLElement | null>(null)
+
+// Auto-impression si le paramètre autoPrintReceipt est activé
+watch(() => props.show, (visible) => {
+  if (visible && settings.value.transactions?.autoPrintReceipt) {
+    // Délai court pour laisser le DOM se rendre avant d'imprimer
+    setTimeout(() => printReceipt(), 400)
+  }
+})
 
 // Detect current Bootstrap theme from <html data-bs-theme>
 const isDark = computed(() => document.documentElement.getAttribute('data-bs-theme') === 'dark')
@@ -291,9 +307,10 @@ const printReceipt = () => {
 
   const tx = props.transaction
   const txCurrency = tx.currency?.code ?? tx.currency_code ?? 'XAF'
+  const locale = receiptLocale.value
   const fmtNum = (n: number) => {
     try {
-      return new Intl.NumberFormat('fr-FR', {
+      return new Intl.NumberFormat(locale, {
         style: 'currency',
         currency: txCurrency,
         minimumFractionDigits: 0,
@@ -301,12 +318,12 @@ const printReceipt = () => {
       }).format(n)
     } catch {
       return (
-        new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(n) + ' ' + txCurrency
+        new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n) + ' ' + txCurrency
       )
     }
   }
   const fmtDate = (d: string) =>
-    new Date(d).toLocaleString('fr-FR', {
+    new Date(d).toLocaleString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -651,23 +668,23 @@ const downloadPDF = async () => {
 
 const formatCurrency = (amount: number, code?: string) => {
   const currency = code ?? currencyCode.value
+  const locale = receiptLocale.value
   try {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,
       minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount)
   } catch {
-    // Fallback for unsupported currency codes
     return (
-      new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(amount) + ' ' + currency
+      new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount) + ' ' + currency
     )
   }
 }
 
 const formatDateTime = (date: string) => {
-  return new Date(date).toLocaleString('fr-FR', {
+  return new Date(date).toLocaleString(receiptLocale.value, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
