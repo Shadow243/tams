@@ -697,8 +697,5 @@ onUnmounted(() => {
 // Global styles for body when lockscreen is active
 body.lockscreen-active {
   overflow: hidden !important;
-  height: 100vh;
-  position: fixed;
-  width: 100%;
 }
 </style>

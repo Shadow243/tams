@@ -10,20 +10,35 @@ export const useLockScreenStore = defineStore('lockscreen', () => {
   const maxAttempts = 5
   const lockTimeout = ref<NodeJS.Timeout | null>(null)
 
+  // Reactive clock — updated every second so lockDuration stays live
+  const now = ref(new Date())
+  let clockInterval: ReturnType<typeof setInterval> | null = null
+
+  function startClock() {
+    if (clockInterval) return
+    clockInterval = setInterval(() => { now.value = new Date() }, 1000)
+  }
+
+  function stopClock() {
+    if (clockInterval) {
+      clearInterval(clockInterval)
+      clockInterval = null
+    }
+  }
+
   // Getters
   const isScreenLocked = computed(() => isLocked.value)
   const canAttemptUnlock = computed(() => unlockAttempts.value < maxAttempts)
   const remainingAttempts = computed(() => Math.max(0, maxAttempts - unlockAttempts.value))
   const isBlocked = computed(() => unlockAttempts.value >= maxAttempts)
-  
+
   const lockDuration = computed(() => {
     if (!lockedAt.value) return '0s'
-    const now = new Date()
-    const diff = now.getTime() - lockedAt.value.getTime()
+    const diff = now.value.getTime() - lockedAt.value.getTime()
     const seconds = Math.floor(diff / 1000)
     const minutes = Math.floor(seconds / 60)
     const hours = Math.floor(minutes / 60)
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`
     return `${seconds}s`
@@ -34,11 +49,10 @@ export const useLockScreenStore = defineStore('lockscreen', () => {
     isLocked.value = true
     lockedAt.value = new Date()
     unlockAttempts.value = 0
-    
-    // Add body class to prevent scrolling
+    startClock()
+
     document.body.classList.add('lockscreen-active')
-    
-    // Save lock state to sessionStorage
+
     sessionStorage.setItem('__LOCKSCREEN_ACTIVE__', 'true')
     sessionStorage.setItem('__LOCKSCREEN_TIME__', lockedAt.value.toISOString())
   }
@@ -47,15 +61,13 @@ export const useLockScreenStore = defineStore('lockscreen', () => {
     isLocked.value = false
     lockedAt.value = null
     unlockAttempts.value = 0
-    
-    // Remove body class
+    stopClock()
+
     document.body.classList.remove('lockscreen-active')
-    
-    // Clear from sessionStorage
+
     sessionStorage.removeItem('__LOCKSCREEN_ACTIVE__')
     sessionStorage.removeItem('__LOCKSCREEN_TIME__')
-    
-    // Clear any timeout
+
     if (lockTimeout.value) {
       clearTimeout(lockTimeout.value)
       lockTimeout.value = null
@@ -99,11 +111,12 @@ export const useLockScreenStore = defineStore('lockscreen', () => {
   function restoreState() {
     const wasLocked = sessionStorage.getItem('__LOCKSCREEN_ACTIVE__')
     const lockTime = sessionStorage.getItem('__LOCKSCREEN_TIME__')
-    
+
     if (wasLocked === 'true' && lockTime) {
       isLocked.value = true
       lockedAt.value = new Date(lockTime)
       document.body.classList.add('lockscreen-active')
+      startClock()
     }
   }
 
