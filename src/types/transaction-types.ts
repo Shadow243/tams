@@ -2,6 +2,7 @@ export type BalanceEffect = 'none' | 'debit' | 'credit'
 export type BalanceAmount = 'gross' | 'net' | 'fee'
 
 export interface TransactionType {
+  requires_dest_customer: boolean
   id: number
   uuid: string
   code: string
@@ -22,6 +23,7 @@ export interface TransactionType {
 }
 
 export interface TransactionTypeList {
+  requires_dest_customer: boolean
   id: number
   uuid: string
   code: string

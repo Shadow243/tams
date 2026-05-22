@@ -312,9 +312,12 @@ watch(
 // Detect current Bootstrap theme from <html data-bs-theme>
 const isDark = computed(() => document.documentElement.getAttribute('data-bs-theme') === 'dark')
 
-// Currency code: prefer relation > column > fallback
+// Currency display: prefer symbol from relation, fallback to code, then 'XAF'
 const currencyCode = computed(
   () => props.transaction?.currency?.code ?? props.transaction?.currency_code ?? 'XAF'
+)
+const currencySymbol = computed(
+  () => props.transaction?.currency?.symbol ?? props.transaction?.currency?.code ?? props.transaction?.currency_code ?? 'XAF'
 )
 
 const closeModal = () => {
@@ -325,27 +328,10 @@ const printReceipt = () => {
   if (!receiptContent.value || !props.transaction) return
 
   const tx = props.transaction
-  const txCurrency = tx.currency?.code ?? tx.currency_code ?? 'XAF'
+  const txSymbol = tx.currency?.symbol ?? tx.currency?.code ?? tx.currency_code ?? 'XAF'
   const locale = receiptLocale.value
-  const fmtNum = (n: number) => {
-    try {
-      return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: txCurrency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }).format(n)
-    } catch {
-      return (
-        new Intl.NumberFormat(locale, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2,
-        }).format(n) +
-        ' ' +
-        txCurrency
-      )
-    }
-  }
+  const fmtNum = (n: number) =>
+    new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n) + ' ' + txSymbol
   const fmtDate = (d: string) =>
     new Date(d).toLocaleString(locale, {
       day: '2-digit',
@@ -695,25 +681,14 @@ const downloadPDF = async () => {
   }
 }
 
-const formatCurrency = (amount: number, code?: string) => {
-  const currency = code ?? currencyCode.value
+const formatCurrency = (amount: number, symbolOverride?: string) => {
+  const symbol = symbolOverride ?? currencySymbol.value
   const locale = receiptLocale.value
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  } catch {
-    return (
-      new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(
-        amount
-      ) +
-      ' ' +
-      currency
-    )
-  }
+  const formatted = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
+  return `${formatted} ${symbol}`
 }
 
 const formatDateTime = (date: string) => {

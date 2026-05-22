@@ -204,14 +204,20 @@
               </div>
             </div>
 
-            <!-- Destination Customer (optional, filled by cashier when needed) -->
-            <div class="card mb-3 border-info">
-              <div class="card-header bg-info bg-opacity-10">
-                <h6 class="mb-0 text-info">
+            <!-- Destination Customer — obligatoire pour certains types, optionnel pour d'autres -->
+            <div class="card mb-3" :class="requiresDestCustomer ? 'border-danger' : 'border-info'">
+              <div class="card-header" :class="requiresDestCustomer ? 'bg-danger bg-opacity-10' : 'bg-info bg-opacity-10'">
+                <h6 class="mb-0" :class="requiresDestCustomer ? 'text-danger' : 'text-info'">
                   <i class="ti ti-user-check me-2"></i>
                   {{ t('transactions.dest_customer_info') || 'Bénéficiaire' }}
-                  <small class="text-muted ms-2">({{ t('transactions.optional') || 'optionnel' }})</small>
+                  <span v-if="requiresDestCustomer" class="text-danger ms-1">*</span>
+                  <small v-else class="text-muted ms-2">({{ t('transactions.optional') || 'optionnel' }})</small>
                 </h6>
+              </div>
+              <!-- Alerte si le bénéficiaire est requis et absent -->
+              <div v-if="requiresDestCustomer && !localForm.dest_customer_id" class="alert alert-danger alert-sm mb-0 py-2 px-3 rounded-0 border-0 border-bottom">
+                <i class="ti ti-alert-circle me-1"></i>
+                {{ t('transactions.dest_customer_required') || 'Ce type de transaction nécessite un bénéficiaire avant de pouvoir soumettre.' }}
               </div>
               <div class="card-body">
                 <div class="row">
@@ -793,6 +799,11 @@ const requiresCustomerAccount = computed(() =>
   (selectedTransactionType.value?.customer_account_effect ?? 'none') !== 'none'
 )
 
+// Whether the selected type requires a destination customer (receiver) before submit
+const requiresDestCustomer = computed(() =>
+  selectedTransactionType.value?.requires_dest_customer === true
+)
+
 // Filter wallets by selected branch
 const availableWallets = computed(() => {
   if (!localForm.value.branch_id) return []
@@ -845,7 +856,8 @@ const isFormValid = computed(() => {
     localForm.value.branch_id &&
     (localForm.value.gross_amount ?? 0) > 0 &&
     (localForm.value.fee_amount ?? 0) >= 0 &&
-    (!localForm.value.withdrawal_code || localForm.value.expires_at)
+    (!localForm.value.withdrawal_code || localForm.value.expires_at) &&
+    (!requiresDestCustomer.value || !!localForm.value.dest_customer_id)
   )
 })
 
