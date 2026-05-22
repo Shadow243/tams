@@ -9,8 +9,13 @@
           </p>
         </div>
 
-        <div class="text-end mt-3 mt-sm-0">
-          <button v-if="canCreateTransaction" @click.prevent="handleAddTransaction" type="button" class="btn btn-primary me-2">
+        <div class="text-end mt-3 mt-sm-0 d-flex gap-2 justify-content-end flex-wrap">
+          <!-- Rapport du jour — agent uniquement -->
+          <button v-if="isAgent" @click.prevent="applyDailyReport" type="button" class="btn btn-outline-success">
+            <i class="ti ti-calendar-today me-1"></i>
+            {{ t('transactions.daily_report') || 'Rapport du jour' }}
+          </button>
+          <button v-if="canCreateTransaction" @click.prevent="handleAddTransaction" type="button" class="btn btn-primary">
             <i class="ti ti-plus me-1"></i> {{ t('transactions.add_transaction') }}
           </button>
           <button @click.prevent="handleShowStatistics" type="button" class="btn btn-info">
@@ -211,6 +216,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useHead } from '@vueuse/head'
 import { usePermissions } from '@/composables/usePermissions'
 import { useUserSettings } from '@/composables/useUserSettings'
+import { useAuthStore } from '@/stores/auth'
 import { useTransactionStore } from '@/stores/transactions'
 import { useTransactionTypeStore } from '@/stores/transaction-types'
 import { useBranchStore } from '@/stores/branches'
@@ -226,7 +232,8 @@ import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
-const { canCreateTransaction, canEditTransaction, isCaissier } = usePermissions()
+const { canCreateTransaction, canEditTransaction, isCaissier, isAgent } = usePermissions()
+const authStore = useAuthStore()
 
 // Caissier ne peut créer que des ravitaillements internes (wallet_wallet)
 const filteredTransactionTypes = computed(() =>
@@ -281,18 +288,21 @@ const formData = ref<TransactionFormData>({
 })
 
 onMounted(async () => {
+  // Agent : restreindre la liste à ses propres transactions + aujourd'hui par défaut
+  const today = new Date().toISOString().split('T')[0]
+  store.updateFilters({
+    currency_id: undefined,
+    start_date: isAgent.value ? today : undefined,
+    end_date: isAgent.value ? today : undefined,
+    user_id: isAgent.value ? (authStore.user?.id ?? null) : null,
+  })
+
   await Promise.all([
     store.fetchTransactions(),
     transactionTypeStore.fetchTransactionTypes(),
     branchStore.fetchBranches(),
     walletStore.fetchWallets(),
     currencyStore.fetchAllCurrencies(),
-
-    store.updateFilters({
-      currency_id: undefined,
-      start_date: undefined,
-      end_date: undefined,
-    }),
     store.fetchStatistics(),
   ])
 })
@@ -514,6 +524,18 @@ const handleCompleteTransaction = async (id: string) => {
       })
     }
   }
+}
+
+// Rapport du jour : applique le filtre aujourd'hui + user_id de l'agent
+const applyDailyReport = async () => {
+  const today = new Date().toISOString().split('T')[0]
+  store.updateFilters({
+    start_date: today,
+    end_date: today,
+    user_id: authStore.user?.id ?? null,
+    status: '',
+  })
+  await store.fetchTransactions()
 }
 
 const handleShowStatistics = async () => {

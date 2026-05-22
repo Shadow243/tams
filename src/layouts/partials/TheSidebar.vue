@@ -107,7 +107,7 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const { userAvatar } = useUserAvatar()
 const user = computed(() => authStore.user)
-const { canSeeConfigurations } = usePermissions()
+const { canSeeConfigurations, can, isAgent, isCaissier } = usePermissions()
 
 // Sidebar toggle
 const { toggleSidebar } = useSidebarToggle()
@@ -118,44 +118,43 @@ const appRoutes = computed(() => {
     { label: t('sidebar.dashboard'), type: 'header' },
     { icon: 'home', label: t('sidebar.home'), route: 'home', type: 'menu' },
     { label: t('sidebar.apps'), type: 'header' },
-    {
-      icon: 'receipt-2',
-      label: t('sidebar.transactions'),
-      route: 'transactions.list',
-      type: 'menu',
-    },
-    {
-      icon: 'pig-money',
-      label: t('sidebar.customer_accounts'),
-      route: 'customer-accounts.list',
-      type: 'menu',
-    },
-    {
-      icon: 'device-desktop',
-      label: t('sidebar.operators'),
-      route: 'operators.list',
-      type: 'menu',
-    },
-    { icon: 'building-store', label: t('sidebar.branches'), route: 'branches.list', type: 'menu' },
-    { icon: 'wallet', label: t('sidebar.wallets'), route: 'wallets.list', type: 'menu' },
-    {
-      icon: 'arrows-exchange',
-      label: t('sidebar.transaction_types'),
-      route: 'transaction-types.list',
-      type: 'menu',
-    },
   ]
 
+  // Transactions — visible par tous les rôles opérationnels
+  if (can('lire_transactions')) {
+    const txLabel = isCaissier.value
+      ? (t('sidebar.ravitaillements') || 'Ravitaillements')
+      : isAgent.value
+        ? (t('sidebar.my_transactions') || 'Mes transactions')
+        : t('sidebar.transactions')
+    routes.push({ icon: 'receipt-2', label: txLabel, route: 'transactions.list', type: 'menu' })
+  }
+
+  // Comptes clients — agent et au-dessus
+  if (can('lire_clients')) {
+    routes.push({ icon: 'pig-money', label: t('sidebar.customer_accounts'), route: 'customer-accounts.list', type: 'menu' })
+  }
+
+  // Pages de gestion — superviseur et admin uniquement
+  if (can('lire_operateurs')) {
+    routes.push({ icon: 'device-desktop', label: t('sidebar.operators'), route: 'operators.list', type: 'menu' })
+  }
+  if (can('lire_branches')) {
+    routes.push({ icon: 'building-store', label: t('sidebar.branches'), route: 'branches.list', type: 'menu' })
+  }
+  if (can('lire_portefeuilles')) {
+    routes.push({ icon: 'wallet', label: t('sidebar.wallets'), route: 'wallets.list', type: 'menu' })
+  }
+  if (can('lire_types_operations')) {
+    routes.push({ icon: 'arrows-exchange', label: t('sidebar.transaction_types'), route: 'transaction-types.list', type: 'menu' })
+  }
+
+  // Configuration — admin uniquement
   if (canSeeConfigurations.value) {
     routes.push(
       { label: t('sidebar.params'), type: 'header' },
       { icon: 'receipt', label: t('sidebar.fee_rules'), route: 'fee-rules.list', type: 'menu' },
-      {
-        icon: 'currency-dollar',
-        label: t('sidebar.currencies'),
-        route: 'currencies.list',
-        type: 'menu',
-      },
+      { icon: 'currency-dollar', label: t('sidebar.currencies'), route: 'currencies.list', type: 'menu' },
       { icon: 'globe', label: t('sidebar.countries'), route: 'countries.list', type: 'menu' },
       { icon: 'users', label: t('sidebar.users'), route: 'users.list', type: 'menu' }
     )

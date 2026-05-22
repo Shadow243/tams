@@ -999,6 +999,50 @@
         </div>
       </div>
 
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- Transactions en attente — section dédiée pour l'agent            -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div v-if="isAgent && !store.loadingDashboard && data && data.by_status.pending > 0" class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm border-start border-warning border-3">
+            <div class="card-header py-3 border-bottom d-flex align-items-center justify-content-between">
+              <h5 class="card-title mb-0 fw-semibold">
+                <i class="ti ti-clock-hour-4 me-2 text-warning"></i>
+                {{ t('dashboard.pending_transactions') || 'Mes transactions en attente' }}
+                <span class="badge bg-warning text-dark ms-2">{{ data.by_status.pending }}</span>
+              </h5>
+              <router-link to="/transactions" class="btn btn-sm btn-outline-warning">
+                {{ t('dashboard.view_all') || 'Voir tout' }}
+                <i class="ti ti-arrow-right ms-1"></i>
+              </router-link>
+            </div>
+            <div class="card-body p-3">
+              <div class="d-flex flex-wrap gap-3">
+                <div v-for="tx in data.recent_transactions.filter(t => t.status === 'pending')" :key="tx.id"
+                  class="d-flex align-items-center gap-2 p-2 rounded bg-warning-subtle flex-grow-1"
+                  style="min-width: 260px"
+                >
+                  <span class="status-icon-round bg-warning-subtle flex-shrink-0">
+                    <i class="ti ti-clock text-warning" style="font-size: 0.8rem"></i>
+                  </span>
+                  <div class="overflow-hidden">
+                    <div class="small fw-semibold text-truncate">{{ tx.reference }}</div>
+                    <div class="d-flex gap-2 align-items-center mt-1">
+                      <span class="text-muted" style="font-size: 0.7rem">{{ tx.transaction_type?.name || '—' }}</span>
+                      <span class="fw-semibold text-warning" style="font-size: 0.8rem">{{ formatAmount(tx.gross_amount) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="!data.recent_transactions.filter(t => t.status === 'pending').length" class="text-muted small">
+                  <i class="ti ti-info-circle me-1"></i>
+                  {{ t('dashboard.pending_not_in_recent') || 'Voir la liste complète des transactions.' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Empty state (no data, not loading) -->
       <div v-if="!store.loadingDashboard && !data" class="row">
         <div class="col-12">
