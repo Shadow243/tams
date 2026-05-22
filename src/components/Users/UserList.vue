@@ -288,6 +288,45 @@
           </select>
         </div>
 
+        <!-- Wallets — visible uniquement pour le rôle Agent -->
+        <div v-if="isAgentRole" class="col-12">
+          <label class="form-label fw-semibold">
+            <i class="ti ti-wallet me-1 text-primary"></i>
+            {{ t('users.form.wallets') || 'Wallets assignés' }}
+            <span class="badge bg-info-subtle text-info ms-1">Agent</span>
+          </label>
+          <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
+            <div v-if="!walletStore.wallet_list.length" class="text-muted small p-1">
+              {{ t('users.form.no_wallets') || 'Aucun wallet disponible.' }}
+            </div>
+            <div
+              v-for="wallet in walletStore.wallet_list"
+              :key="wallet.id"
+              class="form-check py-1 border-bottom"
+            >
+              <input
+                type="checkbox"
+                :id="`uw-${wallet.id}`"
+                :value="wallet.id"
+                v-model="form.wallet_ids"
+                class="form-check-input"
+              />
+              <label :for="`uw-${wallet.id}`" class="form-check-label d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary">
+                  {{ wallet.operator_name || wallet.operator?.name || '—' }}
+                </span>
+                <span class="fw-medium">{{ wallet.wallet_number }}</span>
+                <span class="text-muted small">{{ wallet.currency_code || wallet.currency?.code }}</span>
+                <span class="text-muted small ms-auto">{{ wallet.branch_name || wallet.branch?.name }}</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-text">
+            <i class="ti ti-info-circle me-1"></i>
+            {{ form.wallet_ids.length }} wallet(s) sélectionné(s)
+          </div>
+        </div>
+
         <div class="col-12" v-if="isEditing && !showPasswordFields">
           <button
             type="button"
@@ -371,6 +410,7 @@ import { useI18n } from '@/composables/useI18n'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { useUserStore } from '@/stores/users'
 import { useBranchStore } from '@/stores/branches'
+import { useWalletStore } from '@/stores/wallets'
 import User from '@/components/Users/User.vue'
 import BaseModal from '@/components/Shared/BaseModal.vue'
 import SearchableSelect from '@/components/Shared/SearchableSelect.vue'
@@ -382,12 +422,12 @@ const { t } = useI18n()
 const { getItemsPerPage } = useUserSettings()
 const userStore = useUserStore()
 const branchStore = useBranchStore()
+const walletStore = useWalletStore()
 
-// Load branches on mount
+// Load branches + wallets on mount
 onMounted(() => {
-  if (branchStore.branch_list.length === 0) {
-    branchStore.fetchBranches()
-  }
+  if (branchStore.branch_list.length === 0) branchStore.fetchBranches()
+  if (walletStore.wallet_list.length === 0) walletStore.fetchWallets()
   fetchRoles()
 })
 
@@ -412,12 +452,19 @@ const form = reactive({
   phone: '',
   gender: '',
   country_code: '',
-  branch_id: null,
-  role_id: null,
+  branch_id: null as number | null,
+  role_id: null as number | null,
   password: '',
   password_confirmation: '',
   is_email_verified: false,
   is_active: true,
+  wallet_ids: [] as number[],
+})
+
+// Vrai si le rôle sélectionné est "agent"
+const isAgentRole = computed(() => {
+  if (!form.role_id) return false
+  return roles.value.find(r => r.id === form.role_id)?.name === 'agent'
 })
 
 // États du formulaire
@@ -445,6 +492,7 @@ const resetForm = () => {
     password_confirmation: '',
     is_email_verified: false,
     is_active: true,
+    wallet_ids: [],
   })
   isEditing.value = false
   showPasswordFields.value = false
@@ -478,6 +526,9 @@ const submitForm = async () => {
   // Convertir les booléens
   formData.is_email_verified = Boolean(formData.is_email_verified)
   formData.is_active = Boolean(formData.is_active)
+
+  // Envoyer wallet_ids seulement si rôle agent, sinon vider
+  formData.wallet_ids = isAgentRole.value ? form.wallet_ids : []
 
   const success = await userStore.storeUser(formData)
 
@@ -573,6 +624,7 @@ const editUser = async (user: any) => {
   // Convertir les valeurs en booléens - vérifier si les dates existent ET ne sont pas null
   form.is_email_verified = !!(user.email_verified_at || user.is_email_verified)
   form.is_active = user.active === 1 || user.active === true || user.is_active === true
+  form.wallet_ids = Array.isArray(user.wallet_ids) ? [...user.wallet_ids] : []
 
   console.log('Form after assignment:', {
     gender: form.gender,

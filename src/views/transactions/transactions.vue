@@ -182,7 +182,7 @@
       :processing="store.processing"
       :transaction-types="filteredTransactionTypes"
       :branches="branchStore.branch_list"
-      :wallets="walletStore.wallet_list"
+      :wallets="filteredWallets"
       @close="handleCloseModal"
       @submit="handleSubmit"
     />
@@ -241,6 +241,14 @@ const filteredTransactionTypes = computed(() =>
     ? transactionTypeStore.transactionType_list.filter((t: any) => t.code === 'wallet_wallet')
     : transactionTypeStore.transactionType_list
 )
+
+// Agent : restreindre les wallets à ceux qui lui sont assignés
+const filteredWallets = computed(() => {
+  if (!isAgent.value) return walletStore.wallet_list
+  const agentWalletIds = authStore.user?.wallet_ids ?? []
+  if (!agentWalletIds.length) return []
+  return walletStore.wallet_list.filter((w: any) => agentWalletIds.includes(w.id))
+})
 
 useHead({
   title: t('transactions.page_title'),

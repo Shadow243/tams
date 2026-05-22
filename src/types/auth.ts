@@ -16,6 +16,7 @@ export interface User {
     email_verified_at: string | null
     permissions: string[]
     roles?: string[]
+    wallet_ids?: number[]
     avatar?: {
         full: string
         thumbnail: string
