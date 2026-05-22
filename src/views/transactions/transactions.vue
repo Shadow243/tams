@@ -175,7 +175,7 @@
       :form-data="formData"
       :is-editing="isEditing"
       :processing="store.processing"
-      :transaction-types="transactionTypeStore.transactionType_list"
+      :transaction-types="filteredTransactionTypes"
       :branches="branchStore.branch_list"
       :wallets="walletStore.wallet_list"
       @close="handleCloseModal"
@@ -207,7 +207,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useHead } from '@vueuse/head'
 import { usePermissions } from '@/composables/usePermissions'
 import { useUserSettings } from '@/composables/useUserSettings'
@@ -226,7 +226,14 @@ import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
-const { canCreateTransaction, canEditTransaction } = usePermissions()
+const { canCreateTransaction, canEditTransaction, isCaissier } = usePermissions()
+
+// Caissier ne peut créer que des ravitaillements internes (wallet_wallet)
+const filteredTransactionTypes = computed(() =>
+  isCaissier.value
+    ? transactionTypeStore.transactionType_list.filter((t: any) => t.code === 'wallet_wallet')
+    : transactionTypeStore.transactionType_list
+)
 
 useHead({
   title: t('transactions.page_title'),
@@ -292,8 +299,14 @@ onMounted(async () => {
 
 const handleAddTransaction = () => {
   isEditing.value = false
+
+  // Pré-sélectionner le type ravitaillement pour le caissier (son seul type autorisé)
+  const preselectedTypeId = isCaissier.value
+    ? (transactionTypeStore.transactionType_list.find((t: any) => t.code === 'wallet_wallet')?.id ?? null)
+    : null
+
   formData.value = {
-    transaction_type_id: null,
+    transaction_type_id: preselectedTypeId,
     branch_id: null,
     destination_branch_id: null,
     customer_id: null,

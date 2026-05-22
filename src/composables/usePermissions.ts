@@ -28,8 +28,8 @@ export function usePermissions() {
   const canDelete  = computed(() => isAdmin.value)
 
   // ── Transactions ─────────────────────────────────────────────────────────────
-  // Agent effectue les transactions
-  const canCreateTransaction   = computed(() => isAdmin.value || isAgent.value)
+  // Agent effectue les transactions, caissier crée les ravitaillements
+  const canCreateTransaction   = computed(() => isAdmin.value || isAgent.value || isCaissier.value)
   const canEditTransaction     = computed(() => isAdmin.value)
   // Caissier complète (ravitaillement → paiement sortant)
   const canCompleteTransaction = computed(() => isAdmin.value || isCaissier.value)
@@ -37,12 +37,12 @@ export function usePermissions() {
   const canCancelTransaction   = computed(() => isAdmin.value || isSuperviseur.value)
 
   // ── Visibilité dashboard ──────────────────────────────────────────────────────
-  // Filtre de branche actif uniquement pour admin + superviseur
-  const canFilterBranch      = computed(() => isAdmin.value || isSuperviseur.value)
+  // Filtre de branche : caissier en a besoin pour gérer les ravitaillements entre agences
+  const canFilterBranch      = computed(() => isAdmin.value || isSuperviseur.value || isCaissier.value)
   // Classement "Par agence" — vue globale réservée admin/superviseur
   const canSeeBranchRanking  = computed(() => isAdmin.value || isSuperviseur.value)
-  // Totaux système (toutes agences confondues)
-  const canSeeSystemTotals   = computed(() => isAdmin.value || isSuperviseur.value)
+  // Totaux système — caissier en a besoin pour connaître l'état global des liquidités
+  const canSeeSystemTotals   = computed(() => isAdmin.value || isSuperviseur.value || isCaissier.value)
   // Tableau des soldes par agence
   const canSeeBranchBalances = computed(() => isAdmin.value || isSuperviseur.value || isCaissier.value)
 
