@@ -619,6 +619,114 @@
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- Rapport Par Wallet                                                -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div v-if="!store.loadingDashboard && data && data.by_wallet.length" class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header py-3 border-bottom d-flex align-items-center justify-content-between">
+              <h5 class="card-title mb-0 fw-semibold">
+                <i class="ti ti-wallet me-2 text-primary"></i>
+                {{ isAgent
+                  ? (t('dashboard.my_wallets_report') || 'Rapport de mes wallets')
+                  : (t('dashboard.by_wallet') || 'Rapport par wallet') }}
+              </h5>
+              <span class="badge bg-secondary-subtle text-secondary">
+                {{ data.by_wallet.length }} wallet(s)
+              </span>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-3">{{ t('dashboard.wallet') || 'Wallet' }}</th>
+                      <th>{{ t('dashboard.operator') || 'Opérateur' }}</th>
+                      <th v-if="!isAgent">{{ t('dashboard.branch') || 'Agence' }}</th>
+                      <th class="text-center">{{ t('dashboard.transactions_count') || 'Transactions' }}</th>
+                      <th class="text-end">{{ t('dashboard.total_amount') || 'Montant total' }}</th>
+                      <th class="text-end">{{ t('dashboard.total_fees') || 'Frais' }}</th>
+                      <th class="text-end pe-3">{{ t('dashboard.total_net') || 'Net' }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="w in data.by_wallet" :key="w.wallet_id">
+                      <!-- Wallet number + progress bar -->
+                      <td class="ps-3" style="min-width: 180px">
+                        <div class="fw-medium small">{{ w.wallet_number }}</div>
+                        <div class="progress mt-1" style="height: 3px">
+                          <div
+                            class="progress-bar bg-primary"
+                            :style="{ width: getWalletPercent(w.total_amount) + '%' }"
+                          ></div>
+                        </div>
+                      </td>
+                      <!-- Operator -->
+                      <td>
+                        <span class="badge bg-primary-subtle text-primary small">
+                          {{ w.operator_name }}
+                        </span>
+                        <div class="text-muted" style="font-size: 0.7rem">{{ w.currency_code }}</div>
+                      </td>
+                      <!-- Branch (hidden for agent) -->
+                      <td v-if="!isAgent" class="small text-muted">{{ w.branch_name }}</td>
+                      <!-- Count -->
+                      <td class="text-center">
+                        <span class="badge bg-light text-dark border fw-semibold">{{ formatNumber(w.count) }}</span>
+                      </td>
+                      <!-- Total amount -->
+                      <td class="text-end fw-semibold text-success">
+                        {{ formatBalanceAmount(w.total_amount, w.currency_symbol) }}
+                      </td>
+                      <!-- Fees -->
+                      <td class="text-end text-warning small">
+                        {{ formatBalanceAmount(w.total_fees, w.currency_symbol) }}
+                      </td>
+                      <!-- Net -->
+                      <td class="text-end pe-3 fw-bold text-primary">
+                        {{ formatBalanceAmount(w.total_amount - w.total_fees, w.currency_symbol) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                  <!-- Totaux -->
+                  <tfoot class="table-light fw-bold">
+                    <tr>
+                      <td class="ps-3" :colspan="isAgent ? 2 : 3">
+                        <small class="text-muted">{{ t('dashboard.total') || 'Total' }}</small>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge bg-primary-subtle text-primary">
+                          {{ formatNumber(data.by_wallet.reduce((s, w) => s + w.count, 0)) }}
+                        </span>
+                      </td>
+                      <td class="text-end text-success">
+                        {{ formatBalanceAmount(
+                          data.by_wallet.reduce((s, w) => s + w.total_amount, 0),
+                          data.by_wallet[0]?.currency_symbol
+                        ) }}
+                      </td>
+                      <td class="text-end text-warning">
+                        {{ formatBalanceAmount(
+                          data.by_wallet.reduce((s, w) => s + w.total_fees, 0),
+                          data.by_wallet[0]?.currency_symbol
+                        ) }}
+                      </td>
+                      <td class="text-end pe-3 text-primary">
+                        {{ formatBalanceAmount(
+                          data.by_wallet.reduce((s, w) => s + w.total_amount - w.total_fees, 0),
+                          data.by_wallet[0]?.currency_symbol
+                        ) }}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
       <!-- Balance Report Section                                            -->
       <!-- ═══════════════════════════════════════════════════════════════════ -->
 
@@ -1367,6 +1475,12 @@ function getBranchPercent(count: number) {
   return max ? Math.round((count / max) * 100) : 0
 }
 
+function getWalletPercent(amount: number) {
+  if (!data.value?.by_wallet.length) return 0
+  const max = Math.max(...data.value.by_wallet.map((w: { total_amount: number }) => w.total_amount))
+  return max ? Math.round((amount / max) * 100) : 0
+}
+
 // ── ApexCharts: Status Donut ──────────────────────────────────────────────────
 const statusChartSeries = computed(() => {
   if (!data.value) return statusItems.map(() => 0)
@@ -1541,7 +1655,7 @@ const trendDateRange = computed(() => {
 })
 
 // ── onMounted ─────────────────────────────────────────────────────────────────
-function formatBalanceAmount(n: number, symbol?: string) {
+function formatBalanceAmount(n: number, symbol?: string | null) {
   const formatted = new Intl.NumberFormat('fr-FR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

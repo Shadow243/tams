@@ -178,6 +178,18 @@ export interface DashboardStatisticsByBranch {
   total_amount: number
 }
 
+export interface DashboardStatisticsByWallet {
+  wallet_id: number
+  wallet_number: string
+  operator_name: string
+  branch_name: string
+  currency_code: string
+  currency_symbol: string | null
+  count: number
+  total_amount: number
+  total_fees: number
+}
+
 export interface DashboardTrendItem {
   date: string
   currency_id: number
@@ -206,6 +218,7 @@ export interface DashboardStatistics {
   }
   by_type: DashboardStatisticsByType[]
   by_branch: DashboardStatisticsByBranch[]
+  by_wallet: DashboardStatisticsByWallet[]
   trend: DashboardTrendItem[]
   recent_transactions: Transaction[]
 }
