@@ -293,6 +293,10 @@ export const useTransactionStore = defineStore('transaction', () => {
         params.transaction_type_id = dashboardFilters.transaction_type_id
       }
 
+      if (dashboardFilters?.user_id) {
+        params.user_id = dashboardFilters.user_id
+      }
+
       const response = await axiosInstance.get(
         `${appConfig.apiUrl}/transactions/dashboard/statistics`,
         { params, signal: dashboardAbortController.signal }

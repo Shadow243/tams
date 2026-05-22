@@ -32,8 +32,12 @@ export const useAuthStore = defineStore('auth', {
             const { setCookie: setToken } = useCookie('token', '')
             if (user) {
                 this.user = user
+                this.token = token
                 setToken(token)
                 localStorage.setItem('token', token)
+                
+                // Set axios authorization header immediately
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`
             }
         },
         async fetchUser() {

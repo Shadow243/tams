@@ -64,7 +64,9 @@
               <!-- Settings -->
               <a href="javascript:void(0);" class="dropdown-item">
                 <i class="ti ti-settings-2 me-1 fs-lg align-middle"></i>
-                <span class="align-middle">{{ t('sidebar.account_settings') || 'Paramètres du compte' }}</span>
+                <span class="align-middle">{{
+                  t('sidebar.account_settings') || 'Paramètres du compte'
+                }}</span>
               </a>
 
               <!-- Lock -->
@@ -116,20 +118,46 @@ const appRoutes = computed(() => {
     { label: t('sidebar.dashboard'), type: 'header' },
     { icon: 'home', label: t('sidebar.home'), route: 'home', type: 'menu' },
     { label: t('sidebar.apps'), type: 'header' },
-    { icon: 'receipt-2',      label: t('sidebar.transactions'),      route: 'transactions.list',      type: 'menu' },
-    { icon: 'device-desktop', label: t('sidebar.operators'),         route: 'operators.list',         type: 'menu' },
-    { icon: 'building-store', label: t('sidebar.branches'),          route: 'branches.list',          type: 'menu' },
-    { icon: 'wallet',         label: t('sidebar.wallets'),           route: 'wallets.list',           type: 'menu' },
-    { icon: 'arrows-exchange',label: t('sidebar.transaction_types'), route: 'transaction-types.list', type: 'menu' },
+    {
+      icon: 'receipt-2',
+      label: t('sidebar.transactions'),
+      route: 'transactions.list',
+      type: 'menu',
+    },
+    {
+      icon: 'pig-money',
+      label: t('sidebar.customer_accounts'),
+      route: 'customer-accounts.list',
+      type: 'menu',
+    },
+    {
+      icon: 'device-desktop',
+      label: t('sidebar.operators'),
+      route: 'operators.list',
+      type: 'menu',
+    },
+    { icon: 'building-store', label: t('sidebar.branches'), route: 'branches.list', type: 'menu' },
+    { icon: 'wallet', label: t('sidebar.wallets'), route: 'wallets.list', type: 'menu' },
+    {
+      icon: 'arrows-exchange',
+      label: t('sidebar.transaction_types'),
+      route: 'transaction-types.list',
+      type: 'menu',
+    },
   ]
 
   if (canSeeConfigurations.value) {
     routes.push(
       { label: t('sidebar.params'), type: 'header' },
-      { icon: 'receipt',          label: t('sidebar.fee_rules'),  route: 'fee-rules.list',   type: 'menu' },
-      { icon: 'currency-dollar',  label: t('sidebar.currencies'), route: 'currencies.list',  type: 'menu' },
-      { icon: 'globe',            label: t('sidebar.countries'),  route: 'countries.list',   type: 'menu' },
-      { icon: 'users',            label: t('sidebar.users'),      route: 'users.list',       type: 'menu' },
+      { icon: 'receipt', label: t('sidebar.fee_rules'), route: 'fee-rules.list', type: 'menu' },
+      {
+        icon: 'currency-dollar',
+        label: t('sidebar.currencies'),
+        route: 'currencies.list',
+        type: 'menu',
+      },
+      { icon: 'globe', label: t('sidebar.countries'), route: 'countries.list', type: 'menu' },
+      { icon: 'users', label: t('sidebar.users'), route: 'users.list', type: 'menu' }
     )
   }
 

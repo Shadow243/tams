@@ -1,6 +1,7 @@
 import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 import { hidePreloader } from "@/utils/ui-utils";
 import { useAuthStore } from "@/stores/auth";
+import { axiosInstance } from "@/plugins/axios";
 
 export default async (
     to: RouteLocationNormalized,
@@ -8,9 +9,13 @@ export default async (
     next: NavigationGuardNext
 ): Promise<void> => {
     const store = useAuthStore();
-    //   const pathname = window.location.pathname;
+    
+    // Restore token to axios if exists
+    if (store.token && !axiosInstance.defaults.headers.common['Authorization']) {
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${store.token}`;
+    }
 
-    if (store.user === null) {
+    if (store.user === null && store.token) {
         try {
             await store.fetchUser();
             console.log("User fetched successfully:", store.user);

@@ -15,6 +15,8 @@ export interface TransactionType {
   dest_branch_amount: BalanceAmount
   dest_wallet_effect: BalanceEffect
   dest_wallet_amount: BalanceAmount
+  customer_account_effect: BalanceEffect
+  customer_account_amount: BalanceAmount
   created_at: string
   updated_at: string
 }
@@ -33,6 +35,8 @@ export interface TransactionTypeList {
   dest_branch_amount: BalanceAmount
   dest_wallet_effect: BalanceEffect
   dest_wallet_amount: BalanceAmount
+  customer_account_effect: BalanceEffect
+  customer_account_amount: BalanceAmount
   created_at: string
   updated_at: string
 }
@@ -68,4 +72,6 @@ export interface TransactionTypeFormData {
   dest_branch_amount: BalanceAmount
   dest_wallet_effect: BalanceEffect
   dest_wallet_amount: BalanceAmount
+  customer_account_effect: BalanceEffect
+  customer_account_amount: BalanceAmount
 }

@@ -4,9 +4,16 @@
       <!-- Page Header -->
       <div class="d-flex align-items-sm-center flex-sm-row flex-column my-3 gap-3">
         <div class="flex-grow-1">
-          <h4 class="fs-xl mb-1">{{ t('dashboard.title') || 'Tableau de bord' }}</h4>
+          <h4 class="fs-xl mb-1">
+            {{ t('dashboard.title') || 'Tableau de bord' }}
+            <span v-if="isAgent" class="badge bg-info-subtle text-info ms-2 fs-6 fw-normal align-middle">
+              <i class="ti ti-user me-1"></i>{{ t('dashboard.my_data') || 'Mes données' }}
+            </span>
+          </h4>
           <p class="text-muted mb-0">
-            {{ t('dashboard.description') || 'Vue globale du système de transfert' }}
+            {{ isAgent
+              ? (t('dashboard.description_agent') || 'Vos transactions et votre agence')
+              : (t('dashboard.description') || 'Vue globale du système de transfert') }}
           </p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -46,20 +53,26 @@
               style="max-width: 150px"
             />
           </template>
-          <!-- Branch Filter -->
-          <select
-            v-model="filters.branch_id"
-            @change="debouncedLoadDashboard"
-            class="form-select form-select-sm"
-            style="min-width: 150px"
-          >
-            <option :value="null">
-              {{ t('dashboard.filter.all_branches') || 'Toutes les agences' }}
-            </option>
-            <option v-for="b in branchStore.branch_list" :key="b.id" :value="b.id">
-              {{ b.name }}
-            </option>
-          </select>
+          <!-- Branch Filter — masqué pour l'agent (agence verrouillée) -->
+          <template v-if="canFilterBranch">
+            <select
+              v-model="filters.branch_id"
+              @change="debouncedLoadDashboard"
+              class="form-select form-select-sm"
+              style="min-width: 150px"
+            >
+              <option :value="null">
+                {{ t('dashboard.filter.all_branches') || 'Toutes les agences' }}
+              </option>
+              <option v-for="b in branchStore.branch_list" :key="b.id" :value="b.id">
+                {{ b.name }}
+              </option>
+            </select>
+          </template>
+          <span v-else-if="isAgent" class="badge bg-secondary-subtle text-secondary py-2 px-3">
+            <i class="ti ti-building-bank me-1"></i>
+            {{ agentBranchName || t('dashboard.my_branch') || 'Mon agence' }}
+          </span>
           <!-- Currency Filter -->
           <select
             v-model="filters.currency_id"
@@ -448,10 +461,10 @@
         </div>
       </div>
 
-      <!-- Third Row: By Type + By Branch + Recent -->
+      <!-- Third Row: By Type + By Branch (admin/superviseur) + Recent -->
       <div v-if="!store.loadingDashboard && data" class="row g-3 mb-4">
         <!-- By Transaction Type -->
-        <div class="col-xl-4 col-lg-6">
+        <div :class="canSeeBranchRanking ? 'col-xl-4 col-lg-6' : 'col-xl-6 col-lg-6'">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 border-bottom">
               <h5 class="card-title mb-0 fw-semibold">
@@ -492,8 +505,8 @@
           </div>
         </div>
 
-        <!-- By Branch -->
-        <div class="col-xl-4 col-lg-6">
+        <!-- By Branch — admin + superviseur uniquement -->
+        <div v-if="canSeeBranchRanking" class="col-xl-4 col-lg-6">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 border-bottom">
               <h5 class="card-title mb-0 fw-semibold">
@@ -535,7 +548,7 @@
         </div>
 
         <!-- Recent Transactions -->
-        <div class="col-xl-4 col-lg-12">
+        <div :class="canSeeBranchRanking ? 'col-xl-4 col-lg-12' : 'col-xl-6 col-lg-12'">
           <div class="card border-0 shadow-sm h-100">
             <div
               class="card-header py-3 border-bottom d-flex align-items-center justify-content-between"
@@ -614,13 +627,14 @@
         <div>
           <h5 class="mb-1 fw-semibold">
             <i class="ti ti-scale me-2 text-primary"></i>
-            {{ t('dashboard.balance_report') || 'Rapport des soldes' }}
+            {{ isAgent
+              ? (t('dashboard.balance_report_agent') || 'Mes soldes')
+              : (t('dashboard.balance_report') || 'Rapport des soldes') }}
           </h5>
           <p class="text-muted mb-0 small">
-            {{
-              t('dashboard.balance_report_desc') ||
-              'Soldes cash par agence et soldes virtuels par wallet'
-            }}
+            {{ isAgent
+              ? (t('dashboard.balance_report_agent_desc') || 'Soldes virtuels de vos wallets')
+              : (t('dashboard.balance_report_desc') || 'Soldes cash par agence et soldes virtuels par wallet') }}
           </p>
         </div>
         <button
@@ -661,8 +675,8 @@
         </div>
       </template>
 
-      <!-- Summary cards by currency (only currencies with non-zero balances) -->
-      <div v-if="!loadingBalances && balanceReport?.summary.length">
+      <!-- Totaux Système — admin + superviseur uniquement -->
+      <div v-if="!loadingBalances && balanceReport?.summary.length && canSeeSystemTotals">
         <!-- Section header -->
         <div class="d-flex align-items-center justify-content-between mb-3">
           <h5 class="mb-0 fw-semibold">
@@ -807,8 +821,8 @@
 
       <!-- Branch + Wallet tables -->
       <div v-if="!loadingBalances && balanceReport" class="row g-3 mb-4">
-        <!-- Branch balances -->
-        <div class="col-lg-6">
+        <!-- Soldes agences — admin + superviseur + caissier uniquement -->
+        <div v-if="canSeeBranchBalances" class="col-lg-6">
           <div class="card border-0 shadow-sm h-100">
             <div
               class="card-header py-3 border-bottom d-flex align-items-center justify-content-between"
@@ -1007,6 +1021,9 @@
         </div>
       </div>
     </div>
+
+    <!-- ── Rapport Comptes Clients VIP ──────────────────────────────────── -->
+    <CustomerAccountsReport v-if="can('lire_clients')" />
   </div>
 </template>
 
@@ -1020,6 +1037,9 @@ import { useCurrencyStore } from '@/stores/currencies'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/composables/useI18n'
 import { useBalanceReport } from '@/composables/useBalanceReport'
+import { usePermissions } from '@/composables/usePermissions'
+import CustomerAccountsReport from '@/components/CustomerAccounts/CustomerAccountsReport.vue'
+
 import { echo } from '@/plugins/echo'
 import type { DashboardFilters, DashboardStatistics } from '@/types'
 
@@ -1028,6 +1048,14 @@ const authStore = useAuthStore()
 
 useHead({ title: t('dashboard.title') || 'Tableau de bord' })
 
+const {
+  can,
+  isAgent,
+  canFilterBranch,
+  canSeeBranchRanking,
+  canSeeSystemTotals,
+  canSeeBranchBalances,
+} = usePermissions()
 const store = useTransactionStore()
 const typeStore = useTransactionTypeStore()
 const branchStore = useBranchStore()
@@ -1038,9 +1066,18 @@ const {
   fetchReport: _fetchBalanceReport,
 } = useBalanceReport()
 
-// Typed wrapper — avoids TS2345 caused by vue-tsc inferring (silent?: boolean) on @click
+// Nom de l'agence de l'agent connecté (affiché à la place du filtre branche)
+const agentBranchName = computed(() =>
+  branchStore.branch_list.find(b => b.id === authStore.user?.branch_id)?.name ?? ''
+)
+
+// Passe branch_id pour les rapports de solde des agents (données de leur agence uniquement)
 function fetchBalanceReport(silent = false) {
-  return _fetchBalanceReport(silent)
+  const params =
+    isAgent.value && authStore.user?.branch_id
+      ? { branch_id: authStore.user.branch_id }
+      : undefined
+  return _fetchBalanceReport(silent, params)
 }
 const handleRefreshBalance = () => fetchBalanceReport()
 
@@ -1110,31 +1147,26 @@ function onPeriodChange() {
   if (filters.value.period !== 'custom') debouncedLoadDashboard()
 }
 
-async function loadDashboard() {
+function buildDashboardParams() {
   const { start, end } = getDateRange(filters.value.period)
-  await store.fetchDashboardStatistics({
+  return {
     start_date: start ?? undefined,
     end_date: end ?? undefined,
     branch_id: filters.value.branch_id ?? undefined,
     currency_id: filters.value.currency_id ?? undefined,
     transaction_type_id: filters.value.transaction_type_id ?? undefined,
-  })
+    user_id: isAgent.value ? (authStore.user?.id ?? undefined) : undefined,
+  }
+}
+
+async function loadDashboard() {
+  await store.fetchDashboardStatistics(buildDashboardParams())
 }
 
 // Silent version for real-time updates (no loader shown)
 async function loadDashboardSilent() {
   try {
-    const { start, end } = getDateRange(filters.value.period)
-    await store.fetchDashboardStatistics(
-      {
-        start_date: start ?? undefined,
-        end_date: end ?? undefined,
-        branch_id: filters.value.branch_id ?? undefined,
-        currency_id: filters.value.currency_id ?? undefined,
-        transaction_type_id: filters.value.transaction_type_id ?? undefined,
-      },
-      true, // silent = true
-    )
+    await store.fetchDashboardStatistics(buildDashboardParams(), true)
   } catch (e) {
     console.warn('[realtime] dashboard silent refresh failed:', e)
   }
@@ -1477,6 +1509,11 @@ function formatBalanceAmount(n: number, symbol?: string) {
 let echoChannel: ReturnType<typeof echo.private> | null = null
 
 onMounted(async () => {
+  // Verrouiller l'agence pour les agents (ils ne voient que leurs données)
+  if (isAgent.value && authStore.user?.branch_id) {
+    filters.value.branch_id = authStore.user.branch_id
+  }
+
   await Promise.all([
     branchStore.fetchBranches(1, undefined, 100),
     currencyStore.fetchAllCurrencies(),

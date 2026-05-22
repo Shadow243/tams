@@ -19,8 +19,23 @@
           <div id="receipt-content" ref="receiptContent" class="receipt-container p-4">
             <!-- Header -->
             <div class="text-center mb-4 border-bottom pb-3">
-              <h3 class="fw-bold mb-1">{{ appConfig.appName }}</h3>
-              <p class="text-muted mb-0 small">
+              <img
+                :src="logoImg"
+                alt="TAMS Logo"
+                class="brand-logo mb-2"
+                style="height: 50px; width: auto"
+              />
+              <h3 class="fw-bold mb-1" style="letter-spacing: 4px">TAMS</h3>
+              <p
+                class="text-muted mb-1 small"
+                style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase"
+              >
+                Transaction &amp; Asset Management System
+              </p>
+              <p
+                class="text-muted mb-0 small fw-bold"
+                style="font-size: 0.85rem; letter-spacing: 2px"
+              >
                 {{ t('transactions.transaction_receipt') || 'REÇU DE TRANSACTION' }}
               </p>
             </div>
@@ -137,7 +152,7 @@
                 <div class="col-6">
                   <strong>{{ t('transactions.description') || 'Note' }}:</strong>
                 </div>
-                <div class="col-6 text-end text-muted small" style="word-break:break-word">
+                <div class="col-6 text-end text-muted small" style="word-break: break-word">
                   {{ transaction.description }}
                 </div>
               </div>
@@ -252,6 +267,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { logoImg, iconImage } from '@/utils/ui-utils'
 import { useI18n } from '@/composables/useI18n'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { axiosInstance } from '@/plugins/axios'
@@ -283,12 +299,15 @@ const downloading = ref(false)
 const receiptContent = ref<HTMLElement | null>(null)
 
 // Auto-impression si le paramètre autoPrintReceipt est activé
-watch(() => props.show, (visible) => {
-  if (visible && settings.value.transactions?.autoPrintReceipt) {
-    // Délai court pour laisser le DOM se rendre avant d'imprimer
-    setTimeout(() => printReceipt(), 400)
+watch(
+  () => props.show,
+  (visible) => {
+    if (visible && settings.value.transactions?.autoPrintReceipt) {
+      // Délai court pour laisser le DOM se rendre avant d'imprimer
+      setTimeout(() => printReceipt(), 400)
+    }
   }
-})
+)
 
 // Detect current Bootstrap theme from <html data-bs-theme>
 const isDark = computed(() => document.documentElement.getAttribute('data-bs-theme') === 'dark')
@@ -318,7 +337,12 @@ const printReceipt = () => {
       }).format(n)
     } catch {
       return (
-        new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n) + ' ' + txCurrency
+        new Intl.NumberFormat(locale, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        }).format(n) +
+        ' ' +
+        txCurrency
       )
     }
   }
@@ -419,6 +443,11 @@ const printReceipt = () => {
       border-bottom: 2px dashed #333;
       margin-bottom: 12px;
     }
+    .brand-logo {
+      height: 40px;
+      width: auto;
+      margin-bottom: 5px;
+    }
     .brand-icon {
       display: inline-block;
       width: 36px; height: 36px;
@@ -431,9 +460,9 @@ const printReceipt = () => {
       text-align: center;
       margin-bottom: 5px;
     }
-    .brand-name { font-size: 16px; font-weight: 900; letter-spacing: 3px; }
-    .brand-sub  { font-size: 8px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-    .doc-type   { font-size: 10px; font-weight: 700; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase; }
+    .brand-name { font-size: 16px; font-weight: 900; letter-spacing: 3px; color: #1a1a2e; }
+    .brand-sub  { font-size: 7.5px; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+    .doc-type   { font-size: 9.5px; font-weight: 700; letter-spacing: 2px; margin-top: 7px; text-transform: uppercase; color: #374151; }
 
     /* Info table */
     .section {
@@ -531,9 +560,9 @@ const printReceipt = () => {
 
   <!-- Brand header -->
   <div class="brand">
-    <div class="brand-icon">T</div>
+    <img :src="logoImg" alt="TAMS" class="brand-logo">
     <div class="brand-name">TAMS</div>
-    <div class="brand-sub">Transaction &amp; Asset Management</div>
+    <div class="brand-sub">Transaction &amp; Asset Management System</div>
     <div class="doc-type">Reçu de Transaction</div>
   </div>
 
@@ -678,7 +707,11 @@ const formatCurrency = (amount: number, code?: string) => {
     }).format(amount)
   } catch {
     return (
-      new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount) + ' ' + currency
+      new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(
+        amount
+      ) +
+      ' ' +
+      currency
     )
   }
 }

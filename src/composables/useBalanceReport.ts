@@ -7,10 +7,12 @@ export function useBalanceReport() {
   const report = ref<BalanceReport | null>(null)
   const loading = ref(false)
 
-  async function fetchReport(silent = false) {
+  async function fetchReport(silent = false, params?: { branch_id?: number }) {
     if (!silent) loading.value = true
     try {
-      const { data } = await axiosInstance.get(`${appConfig.apiUrl}/reports/balances`)
+      const { data } = await axiosInstance.get(`${appConfig.apiUrl}/reports/balances`, {
+        params,
+      })
       report.value = data
     } catch (e) {
       console.error(e)

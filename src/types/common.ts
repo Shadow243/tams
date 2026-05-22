@@ -20,3 +20,26 @@ export interface PaginatedResponse<T> {
   links: Links
   meta: Meta
 }
+
+export interface Customer {
+  id: number
+  uuid?: string
+  name: string
+  full_name?: string
+  phone: string
+  email?: string
+  address?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface Currency {
+  id: number
+  code: string
+  name: string
+  symbol: string
+  decimal_places?: number
+  exchange_rate?: number
+  is_active?: boolean
+  is_default?: boolean
+}

@@ -226,6 +226,51 @@
               </div>
             </div>
 
+            <!-- Customer TAMS Account -->
+            <div class="row g-2 mb-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">
+                  {{ t('transaction_types.customer_account') || 'Compte client TAMS' }}
+                </label>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.effect') || 'Effect'
+                }}</label>
+                <select
+                  v-model="localForm.customer_account_effect"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="none">{{ t('transaction_types.effect_none') || 'None' }}</option>
+                  <option value="debit">
+                    {{ t('transaction_types.effect_debit') || 'Debit (loses balance)' }}
+                  </option>
+                  <option value="credit">
+                    {{ t('transaction_types.effect_credit') || 'Credit (gains balance)' }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6" v-if="localForm.customer_account_effect !== 'none'">
+                <label class="form-label text-muted small">{{
+                  t('transaction_types.amount') || 'Amount'
+                }}</label>
+                <select
+                  v-model="localForm.customer_account_amount"
+                  class="form-select"
+                  :disabled="processing"
+                >
+                  <option value="gross">
+                    {{ t('transaction_types.amount_gross') || 'Gross amount' }}
+                  </option>
+                  <option value="net">
+                    {{ t('transaction_types.amount_net') || 'Net amount (after fees)' }}
+                  </option>
+                  <option value="fee">{{ t('transaction_types.amount_fee') || 'Fee only' }}</option>
+                </select>
+              </div>
+            </div>
+
             <!-- Destination Branch -->
             <div class="row g-2 mb-2">
               <div class="col-12">
@@ -339,6 +384,8 @@ const localForm = ref<TransactionTypeFormData>({
   dest_wallet_amount: 'gross',
   dest_branch_effect: 'none',
   dest_branch_amount: 'gross',
+  customer_account_effect: 'none',
+  customer_account_amount: 'gross',
 })
 
 // Sync formData prop → localForm whenever any property changes.

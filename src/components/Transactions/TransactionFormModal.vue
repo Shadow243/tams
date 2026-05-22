@@ -165,6 +165,45 @@
               </div>
             </div>
 
+            <!-- Customer TAMS Account (shown when transaction type requires it) -->
+            <div v-if="requiresCustomerAccount" class="card mb-3 border-warning">
+              <div class="card-header bg-warning bg-opacity-10">
+                <h6 class="mb-0 text-warning">
+                  <i class="ti ti-pig-money me-2"></i>
+                  {{ t('transactions.customer_account') || 'Compte client TAMS' }}
+                  <span class="text-danger ms-1">*</span>
+                </h6>
+              </div>
+              <div class="card-body">
+                <div v-if="!localForm.customer_id" class="text-muted small">
+                  <i class="ti ti-info-circle me-1"></i>
+                  {{ t('transactions.select_customer_first') || 'Sélectionnez d\'abord un client' }}
+                </div>
+                <div v-else>
+                  <label class="form-label">
+                    {{ t('transactions.select_account') || 'Compte à utiliser' }}
+                  </label>
+                  <div v-if="loadingCustomerAccounts" class="text-center py-2">
+                    <span class="spinner-border spinner-border-sm text-warning"></span>
+                  </div>
+                  <SearchableSelect
+                    v-else
+                    v-model="localForm.customer_account_id"
+                    :options="customerAccounts"
+                    :option-label="(a) => `${a.account_number} — ${a.currency?.code || ''} (solde: ${a.balance})`"
+                    option-value="id"
+                    :placeholder="t('transactions.select_account') || 'Sélectionnez un compte'"
+                    :disabled="processing"
+                    :clearable="true"
+                  />
+                  <small v-if="customerAccounts.length === 0 && !loadingCustomerAccounts" class="text-danger">
+                    <i class="ti ti-alert-circle me-1"></i>
+                    {{ t('transactions.no_account_found') || 'Aucun compte trouvé pour ce client' }}
+                  </small>
+                </div>
+              </div>
+            </div>
+
             <!-- Destination Customer (optional, filled by cashier when needed) -->
             <div class="card mb-3 border-info">
               <div class="card-header bg-info bg-opacity-10">
@@ -581,6 +620,7 @@ const props = withDefaults(defineProps<Props>(), {
     customer_phone: '',
     wallet_id: null,
     dest_wallet_id: null,
+    customer_account_id: null,
     currency_code: 'CDF',
     gross_amount: 0,
     fee_amount: 0,
@@ -614,6 +654,8 @@ const showDestCustomerSearch = ref(false)
 const selectedDestCustomer = ref<any>(null)
 const showPreview = ref(false)
 const loadingCurrencies = ref(false)
+const customerAccounts = ref<any[]>([])
+const loadingCustomerAccounts = ref(false)
 
 let feeCalculationTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -740,6 +782,16 @@ watch(
 )
 
 const isEditing = computed(() => !!localForm.value.id)
+
+// Selected transaction type object
+const selectedTransactionType = computed(() =>
+  props.transactionTypes.find((t) => t.id === localForm.value.transaction_type_id) ?? null
+)
+
+// Whether the selected type requires a customer TAMS account
+const requiresCustomerAccount = computed(() =>
+  (selectedTransactionType.value?.customer_account_effect ?? 'none') !== 'none'
+)
 
 // Filter wallets by selected branch
 const availableWallets = computed(() => {
@@ -879,6 +931,41 @@ const generateWithdrawalCode = () => {
   expiresAt.setMinutes(expiresAt.getMinutes() - expiresAt.getTimezoneOffset())
   localForm.value.expires_at = expiresAt.toISOString().slice(0, 16)
 }
+
+const loadCustomerAccounts = async (customerId: string | number) => {
+  loadingCustomerAccounts.value = true
+  customerAccounts.value = []
+  localForm.value.customer_account_id = null
+  try {
+    const res = await axiosInstance.get(`${appConfig.apiUrl}/customer-accounts/customer/${customerId}`)
+    customerAccounts.value = res.data.data || []
+  } catch {
+    customerAccounts.value = []
+  } finally {
+    loadingCustomerAccounts.value = false
+  }
+}
+
+// Load customer accounts when type requires it and customer changes
+watch(
+  [() => localForm.value.customer_id, requiresCustomerAccount],
+  ([customerId, needed]) => {
+    if (needed && customerId) {
+      loadCustomerAccounts(customerId)
+    } else {
+      customerAccounts.value = []
+      localForm.value.customer_account_id = null
+    }
+  }
+)
+
+// Reset customer_account_id when type no longer requires it
+watch(requiresCustomerAccount, (needed) => {
+  if (!needed) {
+    localForm.value.customer_account_id = null
+    customerAccounts.value = []
+  }
+})
 
 const onCustomerSelected = (customer: any) => {
   selectedCustomer.value = customer

@@ -185,6 +185,30 @@ const routes: RouteRecordRaw[] = [
             title: "Currencies",
             middleware: "auth",
         },
+    },
+    {
+        path: "/customer-accounts",
+        component: () =>
+            import("@/views/customer-accounts/CustomerAccountsIndex.vue").then((m) => m.default || m),
+        children: [
+            {
+                path: "",
+                name: "customer-accounts.index",
+                redirect: { name: "customer-accounts.list" },
+            },
+            {
+                path: "list",
+                name: "customer-accounts.list",
+                component: () =>
+                    import("@/views/customer-accounts/customer-accounts.vue").then((m) => m.default || m),
+            },
+            {
+                path: ":id",
+                name: "customer-account-details",
+                component: () =>
+                    import("@/views/customer-accounts/CustomerAccountDetail.vue").then((m) => m.default || m),
+            },
+        ],
     }
 ];
 

@@ -112,6 +112,7 @@ export interface TransactionFormData {
   dest_customer_id?: string | null
   wallet_id: number | null
   dest_wallet_id?: number | null
+  customer_account_id?: number | null
   customer_phone: string | null
   currency_code: string
   currency_id?: number | null
@@ -216,4 +217,5 @@ export interface DashboardFilters {
   branch_id: number | null
   currency_id: number | null
   transaction_type_id: number | null
+  user_id?: number | null
 }
