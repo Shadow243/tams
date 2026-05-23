@@ -13,7 +13,9 @@
     "cash_balance": "Cash Balance",
     "wallet": "Number",
     "operator": "Operator",
-    "virtual_balance": "Virtual Balance"
+    "virtual_balance": "Virtual Balance",
+    "by_wallet": "By wallet",
+    "transactions_count": "Number of transactions"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -91,7 +93,10 @@
     "never": "Never",
     "minutes": "minutes",
     "minute": "minute",
-    "hour": "hour"
+    "hour": "hour",
+    "search": "Search",
+    "status": "Status",
+    "actions": "Actions"
   },
   "users": {
     "page_title": "Users Management",
@@ -751,6 +756,7 @@
     "currency_from_wallet": "Currency set by the selected wallet",
     "dest_customer_info": "Beneficiary",
     "dest_customer": "Beneficiary Customer",
+    "dest_customer_required": "Beneficiary customer required",
     "no_dest_customer_selected": "No beneficiary selected",
     "description": "Note / Description",
     "description_placeholder": "e.g: Airtel Money code, external reference, reason...",
@@ -891,5 +897,19 @@
       "receipt_format": "Receipt Format",
       "receipt_language": "Receipt Language"
     }
+  },
+  "accounts": {
+    "vip_accounts": "VIP Customer Accounts",
+    "manage_vip_accounts": "Manage VIP customer accounts",
+    "show_debts": "Show debts",
+    "new_account": "New account",
+    "all_types": "All types",
+    "vip_only": "VIP only",
+    "standard_only": "Standard only",
+    "customer": "Customer",
+    "branch": "Branch",
+    "balance": "Balance",
+    "credit_limit": "Credit limit",
+    "account_number": "Account number"
   }
 }

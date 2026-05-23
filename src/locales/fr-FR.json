@@ -13,7 +13,9 @@
     "cash_balance": "Solde Cash",
     "wallet": "Numéro",
     "operator": "Opérateur",
-    "virtual_balance": "Solde Virtuel"
+    "virtual_balance": "Solde Virtuel",
+    "by_wallet": "Par wallet",
+    "transactions_count": "Nombre de transactions"
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
@@ -91,7 +93,10 @@
     "never": "Jamais",
     "minutes": "minutes",
     "minute": "minute",
-    "hour": "heure"
+    "hour": "heure",
+    "search": "Rechercher",
+    "status": "Statut",
+    "actions": "Actions"
   },
   "users": {
     "page_title": "Gestion des Utilisateurs",
@@ -749,6 +754,7 @@
     "currency_from_wallet": "Devise définie par le portefeuille sélectionné",
     "dest_customer_info": "Bénéficiaire",
     "dest_customer": "Client bénéficiaire",
+    "dest_customer_required": "Client bénéficiaire requis",
     "no_dest_customer_selected": "Aucun bénéficiaire sélectionné",
     "description": "Note / Description",
     "description_placeholder": "Ex: code Airtel Money, référence externe, motif...",
@@ -889,5 +895,19 @@
       "receipt_format": "Format du reçu",
       "receipt_language": "Langue du reçu"
     }
+  },
+  "accounts": {
+    "vip_accounts": "Comptes Clients VIP",
+    "manage_vip_accounts": "Gérer les comptes clients VIP",
+    "show_debts": "Afficher les dettes",
+    "new_account": "Nouveau compte",
+    "all_types": "Tous les types",
+    "vip_only": "VIP uniquement",
+    "standard_only": "Standard uniquement",
+    "customer": "Client",
+    "branch": "Agence",
+    "balance": "Solde",
+    "credit_limit": "Limite de crédit",
+    "account_number": "Numéro de compte"
   }
 }
