@@ -20,6 +20,8 @@
     "home": "Home",
     "apps": "Applications",
     "transactions": "Transactions",
+    "ravitaillements": "Resupply",
+    "my_transactions": "My transactions",
     "customer_accounts": "VIP Customer Accounts",
     "params": "Configurations",
     "operators": "Operators",

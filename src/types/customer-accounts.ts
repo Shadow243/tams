@@ -1,7 +1,7 @@
 import type { Customer } from './common'
 import type { Currency } from './common'
 import type { Branch } from './branches'
-import type { User } from './users'
+import type { User } from './auth'
 import type { Transaction } from './transactions'
 
 export interface CustomerAccount {

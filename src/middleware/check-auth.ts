@@ -18,7 +18,6 @@ export default async (
     if (store.user === null && store.token) {
         try {
             await store.fetchUser();
-            console.log("User fetched successfully:", store.user);
             hidePreloader();
         } catch (e) {
             // Optionally handle error here or ignore

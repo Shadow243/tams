@@ -313,11 +313,11 @@
               />
               <label :for="`uw-${wallet.id}`" class="form-check-label d-flex align-items-center gap-2">
                 <span class="badge bg-primary-subtle text-primary">
-                  {{ wallet.operator_name || wallet.operator?.name || '—' }}
+                  {{ wallet.operator?.name || '—' }}
                 </span>
                 <span class="fw-medium">{{ wallet.wallet_number }}</span>
-                <span class="text-muted small">{{ wallet.currency_code || wallet.currency?.code }}</span>
-                <span class="text-muted small ms-auto">{{ wallet.branch_name || wallet.branch?.name }}</span>
+                <span class="text-muted small">{{ wallet.currency?.code }}</span>
+                <span class="text-muted small ms-auto">{{ wallet.branch?.name }}</span>
               </label>
             </div>
           </div>

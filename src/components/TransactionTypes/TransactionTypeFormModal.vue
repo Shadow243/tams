@@ -413,6 +413,8 @@ watch(
         dest_wallet_amount: 'gross',
         dest_branch_effect: 'none',
         dest_branch_amount: 'gross',
+        customer_account_effect: 'none',
+        customer_account_amount: 'gross',
       }
     }
   }
@@ -435,6 +437,8 @@ const handleSubmit = () => {
     dest_wallet_amount: localForm.value.dest_wallet_amount,
     dest_branch_effect: localForm.value.dest_branch_effect,
     dest_branch_amount: localForm.value.dest_branch_amount,
+    customer_account_effect: localForm.value.customer_account_effect,
+    customer_account_amount: localForm.value.customer_account_amount,
   })
 }
 </script>

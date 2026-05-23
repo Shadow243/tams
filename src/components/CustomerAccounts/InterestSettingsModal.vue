@@ -195,20 +195,20 @@
                 <div class="col-md-6">
                   <small class="text-muted d-block">Montant d'intérêt</small>
                   <strong class="h5 text-danger">
-                    {{ formatCurrency(simulation.interest_amount) }}
+                    {{ formatCurrency(simulation.interest_amount ?? 0) }}
                   </strong>
                 </div>
                 <div class="col-md-6">
                   <small class="text-muted d-block">Nouveau solde</small>
-                  <strong class="h5" :class="getBalanceClass(simulation.new_balance)">
-                    {{ formatCurrency(simulation.new_balance) }}
+                  <strong class="h5" :class="getBalanceClass(simulation.balance_after ?? 0)">
+                    {{ formatCurrency(simulation.balance_after ?? 0) }}
                   </strong>
                 </div>
               </div>
               <hr />
               <small class="text-muted">
                 <i class="ti ti-info-circle me-1"></i>
-                {{ simulation.message }}
+                {{ simulation.reason }}
               </small>
             </div>
           </div>
@@ -307,8 +307,8 @@ watch(
   (newAccount) => {
     simulation.value = null
 
-    if (newAccount?.interest_setting) {
-      const settings = newAccount.interest_setting
+    if (newAccount?.interest_settings) {
+      const settings = newAccount.interest_settings
       form.value = {
         interest_type: settings.interest_type,
         interest_rate: settings.interest_rate || 5.0,

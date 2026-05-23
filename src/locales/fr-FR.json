@@ -20,6 +20,8 @@
     "home": "Accueil",
     "apps": "Applications",
     "transactions": "Transactions",
+    "ravitaillements": "Ravitaillements",
+    "my_transactions": "Mes transactions",
     "customer_accounts": "Comptes Clients VIP",
     "params": "Configurations",
     "operators": "Opérateurs",

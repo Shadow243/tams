@@ -303,6 +303,7 @@ const handleSubmit = async () => {
       form.value = {
         amount: 0,
         description: '',
+        branch_id: null,
       }
     }
   } catch (error) {

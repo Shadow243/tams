@@ -207,7 +207,7 @@
                     <tr v-for="(row, i) in report.top_accounts" :key="i">
                       <td>
                         <span class="badge" :class="i === 0 ? 'bg-warning text-dark' : i === 1 ? 'bg-secondary' : 'bg-light text-dark'">
-                          {{ i + 1 }}
+                          {{ Number(i) + 1 }}
                         </span>
                       </td>
                       <td>

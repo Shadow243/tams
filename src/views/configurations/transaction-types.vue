@@ -69,6 +69,8 @@ const formData = reactive<TransactionTypeFormData>({
   dest_wallet_amount: 'gross',
   dest_branch_effect: 'none',
   dest_branch_amount: 'gross',
+  customer_account_effect: 'none',
+  customer_account_amount: 'gross',
 })
 
 const meta = computed(() => store.transactionTypes?.meta || null)

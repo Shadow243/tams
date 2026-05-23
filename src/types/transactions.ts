@@ -68,6 +68,7 @@ export interface Transaction {
     id: number
     code: string
     name: string
+    symbol?: string | null
   }
   gross_amount: number
   fee_amount: number
