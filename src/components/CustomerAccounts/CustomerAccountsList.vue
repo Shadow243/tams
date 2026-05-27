@@ -89,7 +89,6 @@
             <thead>
               <tr>
                 <th>{{ t('accounts.account_number') || 'N° Compte' }}</th>
-                <th>{{ t('accounts.customer') || 'Client' }}</th>
                 <th>{{ t('accounts.branch') || 'Agence' }}</th>
                 <th>{{ t('accounts.balance') || 'Solde' }}</th>
                 <th>{{ t('accounts.credit_limit') || 'Crédit disponible' }}</th>
@@ -98,110 +97,126 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="account in accountList" :key="account.id">
-                <td>
-                  <strong>{{ account.account_number }}</strong>
-                  <span v-if="account.is_vip" class="badge bg-warning text-dark ms-2">VIP</span>
-                </td>
-                <td>
-                  <div>{{ account.customer?.full_name }}</div>
-                  <small class="text-muted">{{ account.customer?.phone }}</small>
-                </td>
-                <td>{{ account.branch?.name }}</td>
-                <td>
-                  <span
-                    :class="{
-                      'text-danger': account.is_in_debt,
-                      'text-success': !account.is_in_debt,
-                    }"
-                  >
-                    {{ formatCurrency(account.balance, account.currency?.code) }}
-                  </span>
-                </td>
-                <td>{{ formatCurrency(account.credit_limit, account.currency?.code) }}</td>
-                <td>
-                  <span :class="`badge bg-${account.status_color}`">
-                    {{ account.status_label }}
-                  </span>
-                </td>
-                <td class="text-end">
-                  <div class="btn-group btn-group-sm" role="group">
-                    <button
-                      class="btn btn-outline-primary"
-                      @click="viewAccount(account)"
-                      :title="t('common.view') || 'Voir'"
+              <template v-for="group in groupedAccounts" :key="group.customerId">
+                <!-- Customer group header -->
+                <tr class="customer-group-header">
+                  <td colspan="6">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="ti ti-user-circle text-primary"></i>
+                      <strong>{{ group.customerName }}</strong>
+                      <small class="text-muted">{{ group.customerPhone }}</small>
+                      <span class="badge bg-light text-secondary border ms-1">
+                        {{ group.accounts.length }}
+                        {{ group.accounts.length > 1 ? 'comptes' : 'compte' }}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Account rows for this customer -->
+                <tr v-for="account in group.accounts" :key="account.id" class="account-row">
+                  <td class="ps-4">
+                    <strong>{{ account.account_number }}</strong>
+                    <span class="badge bg-light text-secondary border ms-2">{{
+                      account.currency?.code
+                    }}</span>
+                    <span v-if="account.is_vip" class="badge bg-warning text-dark ms-1">VIP</span>
+                  </td>
+                  <td>{{ account.branch?.name }}</td>
+                  <td>
+                    <span
+                      :class="{
+                        'text-danger fw-semibold': account.is_in_debt,
+                        'text-success': !account.is_in_debt,
+                      }"
                     >
-                      <i class="ti ti-eye"></i>
-                    </button>
-                    <button
-                      class="btn btn-outline-success"
-                      @click="openDepositModal(account)"
-                      :title="t('accounts.deposit') || 'Dépôt'"
-                      v-if="can('creer_transactions')"
-                    >
-                      <i class="ti ti-arrow-down"></i>
-                    </button>
-                    <button
-                      class="btn btn-outline-warning"
-                      @click="openWithdrawModal(account)"
-                      :title="t('accounts.withdraw') || 'Retrait'"
-                      v-if="can('creer_transactions')"
-                    >
-                      <i class="ti ti-arrow-up"></i>
-                    </button>
-                    <button
-                      class="btn btn-outline-info"
-                      @click="viewStatement(account)"
-                      :title="t('accounts.statement') || 'Relevé'"
-                    >
-                      <i class="ti ti-file-text"></i>
-                    </button>
-                  </div>
+                      {{ formatCurrency(account.balance, account.currency?.code) }}
+                    </span>
+                  </td>
+                  <td>{{ formatCurrency(account.credit_limit, account.currency?.code) }}</td>
+                  <td>
+                    <span :class="`badge bg-${account.status_color}`">
+                      {{ account.status_label }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button
+                        class="btn btn-outline-primary"
+                        @click="viewAccount(account)"
+                        :title="t('common.view') || 'Voir'"
+                      >
+                        <i class="ti ti-eye"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-success"
+                        @click="openDepositModal(account)"
+                        :title="t('accounts.deposit') || 'Dépôt'"
+                        v-if="can('creer_transactions')"
+                      >
+                        <i class="ti ti-arrow-down"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-warning"
+                        @click="openWithdrawModal(account)"
+                        :title="t('accounts.withdraw') || 'Retrait'"
+                        v-if="can('creer_transactions')"
+                      >
+                        <i class="ti ti-arrow-up"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-info"
+                        @click="viewStatement(account)"
+                        :title="t('accounts.statement') || 'Relevé'"
+                      >
+                        <i class="ti ti-file-text"></i>
+                      </button>
+                    </div>
 
-                  <!-- Dropdown for more actions -->
-                  <div class="btn-group btn-group-sm ms-1" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-outline-secondary dropdown-toggle"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                    >
-                      <i class="ti ti-dots"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                      <li>
-                        <a
-                          class="dropdown-item"
-                          href="#"
-                          @click.prevent="openInterestSettings(account)"
-                        >
-                          <i class="ti ti-percentage me-2"></i>
-                          Paramètres d'intérêts
-                        </a>
-                      </li>
-                      <li v-if="can('editer_clients')">
-                        <a class="dropdown-item" href="#" @click.prevent="editAccount(account)">
-                          <i class="ti ti-edit me-2"></i>
-                          Modifier
-                        </a>
-                      </li>
-                      <li v-if="can('creer_transactions')">
-                        <hr class="dropdown-divider" />
-                      </li>
-                      <li v-if="can('creer_transactions')">
-                        <a
-                          class="dropdown-item"
-                          href="#"
-                          @click.prevent="applyInterestNow(account)"
-                        >
-                          <i class="ti ti-calculator me-2"></i>
-                          Appliquer intérêts maintenant
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
+                    <!-- Dropdown for more actions -->
+                    <div class="btn-group btn-group-sm ms-1" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                        <i class="ti ti-dots"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <a
+                            class="dropdown-item"
+                            href="#"
+                            @click.prevent="openInterestSettings(account)"
+                          >
+                            <i class="ti ti-percentage me-2"></i>
+                            Paramètres d'intérêts
+                          </a>
+                        </li>
+                        <li v-if="can('editer_clients')">
+                          <a class="dropdown-item" href="#" @click.prevent="editAccount(account)">
+                            <i class="ti ti-edit me-2"></i>
+                            Modifier
+                          </a>
+                        </li>
+                        <li v-if="can('creer_transactions')">
+                          <hr class="dropdown-divider" />
+                        </li>
+                        <li v-if="can('creer_transactions')">
+                          <a
+                            class="dropdown-item"
+                            href="#"
+                            @click.prevent="applyInterestNow(account)"
+                          >
+                            <i class="ti ti-calculator me-2"></i>
+                            Appliquer intérêts maintenant
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
@@ -282,6 +297,26 @@ const accountStore = useCustomerAccountStore()
 const isLoading = computed(() => accountStore.isLoading)
 const accounts = computed(() => accountStore.accounts)
 const accountList = computed(() => accountStore.account_list)
+
+const groupedAccounts = computed(() => {
+  const map = new Map<
+    number,
+    { customerId: number; customerName: string; customerPhone: string; accounts: CustomerAccount[] }
+  >()
+  for (const account of accountList.value) {
+    const id = account.customer?.id ?? account.customer_id
+    if (!map.has(id)) {
+      map.set(id, {
+        customerId: id,
+        customerName: account.customer?.full_name ?? '—',
+        customerPhone: account.customer?.phone ?? '',
+        accounts: [],
+      })
+    }
+    map.get(id)!.accounts.push(account)
+  }
+  return Array.from(map.values())
+})
 
 const filters = ref({
   search: '',
@@ -463,5 +498,16 @@ onMounted(() => {
   font-size: 0.75rem;
   letter-spacing: 0.5px;
   color: #6c757d;
+}
+
+.customer-group-header td {
+  background-color: var(--theme-topbar-bg);
+  border-top: 2px solid var(--vz-border-color, #dee2e6);
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.account-row td {
+  border-top: none;
 }
 </style>
