@@ -96,7 +96,11 @@
     "hour": "heure",
     "search": "Rechercher",
     "status": "Statut",
-    "actions": "Actions"
+    "actions": "Actions",
+    "all_statuses": "Tous les statuts",
+    "view": "Voir",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "users": {
     "page_title": "Gestion des Utilisateurs",
@@ -901,15 +905,22 @@
   "accounts": {
     "vip_accounts": "Comptes Clients VIP",
     "manage_vip_accounts": "Gérer les comptes clients VIP",
-    "show_debts": "Afficher les dettes",
+    "show_debts": "Comptes en dette",
     "new_account": "Nouveau compte",
     "all_types": "Tous les types",
     "vip_only": "VIP uniquement",
     "standard_only": "Standard uniquement",
+    "active": "Actif",
+    "suspended": "Suspendu",
+    "closed": "Fermé",
+    "no_accounts": "Aucun compte trouvé",
+    "deposit": "Dépôt",
+    "withdraw": "Retrait",
+    "statement": "Relevé",
     "customer": "Client",
     "branch": "Agence",
     "balance": "Solde",
-    "credit_limit": "Limite de crédit",
-    "account_number": "Numéro de compte"
+    "credit_limit": "Crédit disponible",
+    "account_number": "N° Compte"
   }
 }
