@@ -423,7 +423,8 @@
     "amount": "Montant appliqué",
     "amount_gross": "Montant brut",
     "amount_net": "Montant net (après frais)",
-    "amount_fee": "Frais uniquement"
+    "amount_fee": "Frais uniquement",
+    "customer_account": "Compte Client VIP"
   },
   "fee_rules": {
     "page_title": "Règles de Frais",

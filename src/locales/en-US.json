@@ -425,7 +425,8 @@
     "amount": "Amount applied",
     "amount_gross": "Gross amount",
     "amount_net": "Net amount (after fees)",
-    "amount_fee": "Fee only"
+    "amount_fee": "Fee only",
+    "customer_account": "VIP Customer Account"
   },
   "fee_rules": {
     "page_title": "Fee Rules",
