@@ -69,7 +69,7 @@
             </div>
 
             <!-- Customer Information -->
-            <div class="card mb-3">
+            <div v-if="showCustomerSection" class="card mb-3">
               <div class="card-header bg-light">
                 <h6 class="mb-0">
                   <i class="ti ti-user me-2"></i>
@@ -124,19 +124,17 @@
                       v-model="localForm.customer_phone"
                       :placeholder="t('transactions.customer_phone_placeholder') || '237XXXXXXXXX'"
                       :disabled="processing || !!selectedCustomer"
-                      maxlength="12"
+                      maxlength="15"
                     />
                     <small class="text-muted">
                       {{ t('transactions.customer_phone_hint') || 'Format: 237XXXXXXXXX' }}
                     </small>
                   </div>
 
-                  <div class="col-md-6 mb-3">
+                  <div v-if="showWalletField" class="col-md-6 mb-3">
                     <label for="wallet_id" class="form-label">
                       {{ t('transactions.wallet') || 'Portefeuille' }}
-                      <small class="text-muted"
-                        >({{ t('transactions.optional') || 'optionnel' }})</small
-                      >
+                      <span class="text-danger">*</span>
                     </label>
                     <SearchableSelect
                       v-model="localForm.wallet_id"
@@ -204,8 +202,8 @@
               </div>
             </div>
 
-            <!-- Destination Customer — obligatoire pour certains types, optionnel pour d'autres -->
-            <div class="card mb-3" :class="requiresDestCustomer ? 'border-danger' : 'border-info'">
+            <!-- Destination Customer — visible uniquement si le type le requiert -->
+            <div v-if="showDestCustomerSection" class="card mb-3" :class="requiresDestCustomer ? 'border-danger' : 'border-info'">
               <div class="card-header" :class="requiresDestCustomer ? 'bg-danger bg-opacity-10' : 'bg-info bg-opacity-10'">
                 <h6 class="mb-0" :class="requiresDestCustomer ? 'text-danger' : 'text-info'">
                   <i class="ti ti-user-check me-2"></i>
@@ -377,12 +375,10 @@
 
             <!-- Withdrawal Code & Destination (for specific transaction types) -->
             <div class="row">
-              <div class="col-md-6 mb-3">
+              <div v-if="showDestBranchField" class="col-md-6 mb-3">
                 <label for="destination_branch_id" class="form-label">
                   {{ t('transactions.destination_branch') || 'Agence de destination' }}
-                  <small class="text-muted"
-                    >({{ t('transactions.optional') || 'optionnel' }})</small
-                  >
+                  <span class="text-danger">*</span>
                 </label>
                 <select
                   class="form-select"
@@ -399,12 +395,10 @@
                 </select>
               </div>
 
-              <div class="col-md-6 mb-3">
+              <div v-if="showDestWalletField" class="col-md-6 mb-3">
                 <label class="form-label">
                   {{ t('transactions.dest_wallet') || 'Wallet destination' }}
-                  <small class="text-muted"
-                    >({{ t('transactions.optional') || 'optionnel' }})</small
-                  >
+                  <span class="text-danger">*</span>
                 </label>
                 <SearchableSelect
                   v-model="localForm.dest_wallet_id"
@@ -804,6 +798,33 @@ const requiresDestCustomer = computed(() =>
   selectedTransactionType.value?.requires_dest_customer === true
 )
 
+// Dynamic field visibility based on selected transaction type
+const showCustomerSection = computed(() => {
+  if (!selectedTransactionType.value) return true
+  return selectedTransactionType.value.requires_customer !== false
+})
+
+const showDestCustomerSection = computed(() => {
+  if (!selectedTransactionType.value) return true
+  return selectedTransactionType.value.requires_dest_customer === true
+})
+
+const showWalletField = computed(() => {
+  if (!selectedTransactionType.value) return true
+  return selectedTransactionType.value.wallet_effect !== 'none'
+})
+
+const showDestBranchField = computed(() => {
+  if (!selectedTransactionType.value) return true
+  const t = selectedTransactionType.value
+  return t.dest_branch_effect !== 'none' || t.dest_wallet_effect !== 'none'
+})
+
+const showDestWalletField = computed(() => {
+  if (!selectedTransactionType.value) return true
+  return selectedTransactionType.value.dest_wallet_effect !== 'none'
+})
+
 // Filter wallets by selected branch
 const availableWallets = computed(() => {
   if (!localForm.value.branch_id) return []
@@ -862,6 +883,30 @@ const isFormValid = computed(() => {
 })
 
 const onTransactionTypeChange = () => {
+  const type = selectedTransactionType.value
+
+  // Reset fields that are no longer relevant for the new type
+  if (type) {
+    if (type.wallet_effect === 'none') {
+      localForm.value.wallet_id = null
+    }
+    if (type.dest_branch_effect === 'none' && type.dest_wallet_effect === 'none') {
+      localForm.value.destination_branch_id = null
+      localForm.value.dest_wallet_id = null
+    } else if (type.dest_wallet_effect === 'none') {
+      localForm.value.dest_wallet_id = null
+    }
+    if (!type.requires_customer) {
+      localForm.value.customer_id = null
+      localForm.value.customer_phone = ''
+      selectedCustomer.value = null
+    }
+    if (!type.requires_dest_customer) {
+      localForm.value.dest_customer_id = null
+      selectedDestCustomer.value = null
+    }
+  }
+
   calculateAutomaticFee()
   showPreview.value = true
 }

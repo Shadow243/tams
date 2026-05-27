@@ -71,6 +71,8 @@ const formData = reactive<TransactionTypeFormData>({
   dest_branch_amount: 'gross',
   customer_account_effect: 'none',
   customer_account_amount: 'gross',
+  requires_dest_customer: false,
+  requires_customer: true,
 })
 
 const meta = computed(() => store.transactionTypes?.meta || null)
@@ -92,6 +94,8 @@ const handleAddTransactionType = () => {
   formData.dest_wallet_amount = 'gross'
   formData.dest_branch_effect = 'none'
   formData.dest_branch_amount = 'gross'
+  formData.requires_dest_customer = false
+  formData.requires_customer = true
   store.setCurrentTransactionType(null)
   showModal.value = true
 }
@@ -109,6 +113,8 @@ const handleEditTransactionType = (transactionType: any) => {
   formData.dest_wallet_amount = transactionType.dest_wallet_amount ?? 'gross'
   formData.dest_branch_effect = transactionType.dest_branch_effect ?? 'none'
   formData.dest_branch_amount = transactionType.dest_branch_amount ?? 'gross'
+  formData.requires_dest_customer = transactionType.requires_dest_customer ?? false
+  formData.requires_customer = transactionType.requires_customer ?? true
   store.setCurrentTransactionType(transactionType)
   showModal.value = true
 }

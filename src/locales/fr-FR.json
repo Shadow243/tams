@@ -432,7 +432,12 @@
     "amount_gross": "Montant brut",
     "amount_net": "Montant net (après frais)",
     "amount_fee": "Frais uniquement",
-    "customer_account": "Compte Client VIP"
+    "customer_account": "Compte Client VIP",
+    "customer_config": "Options clients",
+    "requires_customer": "Nécessite un client (expéditeur)",
+    "requires_customer_hint": "Affiche la section client dans le formulaire de transaction",
+    "requires_dest_customer": "Nécessite un bénéficiaire",
+    "requires_dest_customer_hint": "Le bénéficiaire sera obligatoire pour valider la transaction"
   },
   "fee_rules": {
     "page_title": "Règles de Frais",

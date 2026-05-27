@@ -2,7 +2,6 @@ export type BalanceEffect = 'none' | 'debit' | 'credit'
 export type BalanceAmount = 'gross' | 'net' | 'fee'
 
 export interface TransactionType {
-  requires_dest_customer: boolean
   id: number
   uuid: string
   code: string
@@ -18,12 +17,13 @@ export interface TransactionType {
   dest_wallet_amount: BalanceAmount
   customer_account_effect: BalanceEffect
   customer_account_amount: BalanceAmount
+  requires_dest_customer: boolean
+  requires_customer: boolean
   created_at: string
   updated_at: string
 }
 
 export interface TransactionTypeList {
-  requires_dest_customer: boolean
   id: number
   uuid: string
   code: string
@@ -39,6 +39,8 @@ export interface TransactionTypeList {
   dest_wallet_amount: BalanceAmount
   customer_account_effect: BalanceEffect
   customer_account_amount: BalanceAmount
+  requires_dest_customer: boolean
+  requires_customer: boolean
   created_at: string
   updated_at: string
 }
@@ -76,4 +78,6 @@ export interface TransactionTypeFormData {
   dest_wallet_amount: BalanceAmount
   customer_account_effect: BalanceEffect
   customer_account_amount: BalanceAmount
+  requires_dest_customer: boolean
+  requires_customer: boolean
 }

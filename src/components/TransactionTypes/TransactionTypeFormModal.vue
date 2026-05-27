@@ -315,6 +315,48 @@
                 </select>
               </div>
             </div>
+
+            <!-- Customer Options -->
+            <hr />
+            <h6 class="fw-semibold mb-3">
+              {{ t('transaction_types.customer_config') || 'Options clients' }}
+            </h6>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="requires_customer"
+                    v-model="localForm.requires_customer"
+                    :disabled="processing"
+                  />
+                  <label class="form-check-label" for="requires_customer">
+                    {{ t('transaction_types.requires_customer') || 'Nécessite un client (expéditeur)' }}
+                  </label>
+                </div>
+                <small class="text-muted d-block mt-1 ms-4">
+                  {{ t('transaction_types.requires_customer_hint') || 'Affiche la section client dans le formulaire de transaction' }}
+                </small>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="requires_dest_customer"
+                    v-model="localForm.requires_dest_customer"
+                    :disabled="processing"
+                  />
+                  <label class="form-check-label" for="requires_dest_customer">
+                    {{ t('transaction_types.requires_dest_customer') || 'Nécessite un bénéficiaire' }}
+                  </label>
+                </div>
+                <small class="text-muted d-block mt-1 ms-4">
+                  {{ t('transaction_types.requires_dest_customer_hint') || 'Le bénéficiaire sera obligatoire pour valider la transaction' }}
+                </small>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -386,6 +428,8 @@ const localForm = ref<TransactionTypeFormData>({
   dest_branch_amount: 'gross',
   customer_account_effect: 'none',
   customer_account_amount: 'gross',
+  requires_dest_customer: false,
+  requires_customer: true,
 })
 
 // Sync formData prop → localForm whenever any property changes.
@@ -415,6 +459,8 @@ watch(
         dest_branch_amount: 'gross',
         customer_account_effect: 'none',
         customer_account_amount: 'gross',
+        requires_dest_customer: false,
+        requires_customer: true,
       }
     }
   }
@@ -439,6 +485,8 @@ const handleSubmit = () => {
     dest_branch_amount: localForm.value.dest_branch_amount,
     customer_account_effect: localForm.value.customer_account_effect,
     customer_account_amount: localForm.value.customer_account_amount,
+    requires_dest_customer: localForm.value.requires_dest_customer,
+    requires_customer: localForm.value.requires_customer,
   })
 }
 </script>

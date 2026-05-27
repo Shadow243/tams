@@ -434,7 +434,12 @@
     "amount_gross": "Gross amount",
     "amount_net": "Net amount (after fees)",
     "amount_fee": "Fee only",
-    "customer_account": "VIP Customer Account"
+    "customer_account": "VIP Customer Account",
+    "customer_config": "Customer Options",
+    "requires_customer": "Requires a customer (sender)",
+    "requires_customer_hint": "Shows the customer section in the transaction form",
+    "requires_dest_customer": "Requires a beneficiary",
+    "requires_dest_customer_hint": "The beneficiary will be required to validate the transaction"
   },
   "fee_rules": {
     "page_title": "Fee Rules",
