@@ -135,8 +135,8 @@
                   v-model="newCustomer.phone"
                   :placeholder="t('transactions.phone_placeholder') || '243XXXXXXXXX'"
                   required
-                  maxlength="12"
-                  pattern="243[0-9]{9}"
+                  maxlength="15"
+                  pattern="[0-9]{7,15}"
                   @input="validatePhone"
                 />
                 <div v-if="validationErrors.phone" class="invalid-feedback d-block">
@@ -146,24 +146,14 @@
                   v-else-if="newCustomer.phone && !isPhoneValid"
                   class="invalid-feedback d-block"
                 >
-                  <span v-if="!newCustomer.phone.startsWith('243')">
-                    ❌ Le numéro doit commencer par <strong>243</strong> (RDC/Congo)
-                  </span>
-                  <span v-else-if="newCustomer.phone.length !== 12">
-                    ❌ Le numéro doit avoir exactement <strong>12 chiffres</strong> (actuellement:
-                    {{ newCustomer.phone.length }})
-                  </span>
-                  <span v-else> ❌ Format invalide </span>
+                  ❌ {{ t('transactions.phone_format_error') || 'Numéro invalide (7 à 15 chiffres, sans + ni espaces)' }}
                 </div>
                 <div v-else-if="newCustomer.phone && isPhoneValid" class="valid-feedback d-block">
                   ✅ Format valide
                 </div>
                 <small class="form-text text-muted d-block mt-1">
                   <i class="ti ti-info-circle me-1"></i>
-                  {{
-                    t('transactions.phone_format_hint') ||
-                    'Format: 237 suivi de 9 chiffres (ex: 237690123456)'
-                  }}
+                  {{ t('transactions.phone_format_hint') || 'Indicatif pays + numéro, chiffres uniquement (ex: 243690123456, 255712345678)' }}
                 </small>
               </div>
 
@@ -271,8 +261,7 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null
 const isPhoneValid = computed(() => {
   const phone = newCustomer.value.phone
   if (!phone) return false
-  // Must be exactly 12 digits and start with 243 (RDC/Congo)
-  return phone.length === 12 && phone.startsWith('243') && /^243[0-9]{9}$/.test(phone)
+  return /^[0-9]{7,15}$/.test(phone)
 })
 
 // Real-time phone validation
