@@ -523,11 +523,11 @@ const handleCompleteTransaction = async (id: string) => {
         receiptTransaction.value = transactionData
         showReceiptModal.value = true
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error completing transaction:', error)
       Swal.fire({
         title: t('transactions.error') || 'Erreur!',
-        text: t('transactions.complete_error') || 'Échec de la complétion.',
+        text: error.response?.data?.message || t('transactions.complete_error') || 'Échec de la complétion.',
         icon: 'error',
       })
     }
