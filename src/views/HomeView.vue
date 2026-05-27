@@ -80,9 +80,6 @@
             class="form-select form-select-sm"
             style="min-width: 120px"
           >
-            <option :value="null">
-              {{ t('dashboard.filter.all_currencies') || 'Toutes devises' }}
-            </option>
             <option v-for="c in currencyStore.allCurrencies" :key="c.id" :value="c.id">
               {{ c.code }}
             </option>
