@@ -1190,10 +1190,12 @@ import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/composables/useI18n'
 import { useBalanceReport } from '@/composables/useBalanceReport'
 import { usePermissions } from '@/composables/usePermissions'
+import { useUserSettings } from '@/composables/useUserSettings'
 import CustomerAccountsReport from '@/components/CustomerAccounts/CustomerAccountsReport.vue'
 
 import { echo } from '@/plugins/echo'
 import type { DashboardFilters, DashboardStatistics } from '@/types'
+import type { Currency } from '@/types/common'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -1212,6 +1214,7 @@ const store = useTransactionStore()
 const typeStore = useTransactionTypeStore()
 const branchStore = useBranchStore()
 const currencyStore = useCurrencyStore()
+const { settings } = useUserSettings()
 const {
   report: balanceReport,
   loading: loadingBalances,
@@ -1672,9 +1675,20 @@ onMounted(async () => {
     filters.value.branch_id = authStore.user.branch_id
   }
 
+  // Load currencies first so we can resolve the user's default currency ID
+  await currencyStore.fetchAllCurrencies()
+
+  // Apply user's default currency setting unless already overridden
+  if (!filters.value.currency_id) {
+    const defaultCode = settings.value.transactions?.defaultCurrency
+    const match = defaultCode
+      ? currencyStore.allCurrencies.find((c: Currency) => c.code === defaultCode)
+      : currencyStore.defaultCurrency
+    if (match) filters.value.currency_id = match.id
+  }
+
   await Promise.all([
     branchStore.fetchBranches(1, undefined, 100),
-    currencyStore.fetchAllCurrencies(),
     typeStore.fetchTransactionTypes(),
     loadDashboard(),
     fetchBalanceReport(),
