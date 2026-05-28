@@ -166,6 +166,7 @@
       "selectRole": "Select Role",
       "wallets": "Assigned Wallets",
       "no_wallets": "No wallet available.",
+      "select_branch_first": "Select a branch to see wallets.",
       "cancel": "Cancel",
       "update": "Update",
       "create": "Create",

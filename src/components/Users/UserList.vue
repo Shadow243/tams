@@ -296,11 +296,25 @@
             <span class="badge bg-info-subtle text-info ms-1">Agent</span>
           </label>
           <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-            <div v-if="!walletStore.wallet_list.length" class="text-muted small p-1">
+            <!-- Loading state -->
+            <div v-if="formWalletsLoading" class="text-center py-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+              </div>
+            </div>
+            <!-- No branch selected -->
+            <div v-else-if="!form.branch_id" class="text-muted small p-1">
+              <i class="ti ti-info-circle me-1"></i>
+              {{ t('users.form.select_branch_first') || 'Sélectionnez une agence pour voir les wallets.' }}
+            </div>
+            <!-- No wallets in branch -->
+            <div v-else-if="!formWallets.length" class="text-muted small p-1">
               {{ t('users.form.no_wallets') || 'Aucun wallet disponible.' }}
             </div>
+            <!-- Wallet list -->
             <div
-              v-for="wallet in walletStore.wallet_list"
+              v-else
+              v-for="wallet in formWallets"
               :key="wallet.id"
               class="form-check py-1 border-bottom"
             >
@@ -317,9 +331,31 @@
                 </span>
                 <span class="fw-medium">{{ wallet.wallet_number }}</span>
                 <span class="text-muted small">{{ wallet.currency?.code }}</span>
-                <span class="text-muted small ms-auto">{{ wallet.branch?.name }}</span>
               </label>
             </div>
+          </div>
+          <!-- Pagination -->
+          <div v-if="formWalletsMeta && formWalletsMeta.last_page > 1" class="d-flex align-items-center justify-content-between mt-1">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              :disabled="formWalletsMeta.current_page <= 1 || formWalletsLoading"
+              @click="fetchFormWallets((formWalletsMeta?.current_page ?? 1) - 1)"
+            >
+              <i class="ti ti-chevron-left"></i>
+            </button>
+            <span class="small text-muted">
+              {{ formWalletsMeta.current_page }} / {{ formWalletsMeta.last_page }}
+              <span class="ms-1">({{ formWalletsMeta.total }} total)</span>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              :disabled="formWalletsMeta.current_page >= formWalletsMeta.last_page || formWalletsLoading"
+              @click="fetchFormWallets((formWalletsMeta?.current_page ?? 1) + 1)"
+            >
+              <i class="ti ti-chevron-right"></i>
+            </button>
           </div>
           <div class="form-text">
             <i class="ti ti-info-circle me-1"></i>
@@ -410,7 +446,6 @@ import { useI18n } from '@/composables/useI18n'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { useUserStore } from '@/stores/users'
 import { useBranchStore } from '@/stores/branches'
-import { useWalletStore } from '@/stores/wallets'
 import User from '@/components/Users/User.vue'
 import BaseModal from '@/components/Shared/BaseModal.vue'
 import SearchableSelect from '@/components/Shared/SearchableSelect.vue'
@@ -422,12 +457,11 @@ const { t } = useI18n()
 const { getItemsPerPage } = useUserSettings()
 const userStore = useUserStore()
 const branchStore = useBranchStore()
-const walletStore = useWalletStore()
 
-// Load branches + wallets on mount
+
+// Load branches on mount
 onMounted(() => {
   if (branchStore.branch_list.length === 0) branchStore.fetchBranches()
-  if (walletStore.wallet_list.length === 0) walletStore.fetchWallets()
   fetchRoles()
 })
 
@@ -465,6 +499,53 @@ const form = reactive({
 const isAgentRole = computed(() => {
   if (!form.role_id) return false
   return roles.value.find(r => r.id === form.role_id)?.name === 'agent'
+})
+
+// ── Local wallet state for the user form (paginated, filtered by branch) ──
+const formWallets = ref<any[]>([])
+const formWalletsMeta = ref<{ current_page: number; last_page: number; total: number } | null>(null)
+const formWalletsLoading = ref(false)
+
+const fetchFormWallets = async (page = 1) => {
+  if (!form.branch_id) {
+    formWallets.value = []
+    formWalletsMeta.value = null
+    return
+  }
+  formWalletsLoading.value = true
+  try {
+    const response = await axiosInstance.get(`${appConfig.apiUrl}/wallets`, {
+      params: { branch_id: form.branch_id, per_page: 10, page },
+    })
+    formWallets.value = response.data?.data || []
+    formWalletsMeta.value = response.data?.meta || null
+  } catch {
+    formWallets.value = []
+  } finally {
+    formWalletsLoading.value = false
+  }
+}
+
+// Reload wallets when branch changes and clear previously selected wallets
+watch(
+  () => form.branch_id,
+  (newBranchId, oldBranchId) => {
+    if (!isAgentRole.value) return
+    if (newBranchId !== oldBranchId) {
+      form.wallet_ids = []
+    }
+    fetchFormWallets(1)
+  }
+)
+
+// Load/clear wallets when role switches to/from agent
+watch(isAgentRole, (isAgent) => {
+  if (isAgent && form.branch_id) {
+    fetchFormWallets(1)
+  } else if (!isAgent) {
+    formWallets.value = []
+    formWalletsMeta.value = null
+  }
 })
 
 // États du formulaire
@@ -625,6 +706,11 @@ const editUser = async (user: any) => {
   form.is_email_verified = !!(user.email_verified_at || user.is_email_verified)
   form.is_active = user.active === 1 || user.active === true || user.is_active === true
   form.wallet_ids = Array.isArray(user.wallet_ids) ? [...user.wallet_ids] : []
+
+  // Load wallets for agent role — watcher may fire before role_id is set, so trigger explicitly
+  if (roles.value.find((r) => r.id === form.role_id)?.name === 'agent' && form.branch_id) {
+    fetchFormWallets(1)
+  }
 
   console.log('Form after assignment:', {
     gender: form.gender,

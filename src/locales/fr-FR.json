@@ -166,6 +166,7 @@
       "selectRole": "Sélectionner un Rôle",
       "wallets": "Wallets assignés",
       "no_wallets": "Aucun wallet disponible.",
+      "select_branch_first": "Sélectionnez une agence pour voir les wallets.",
       "cancel": "Annuler",
       "update": "Mettre à jour",
       "create": "Créer",
