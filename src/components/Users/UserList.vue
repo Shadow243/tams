@@ -290,13 +290,17 @@
 
         <!-- Wallets — visible uniquement pour le rôle Agent -->
         <div v-if="isAgentRole" class="col-12">
-          <label class="form-label fw-semibold">
-            <i class="ti ti-wallet me-1 text-primary"></i>
+          <label class="form-label fw-semibold d-flex align-items-center gap-2">
+            <i class="ti ti-wallet text-primary"></i>
             {{ t('users.form.wallets') || 'Wallets assignés' }}
-            <span class="badge bg-info-subtle text-info ms-1">Agent</span>
+            <span class="badge bg-info-subtle text-info">Agent</span>
+            <span v-if="walletIdsLoading" class="d-flex align-items-center gap-1 ms-1 text-muted small fw-normal">
+              <span class="spinner-border spinner-border-sm" role="status"></span>
+              Vérification...
+            </span>
           </label>
           <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-            <!-- Loading state -->
+            <!-- Chargement centré pour la liste des wallets -->
             <div v-if="formWalletsLoading" class="text-center py-3">
               <div class="spinner-border spinner-border-sm text-primary" role="status">
                 <span class="visually-hidden">Chargement...</span>
@@ -313,7 +317,6 @@
             </div>
             <!-- Wallet list -->
             <div
-              v-else
               v-for="wallet in formWallets"
               :key="wallet.id"
               class="form-check py-1 border-bottom"
@@ -505,6 +508,7 @@ const isAgentRole = computed(() => {
 const formWallets = ref<any[]>([])
 const formWalletsMeta = ref<{ current_page: number; last_page: number; total: number } | null>(null)
 const formWalletsLoading = ref(false)
+const walletIdsLoading = ref(false)
 
 const fetchFormWallets = async (page = 1) => {
   if (!form.branch_id) {
@@ -705,12 +709,7 @@ const editUser = async (user: any) => {
   // Convertir les valeurs en booléens - vérifier si les dates existent ET ne sont pas null
   form.is_email_verified = !!(user.email_verified_at || user.is_email_verified)
   form.is_active = user.active === 1 || user.active === true || user.is_active === true
-  form.wallet_ids = Array.isArray(user.wallet_ids) ? [...user.wallet_ids] : []
-
-  // Load wallets for agent role — watcher may fire before role_id is set, so trigger explicitly
-  if (roles.value.find((r) => r.id === form.role_id)?.name === 'agent' && form.branch_id) {
-    fetchFormWallets(1)
-  }
+  form.wallet_ids = []
 
   console.log('Form after assignment:', {
     gender: form.gender,
@@ -718,9 +717,27 @@ const editUser = async (user: any) => {
     is_active: form.is_active,
   })
 
-  // Ouvrir le modal après un court délai pour s'assurer que le formulaire est mis à jour
+  // Ouvrir le modal immédiatement sans attendre les wallets
   await nextTick()
   showModal.value = true
+
+  // wallet_ids n'est disponible que via l'endpoint show (wallets eager-loaded).
+  // On lance la requête après ouverture du modal pour ne pas retarder l'UI.
+  const isAgent = roles.value.find((r) => r.id === form.role_id)?.name === 'agent'
+  if (isAgent && form.branch_id) {
+    fetchFormWallets(1).then(async () => {
+      walletIdsLoading.value = true
+      try {
+        const res = await axiosInstance.get(`${appConfig.apiUrl}/users/${user.id}`)
+        const fullUser = res.data?.data ?? res.data
+        form.wallet_ids = Array.isArray(fullUser?.wallet_ids) ? [...fullUser.wallet_ids] : []
+      } catch {
+        // garde les wallet_ids vides
+      } finally {
+        walletIdsLoading.value = false
+      }
+    })
+  }
 }
 
 // Supprimer un utilisateur
