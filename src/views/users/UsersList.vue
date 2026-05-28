@@ -69,6 +69,8 @@ const user_list = computed(() => store.user_list)
 const loading = computed(() => store.loading)
 
 onMounted(() => {
+  // Réinitialiser le filtre de statut pour qu'il corresponde à l'état initial du dropdown ('')
+  store.filters.status = ''
   store.fetchUsers()
 })
 
