@@ -93,6 +93,8 @@
                   <th>Référence</th>
                   <th>Type</th>
                   <th>Description</th>
+                  <th>Effectué par</th>
+                  <th>Agence</th>
                   <th class="text-end">Débit</th>
                   <th class="text-end">Crédit</th>
                   <th class="text-end">Solde</th>
@@ -100,13 +102,13 @@
               </thead>
               <tbody>
                 <tr v-if="loading">
-                  <td colspan="7" class="text-center py-4">
+                  <td colspan="9" class="text-center py-4">
                     <div class="spinner-border spinner-border-sm me-2"></div>
                     Chargement...
                   </td>
                 </tr>
                 <tr v-else-if="transactions.length === 0">
-                  <td colspan="7" class="text-center py-4 text-muted">
+                  <td colspan="9" class="text-center py-4 text-muted">
                     <i class="ti ti-inbox me-2"></i>
                     Aucune transaction trouvée
                   </td>
@@ -125,6 +127,20 @@
                   </td>
                   <td>
                     <small>{{ transaction.description || '-' }}</small>
+                  </td>
+                  <td>
+                    <small v-if="transaction.user">
+                      <i class="ti ti-user-circle me-1 text-muted"></i>
+                      {{ transaction.user.name || transaction.user.username }}
+                    </small>
+                    <span v-else class="text-muted">—</span>
+                  </td>
+                  <td>
+                    <small v-if="transaction.branch">
+                      <i class="ti ti-building me-1 text-muted"></i>
+                      {{ transaction.branch.code }}
+                    </small>
+                    <span v-else class="text-muted">—</span>
                   </td>
                   <td class="text-end text-danger">
                     <span v-if="isDebit(transaction.type)">

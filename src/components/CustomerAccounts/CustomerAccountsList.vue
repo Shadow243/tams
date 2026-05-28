@@ -151,7 +151,7 @@
                         class="btn btn-outline-success"
                         @click="openDepositModal(account)"
                         :title="t('accounts.deposit') || 'Dépôt'"
-                        v-if="can('creer_transactions')"
+                        v-if="can('deposer_comptes_clients')"
                       >
                         <i class="ti ti-arrow-down"></i>
                       </button>
@@ -159,7 +159,7 @@
                         class="btn btn-outline-warning"
                         @click="openWithdrawModal(account)"
                         :title="t('accounts.withdraw') || 'Retrait'"
-                        v-if="can('creer_transactions')"
+                        v-if="can('retirer_comptes_clients')"
                       >
                         <i class="ti ti-arrow-up"></i>
                       </button>

@@ -39,6 +39,8 @@ export interface AccountTransaction {
   transaction?: Transaction
   user_id: number
   user?: User
+  branch_id?: number
+  branch?: Branch
   type: AccountTransactionType
   type_label: string
   type_sign: string
