@@ -1,6 +1,13 @@
 {
   "dashboard": {
+    "title": "Dashboard",
+    "my_data": "My data",
+    "description": "Global overview of the transfer system",
+    "description_agent": "Your transactions and your branch",
+    "my_branch": "My branch",
+    "my_wallets_report": "My wallets report",
     "balance_report": "Balance Report",
+    "balance_report_agent": "My balances",
     "balance_report_desc": "Cash balances per branch and virtual balances per wallet",
     "total_branch_cash": "Branch Cash",
     "total_wallet_virtual": "Wallet Virtual",
@@ -15,7 +22,43 @@
     "operator": "Operator",
     "virtual_balance": "Virtual Balance",
     "by_wallet": "By wallet",
-    "transactions_count": "Number of transactions"
+    "by_type": "By transaction type",
+    "by_branch": "By branch",
+    "by_status": "By status",
+    "transactions_count": "Number of transactions",
+    "total": "Total",
+    "total_transactions": "Transactions",
+    "total_amount": "Total amount",
+    "total_fees": "Total fees",
+    "total_net": "Net amount",
+    "average_amount": "Average amount",
+    "gross": "Gross",
+    "fees": "Fees",
+    "net": "Net",
+    "rate": "Rate",
+    "success_rate": "Success rate",
+    "trend": "Transaction trend",
+    "no_trend_data": "No trend data",
+    "no_data": "No data",
+    "no_recent": "No recent transactions",
+    "recent_transactions": "Recent transactions",
+    "view_all": "View all",
+    "filters_active": "active filter(s)",
+    "reset_filters": "Reset",
+    "period": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "This week",
+      "month": "This month",
+      "last_month": "Last month",
+      "year": "This year",
+      "all": "All",
+      "custom": "Custom"
+    },
+    "filter": {
+      "all_branches": "All branches",
+      "all_types": "All types"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",

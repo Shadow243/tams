@@ -48,18 +48,26 @@
                 <label for="branch_id" class="form-label">
                   {{ t('transactions.branch') || 'Agence' }}
                   <span class="text-danger">*</span>
-                  <span v-if="!canSelectBranch" class="badge bg-info ms-2">{{
-                    t('transactions.auto_from_user') || 'Automatique'
-                  }}</span>
+                  <span v-if="!canSelectBranch" class="badge bg-info ms-2">
+                    <i class="ti ti-lock me-1"></i>{{ t('transactions.auto_from_user') || 'Automatique' }}
+                  </span>
                 </label>
                 <SearchableSelect
+                  v-if="canSelectBranch"
                   v-model="localForm.branch_id"
                   :options="branches"
                   :option-label="(branch) => `${branch.name} (${branch.code})`"
                   option-value="id"
                   :placeholder="t('transactions.select_branch') || 'Sélectionnez une agence'"
-                  :disabled="processing || !canSelectBranch"
+                  :disabled="processing"
                   @change="calculateAutomaticFee"
+                />
+                <input
+                  v-else
+                  type="text"
+                  class="form-control bg-light"
+                  :value="lockedBranchName"
+                  readonly
                 />
                 <div v-if="!canSelectBranch" class="form-text">
                   <i class="ti ti-info-circle me-1"></i>
@@ -662,26 +670,15 @@ let feeCalculationTimeout: ReturnType<typeof setTimeout> | null = null
 // Check if user can manually select branch (admin or supervisor)
 const canSelectBranch = computed(() => {
   if (!authStore.user) return false
-
-  const permissions = authStore.user.permissions || []
   const roles = authStore.user.roles || []
+  if (roles.includes('admin') || roles.includes('superviseur')) return true
+  return !authStore.user.branch_id
+})
 
-  // Admin role or no branch assigned = can select any branch
-  if (roles.includes('admin') || roles.includes('superviseur')) {
-    return true
-  }
-
-  // User without branch_id should be able to select
-  if (!authStore.user.branch_id) {
-    return true
-  }
-
-  // Check for high-level permissions that indicate admin/supervisor role
-  return (
-    permissions.includes('gerer branches') ||
-    permissions.includes('editer branches') ||
-    permissions.some((p) => p.includes('gerer') && !p.includes('transactions'))
-  )
+const lockedBranchName = computed(() => {
+  if (canSelectBranch.value || !localForm.value.branch_id) return ''
+  const branch = props.branches.find((b: any) => b.id === localForm.value.branch_id)
+  return branch ? `${branch.name} (${branch.code})` : String(localForm.value.branch_id)
 })
 
 // Initialize branch_id from authenticated user and load currencies

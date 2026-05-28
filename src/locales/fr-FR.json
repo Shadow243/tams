@@ -1,6 +1,13 @@
 {
   "dashboard": {
+    "title": "Tableau de bord",
+    "my_data": "Mes données",
+    "description": "Vue globale du système de transfert",
+    "description_agent": "Vos transactions et votre agence",
+    "my_branch": "Mon agence",
+    "my_wallets_report": "Rapport de mes wallets",
     "balance_report": "Rapport des soldes",
+    "balance_report_agent": "Mes soldes",
     "balance_report_desc": "Soldes cash par agence et soldes virtuels par wallet",
     "total_branch_cash": "Cash agences",
     "total_wallet_virtual": "Virtuel wallets",
@@ -15,7 +22,43 @@
     "operator": "Opérateur",
     "virtual_balance": "Solde Virtuel",
     "by_wallet": "Par wallet",
-    "transactions_count": "Nombre de transactions"
+    "by_type": "Par type de transaction",
+    "by_branch": "Par agence",
+    "by_status": "Répartition par statut",
+    "transactions_count": "Nombre de transactions",
+    "total": "Total",
+    "total_transactions": "Transactions",
+    "total_amount": "Montant total",
+    "total_fees": "Total frais",
+    "total_net": "Montant net",
+    "average_amount": "Montant moyen",
+    "gross": "Brut",
+    "fees": "Frais",
+    "net": "Net",
+    "rate": "Taux",
+    "success_rate": "Taux de succès",
+    "trend": "Évolution des transactions",
+    "no_trend_data": "Aucune donnée de tendance",
+    "no_data": "Aucune donnée",
+    "no_recent": "Aucune transaction récente",
+    "recent_transactions": "Transactions récentes",
+    "view_all": "Voir tout",
+    "filters_active": "filtre(s) actif(s)",
+    "reset_filters": "Réinitialiser",
+    "period": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "week": "Cette semaine",
+      "month": "Ce mois",
+      "last_month": "Mois passé",
+      "year": "Cette année",
+      "all": "Tout",
+      "custom": "Personnalisé"
+    },
+    "filter": {
+      "all_branches": "Toutes les agences",
+      "all_types": "Tous les types"
+    }
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
