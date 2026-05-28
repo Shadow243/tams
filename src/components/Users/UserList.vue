@@ -608,9 +608,10 @@ const submitForm = async () => {
     delete (formData as any).password_confirmation
   }
 
-  // Convertir les booléens
+  // Renommer pour correspondre aux champs attendus par l'API
+  formData.active = Boolean(formData.is_active)
   formData.is_email_verified = Boolean(formData.is_email_verified)
-  formData.is_active = Boolean(formData.is_active)
+  delete formData.is_active
 
   // Envoyer wallet_ids seulement si rôle agent, sinon vider
   formData.wallet_ids = isAgentRole.value ? form.wallet_ids : []
