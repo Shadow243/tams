@@ -154,6 +154,7 @@
               :selected="selectedUsers.includes(user.id)"
               @edit="editUser"
               @delete="deleteUser"
+              @permissions="goToPermissions"
               @toggle-select="toggleUserSelection"
             />
           </tr>
@@ -442,6 +443,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, reactive, nextTick, type PropType, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 // import { debounce } from 'lodash-es'
 import debounce from 'lodash.debounce'
 import type { UsersResponse, UserList } from '@/types'
@@ -460,6 +462,11 @@ const { t } = useI18n()
 const { getItemsPerPage } = useUserSettings()
 const userStore = useUserStore()
 const branchStore = useBranchStore()
+const router = useRouter()
+
+const goToPermissions = (userId: number) => {
+  router.push({ name: 'users.permissions', params: { id: userId } })
+}
 
 
 // Load branches on mount

@@ -50,6 +50,14 @@
       </a>
       <a
         href="javascript:void(0);"
+        @click="$emit('permissions', user.id)"
+        class="btn btn-info btn-icon btn-sm"
+        title="Permissions"
+      >
+        <i class="ti ti-key fs-lg"></i>
+      </a>
+      <a
+        href="javascript:void(0);"
         @click="$emit('delete', user.id)"
         class="btn btn-danger btn-icon btn-sm"
         title="Delete"
@@ -79,6 +87,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: 'edit', user: User): void
   (e: 'delete', userId: number): void
+  (e: 'permissions', userId: number): void
   (e: 'toggle-select', userId: number): void
 }>()
 

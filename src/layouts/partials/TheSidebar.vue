@@ -156,7 +156,8 @@ const appRoutes = computed(() => {
       { icon: 'receipt', label: t('sidebar.fee_rules'), route: 'fee-rules.list', type: 'menu' },
       { icon: 'currency-dollar', label: t('sidebar.currencies'), route: 'currencies.list', type: 'menu' },
       { icon: 'globe', label: t('sidebar.countries'), route: 'countries.list', type: 'menu' },
-      { icon: 'users', label: t('sidebar.users'), route: 'users.list', type: 'menu' }
+      { icon: 'users', label: t('sidebar.users'), route: 'users.list', type: 'menu' },
+      { icon: 'shield-lock', label: t('sidebar.roles'), route: 'roles.list', type: 'menu' }
     )
   }
 

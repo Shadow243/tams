@@ -77,6 +77,7 @@
     "currencies": "Currencies",
     "countries": "Countries",
     "users": "Users",
+    "roles": "Roles & Permissions",
     "profile": "My Profile",
     "account_settings": "Account Settings",
     "lock_screen": "Lock Screen"
@@ -143,7 +144,11 @@
     "all_statuses": "All statuses",
     "view": "View",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm_delete": "Confirm deletion"
   },
   "users": {
     "page_title": "Users Management",
@@ -214,6 +219,17 @@
       "update": "Update",
       "create": "Create",
       "submit": "Submit"
+    },
+    "permissions": {
+      "title": "User Permissions",
+      "no_role": "No role assigned",
+      "role_permissions": "Permissions via role",
+      "role_permissions_desc": "These permissions are inherited from the user's role and cannot be changed here.",
+      "direct_permissions": "Additional direct permissions",
+      "direct_desc": "Grant extra permissions beyond the user's role. Permissions already included in the role are shown in blue and cannot be re-assigned here.",
+      "from_role": "Included in the user's role",
+      "none": "None",
+      "saved": "User permissions updated successfully"
     }
   },
   "countries": {
@@ -978,5 +994,43 @@
     "balance": "Balance",
     "credit_limit": "Available credit",
     "account_number": "Account No."
+  },
+  "roles": {
+    "page_title": "Roles & Permissions",
+    "page_description": "Manage roles and their associated permissions",
+    "tab_roles": "Roles",
+    "tab_permissions": "Permissions",
+    "add_role": "New Role",
+    "edit_role": "Edit Role",
+    "name": "Role name",
+    "name_placeholder": "e.g. supervisor",
+    "description": "Description",
+    "description_placeholder": "Short description of this role",
+    "permissions": "Permissions",
+    "permissions_count": "Permissions",
+    "users_count": "Users",
+    "no_roles": "No roles found",
+    "select_all": "Select all",
+    "deselect_all": "Deselect all",
+    "no_permissions": "No permissions available",
+    "created": "Role created successfully",
+    "updated": "Role updated successfully",
+    "deleted": "Role deleted successfully",
+    "confirm_delete": "Delete role \"{name}\"? This cannot be undone."
+  },
+  "permissions": {
+    "add": "New Permission",
+    "edit": "Edit Permission",
+    "name": "Permission name",
+    "name_hint": "Use snake_case, e.g. lire_rapports",
+    "group": "Group",
+    "module": "Module",
+    "select_module": "Select a module",
+    "all_modules": "All modules",
+    "no_permissions": "No permissions match the current filter",
+    "created": "Permission created successfully",
+    "updated": "Permission updated successfully",
+    "deleted": "Permission deleted successfully",
+    "confirm_delete": "Delete permission \"{name}\"? This cannot be undone."
   }
 }

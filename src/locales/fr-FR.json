@@ -77,6 +77,7 @@
     "currencies": "Devises",
     "countries": "Pays",
     "users": "Utilisateurs",
+    "roles": "Rôles & Permissions",
     "profile": "Mon Profil",
     "account_settings": "Paramètres du compte",
     "lock_screen": "Verrouiller l'écran"
@@ -143,7 +144,11 @@
     "all_statuses": "Tous les statuts",
     "view": "Voir",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "create": "Créer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "confirm_delete": "Confirmer la suppression"
   },
   "users": {
     "page_title": "Gestion des Utilisateurs",
@@ -214,6 +219,17 @@
       "update": "Mettre à jour",
       "create": "Créer",
       "submit": "Soumettre"
+    },
+    "permissions": {
+      "title": "Permissions de l'utilisateur",
+      "no_role": "Aucun rôle assigné",
+      "role_permissions": "Permissions via le rôle",
+      "role_permissions_desc": "Ces permissions sont héritées du rôle de l'utilisateur et ne peuvent pas être modifiées ici.",
+      "direct_permissions": "Permissions directes supplémentaires",
+      "direct_desc": "Accordez des permissions supplémentaires au-delà du rôle. Les permissions déjà incluses dans le rôle apparaissent en bleu et ne peuvent pas être réassignées ici.",
+      "from_role": "Incluse dans le rôle de l'utilisateur",
+      "none": "Aucune",
+      "saved": "Permissions de l'utilisateur mises à jour avec succès"
     }
   },
   "countries": {
@@ -976,5 +992,43 @@
     "balance": "Solde",
     "credit_limit": "Crédit disponible",
     "account_number": "N° Compte"
+  },
+  "roles": {
+    "page_title": "Rôles & Permissions",
+    "page_description": "Gérer les rôles et leurs permissions associées",
+    "tab_roles": "Rôles",
+    "tab_permissions": "Permissions",
+    "add_role": "Nouveau rôle",
+    "edit_role": "Modifier le rôle",
+    "name": "Nom du rôle",
+    "name_placeholder": "ex. superviseur",
+    "description": "Description",
+    "description_placeholder": "Courte description de ce rôle",
+    "permissions": "Permissions",
+    "permissions_count": "Permissions",
+    "users_count": "Utilisateurs",
+    "no_roles": "Aucun rôle trouvé",
+    "select_all": "Tout sélectionner",
+    "deselect_all": "Tout désélectionner",
+    "no_permissions": "Aucune permission disponible",
+    "created": "Rôle créé avec succès",
+    "updated": "Rôle mis à jour avec succès",
+    "deleted": "Rôle supprimé avec succès",
+    "confirm_delete": "Supprimer le rôle \"{name}\" ? Cette action est irréversible."
+  },
+  "permissions": {
+    "add": "Nouvelle permission",
+    "edit": "Modifier la permission",
+    "name": "Nom de la permission",
+    "name_hint": "Utilisez le format snake_case, ex. lire_rapports",
+    "group": "Groupe",
+    "module": "Module",
+    "select_module": "Sélectionner un module",
+    "all_modules": "Tous les modules",
+    "no_permissions": "Aucune permission ne correspond au filtre",
+    "created": "Permission créée avec succès",
+    "updated": "Permission mise à jour avec succès",
+    "deleted": "Permission supprimée avec succès",
+    "confirm_delete": "Supprimer la permission \"{name}\" ? Cette action est irréversible."
   }
 }

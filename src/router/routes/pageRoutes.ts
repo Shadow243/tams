@@ -47,7 +47,31 @@ const routes: RouteRecordRaw[] = [
                 name: "users.list",
                 component: () =>
                     import("@/views/users/UsersList.vue").then((m) => m.default || m),
-            }
+            },
+            {
+                path: ":id/permissions",
+                name: "users.permissions",
+                component: () =>
+                    import("@/views/users/UserPermissions.vue").then((m) => m.default || m),
+            },
+        ],
+    },
+    {
+        path: "/roles",
+        component: () =>
+            import("@/views/roles/RolesIndex.vue").then((m) => m.default || m),
+        children: [
+            {
+                path: "",
+                name: "roles.index",
+                redirect: { name: "roles.list" },
+            },
+            {
+                path: "list",
+                name: "roles.list",
+                component: () =>
+                    import("@/views/roles/RolesList.vue").then((m) => m.default || m),
+            },
         ],
     },
     {
