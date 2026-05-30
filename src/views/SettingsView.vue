@@ -1004,6 +1004,9 @@ const saveSettingsToAPI = async () => {
     // Update localStorage as well
     localStorage.setItem('userSettings', JSON.stringify(settings.value))
 
+    // Notify same-tab listeners (e.g. useAutoLock) that settings have changed
+    window.dispatchEvent(new Event('userSettingsUpdated'))
+
     // Refresh user data to get updated settings
     await authStore.fetchUser()
 

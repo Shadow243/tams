@@ -78,27 +78,27 @@ function saveUserSettings(settings: UserSettings): void {
   }
 }
 
+// Module-level singleton — shared across all useUserSettings() calls in the same tab
+const _sharedSettings = ref<UserSettings>(getUserSettings())
+
+function _refreshSharedSettings() {
+  _sharedSettings.value = getUserSettings()
+}
+
+if (typeof window !== 'undefined') {
+  // Cross-tab sync via storage event
+  window.addEventListener('storage', (event: StorageEvent) => {
+    if (event.key === 'userSettings') _refreshSharedSettings()
+  })
+  // Same-tab sync via custom event dispatched after manual localStorage writes
+  window.addEventListener('userSettingsUpdated', _refreshSharedSettings)
+}
+
 /**
  * Composable to access user settings
  */
 export function useUserSettings() {
-  const settings = ref<UserSettings>(getUserSettings())
-
-  // Watch for changes in localStorage (from other tabs/windows)
-  const handleStorageChange = (event: StorageEvent) => {
-    if (event.key === 'userSettings' && event.newValue) {
-      try {
-        settings.value = JSON.parse(event.newValue)
-      } catch (error) {
-        console.error('Failed to parse user settings from storage event:', error)
-      }
-    }
-  }
-
-  // Listen for storage changes
-  if (typeof window !== 'undefined') {
-    window.addEventListener('storage', handleStorageChange)
-  }
+  const settings = _sharedSettings
 
   // Create reactive computed refs for each setting
   const itemsPerPage = computed(() => settings.value.itemsPerPage || DEFAULT_SETTINGS.itemsPerPage || 25)
