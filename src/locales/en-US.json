@@ -839,7 +839,11 @@
     "cancel_reason_label": "Cancellation reason (optional)",
     "cancel_reason_placeholder": "e.g: duplicate, data entry error, customer request...",
     "complete_note_label": "Note / External code (optional)",
-    "complete_note_placeholder": "e.g: Airtel Money code, partner reference..."
+    "complete_note_placeholder": "e.g: Airtel Money code, partner reference...",
+    "customer_account": "TAMS Customer Account",
+    "select_customer_first": "Select a customer first",
+    "select_account": "Select an account",
+    "no_account_found": "No account found for this customer"
   },
   "settings": {
     "pageTitle": "Settings",

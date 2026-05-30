@@ -94,6 +94,8 @@ const handleAddTransactionType = () => {
   formData.dest_wallet_amount = 'gross'
   formData.dest_branch_effect = 'none'
   formData.dest_branch_amount = 'gross'
+  formData.customer_account_effect = 'none'
+  formData.customer_account_amount = 'gross'
   formData.requires_dest_customer = false
   formData.requires_customer = true
   store.setCurrentTransactionType(null)
@@ -113,6 +115,8 @@ const handleEditTransactionType = (transactionType: any) => {
   formData.dest_wallet_amount = transactionType.dest_wallet_amount ?? 'gross'
   formData.dest_branch_effect = transactionType.dest_branch_effect ?? 'none'
   formData.dest_branch_amount = transactionType.dest_branch_amount ?? 'gross'
+  formData.customer_account_effect = transactionType.customer_account_effect ?? 'none'
+  formData.customer_account_amount = transactionType.customer_account_amount ?? 'gross'
   formData.requires_dest_customer = transactionType.requires_dest_customer ?? false
   formData.requires_customer = transactionType.requires_customer ?? true
   store.setCurrentTransactionType(transactionType)

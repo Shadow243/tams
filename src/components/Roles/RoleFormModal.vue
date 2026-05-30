@@ -82,14 +82,14 @@
                     <span class="badge bg-secondary ms-2 fw-normal">
                       {{ moduleSelectedCount(module) }} / {{ moduleTotalCount(module) }}
                     </span>
-                    <button
-                      type="button"
+                    <span
+                      role="button"
                       class="btn btn-xs btn-outline-primary ms-3 py-0 px-2"
                       style="font-size: 0.7rem"
                       @click.stop="toggleModule(module)"
                     >
                       {{ moduleSelectedCount(module) === moduleTotalCount(module) ? t('roles.deselect_all') : t('roles.select_all') }}
-                    </button>
+                    </span>
                   </button>
                 </h2>
                 <div

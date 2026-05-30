@@ -308,7 +308,7 @@ onMounted(async () => {
   await Promise.all([
     store.fetchTransactions(),
     transactionTypeStore.fetchTransactionTypes(),
-    branchStore.fetchBranches(),
+    branchStore.fetchBranches(1, undefined, 100),
     walletStore.fetchWallets(),
     currencyStore.fetchAllCurrencies(),
     store.fetchStatistics(),

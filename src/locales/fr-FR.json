@@ -837,7 +837,11 @@
     "cancel_reason_label": "Raison de l'annulation (optionnel)",
     "cancel_reason_placeholder": "Ex: doublon, erreur de saisie, demande client...",
     "complete_note_label": "Note / Code externe (optionnel)",
-    "complete_note_placeholder": "Ex: code Airtel Money, référence partenaire..."
+    "complete_note_placeholder": "Ex: code Airtel Money, référence partenaire...",
+    "customer_account": "Compte Client TAMS",
+    "select_customer_first": "Sélectionnez d'abord un client",
+    "select_account": "Sélectionnez un compte",
+    "no_account_found": "Aucun compte trouvé pour ce client"
   },
   "settings": {
     "pageTitle": "Paramètres",

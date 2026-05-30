@@ -672,20 +672,34 @@ const canSelectBranch = computed(() => {
   if (!authStore.user) return false
   const roles = authStore.user.roles || []
   if (roles.includes('admin') || roles.includes('superviseur')) return true
-  return !authStore.user.branch_id
+  // Only allow free selection if explicitly no branch assigned (not just loading)
+  return authStore.user.branch_id === null
 })
+
+// Branch fetched once on mount for locked display (agents)
+const agentBranch = ref<any>(null)
+const agentBranchLoading = ref(false)
 
 const lockedBranchName = computed(() => {
-  if (canSelectBranch.value || !localForm.value.branch_id) return ''
-  const branch = props.branches.find((b: any) => b.id === localForm.value.branch_id)
-  return branch ? `${branch.name} (${branch.code})` : String(localForm.value.branch_id)
+  if (agentBranchLoading.value) return '...'
+  if (agentBranch.value) return `${agentBranch.value.name} (${agentBranch.value.code})`
+  return authStore.user?.branch_id ? String(authStore.user.branch_id) : ''
 })
 
-// Initialize branch_id from authenticated user and load currencies
 onMounted(async () => {
-  // Only auto-set branch_id if user cannot select branch manually (not admin/supervisor)
-  if (authStore.user?.branch_id && !canSelectBranch.value) {
-    localForm.value.branch_id = authStore.user.branch_id
+  const userBranchId = authStore.user?.branch_id
+  if (userBranchId && !canSelectBranch.value) {
+    localForm.value.branch_id = Number(userBranchId)
+    // Fetch branch name once for the locked display
+    agentBranchLoading.value = true
+    try {
+      const { data } = await axiosInstance.get(`${appConfig.apiUrl}/branches/${userBranchId}`)
+      agentBranch.value = data?.data ?? data
+    } catch {
+      // lockedBranchName falls back to the ID string
+    } finally {
+      agentBranchLoading.value = false
+    }
   }
 
   // Load currencies if not already loaded
@@ -693,7 +707,6 @@ onMounted(async () => {
     loadingCurrencies.value = true
     try {
       await currencyStore.fetchAllCurrencies()
-      // Set default currency if not already set
       if (!localForm.value.currency_code && currencyStore.defaultCurrency) {
         localForm.value.currency_code = currencyStore.defaultCurrency.code
       }
@@ -707,11 +720,15 @@ onMounted(async () => {
   }
 })
 
+// When formData is reset from outside, re-apply the agent's branch_id
 watch(
   () => props.formData,
   (newData) => {
     if (newData) {
       localForm.value = { ...newData }
+      if (authStore.user?.branch_id && !canSelectBranch.value) {
+        localForm.value.branch_id = Number(authStore.user.branch_id)
+      }
       showPreview.value = false
     }
   },
@@ -723,9 +740,9 @@ watch(
   (newShow) => {
     if (newShow) {
       localForm.value = { ...props.formData }
-      // Only auto-set branch_id if user cannot select branch manually (not admin/supervisor)
+      // Always lock branch_id for agents
       if (authStore.user?.branch_id && !canSelectBranch.value) {
-        localForm.value.branch_id = authStore.user.branch_id
+        localForm.value.branch_id = Number(authStore.user.branch_id)
       }
       // Set default currency if not set
       if (!localForm.value.currency_code && currencyStore.defaultCurrency) {
@@ -761,7 +778,7 @@ watch(
   (newBranchId, oldBranchId) => {
     if (oldBranchId !== undefined && newBranchId !== oldBranchId && localForm.value.wallet_id) {
       const selectedWallet = props.wallets.find((w) => w.id === localForm.value.wallet_id)
-      if (selectedWallet && selectedWallet.branch_id !== newBranchId) {
+      if (selectedWallet && Number(selectedWallet.branch_id) !== Number(newBranchId)) {
         localForm.value.wallet_id = null
       }
     }
@@ -825,12 +842,14 @@ const showDestWalletField = computed(() => {
 // Filter wallets by selected branch
 const availableWallets = computed(() => {
   if (!localForm.value.branch_id) return []
-  return props.wallets.filter((w) => w.branch_id === localForm.value.branch_id)
+  const id = Number(localForm.value.branch_id)
+  return props.wallets.filter((w) => Number(w.branch_id) === id)
 })
 
 const availableDestWallets = computed(() => {
   if (!localForm.value.destination_branch_id) return []
-  return props.wallets.filter((w) => w.branch_id === localForm.value.destination_branch_id)
+  const id = Number(localForm.value.destination_branch_id)
+  return props.wallets.filter((w) => Number(w.branch_id) === id)
 })
 
 const activeCurrencies = computed(() => currencyStore.activeCurrencies)

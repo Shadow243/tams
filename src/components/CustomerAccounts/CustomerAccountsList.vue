@@ -90,8 +90,8 @@
               <tr>
                 <th>{{ t('accounts.account_number') || 'N° Compte' }}</th>
                 <th>{{ t('accounts.branch') || 'Agence' }}</th>
-                <th>{{ t('accounts.balance') || 'Solde' }}</th>
-                <th>{{ t('accounts.credit_limit') || 'Crédit disponible' }}</th>
+                <th v-if="canSeeBalance">{{ t('accounts.balance') || 'Solde' }}</th>
+                <th v-if="canSeeBalance">{{ t('accounts.credit_limit') || 'Crédit disponible' }}</th>
                 <th>{{ t('common.status') || 'Statut' }}</th>
                 <th class="text-end">{{ t('common.actions') || 'Actions' }}</th>
               </tr>
@@ -100,7 +100,7 @@
               <template v-for="group in groupedAccounts" :key="group.customerId">
                 <!-- Customer group header -->
                 <tr class="customer-group-header">
-                  <td colspan="6">
+                  <td :colspan="canSeeBalance ? 6 : 4">
                     <div class="d-flex align-items-center gap-2">
                       <i class="ti ti-user-circle text-primary"></i>
                       <strong>{{ group.customerName }}</strong>
@@ -122,7 +122,7 @@
                     <span v-if="account.is_vip" class="badge bg-warning text-dark ms-1">VIP</span>
                   </td>
                   <td>{{ account.branch?.name }}</td>
-                  <td>
+                  <td v-if="canSeeBalance">
                     <span
                       :class="{
                         'text-danger fw-semibold': account.is_in_debt,
@@ -132,7 +132,7 @@
                       {{ formatCurrency(account.balance, account.currency?.code) }}
                     </span>
                   </td>
-                  <td>{{ formatCurrency(account.credit_limit, account.currency?.code) }}</td>
+                  <td v-if="canSeeBalance">{{ formatCurrency(account.credit_limit, account.currency?.code) }}</td>
                   <td>
                     <span :class="`badge bg-${account.status_color}`">
                       {{ account.status_label }}
@@ -290,7 +290,9 @@ import InterestSettingsModal from './InterestSettingsModal.vue'
 import type { CustomerAccount } from '@/types'
 
 const { t } = useI18n()
-const { can } = usePermissions()
+const { can, isAgent } = usePermissions()
+
+const canSeeBalance = computed(() => !isAgent.value)
 const router = useRouter()
 const accountStore = useCustomerAccountStore()
 
