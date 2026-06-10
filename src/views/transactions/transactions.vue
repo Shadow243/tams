@@ -233,13 +233,14 @@ import type { TransactionFormData, Transaction } from '@/types'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
-const { canCreateTransaction, canEditTransaction, isCaissier, isAgent } = usePermissions()
+const { canCreateTransaction, isCaissier, isAgent } = usePermissions()
 const authStore = useAuthStore()
 
-// Caissier ne peut créer que des ravitaillements internes (wallet_wallet)
+// Caissier ne peut créer que des ravitaillements (wallet_wallet et tams_refueling)
+const CAISSIER_CODES = ['wallet_wallet', 'tams_refueling']
 const filteredTransactionTypes = computed(() =>
   isCaissier.value
-    ? transactionTypeStore.transactionType_list.filter((t: any) => t.code === 'wallet_wallet')
+    ? transactionTypeStore.transactionType_list.filter((t: any) => CAISSIER_CODES.includes(t.code))
     : transactionTypeStore.transactionType_list
 )
 
@@ -322,10 +323,8 @@ onMounted(async () => {
 const handleAddTransaction = () => {
   isEditing.value = false
 
-  // Pré-sélectionner le type ravitaillement pour le caissier (son seul type autorisé)
-  const preselectedTypeId = isCaissier.value
-    ? (transactionTypeStore.transactionType_list.find((t: any) => t.code === 'wallet_wallet')?.id ?? null)
-    : null
+  // Pas de pré-sélection pour le caissier : il choisit parmi ses types autorisés
+  const preselectedTypeId = null
 
   formData.value = {
     transaction_type_id: preselectedTypeId,
