@@ -290,9 +290,9 @@ import InterestSettingsModal from './InterestSettingsModal.vue'
 import type { CustomerAccount } from '@/types'
 
 const { t } = useI18n()
-const { can, isAgent } = usePermissions()
+const { can, isAgent, isCaissier } = usePermissions()
 
-const canSeeBalance = computed(() => !isAgent.value)
+const canSeeBalance = computed(() => !isAgent.value && !isCaissier.value)
 const router = useRouter()
 const accountStore = useCustomerAccountStore()
 

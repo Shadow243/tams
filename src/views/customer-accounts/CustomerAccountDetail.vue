@@ -37,7 +37,7 @@
     <template v-else-if="account">
       <!-- Info Cards -->
       <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-3" v-if="canSeeBalance">
           <div class="card h-100">
             <div class="card-body">
               <div class="text-muted small mb-1">Solde</div>
@@ -50,7 +50,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3" v-if="canSeeBalance">
           <div class="card h-100">
             <div class="card-body">
               <div class="text-muted small mb-1">Crédit disponible</div>
@@ -148,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCustomerAccountStore } from '@/stores/customer-accounts'
 import { usePermissions } from '@/composables/usePermissions'
@@ -159,7 +159,9 @@ import type { CustomerAccount } from '@/types'
 const route = useRoute()
 const router = useRouter()
 const store = useCustomerAccountStore()
-const { can } = usePermissions()
+const { can, isAgent, isCaissier } = usePermissions()
+
+const canSeeBalance = computed(() => !isAgent.value && !isCaissier.value)
 
 const account = ref<CustomerAccount | null>(null)
 const transactions = ref<any[]>([])
