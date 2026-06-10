@@ -113,7 +113,6 @@
           <tr class="text-uppercase fs-xxs">
             <th class="text-center" style="width: 5%">#</th>
             <th>{{ t('wallets.table.wallet_number') || 'Wallet Number' }}</th>
-            <th>{{ t('wallets.table.branch') || 'Branch' }}</th>
             <th>{{ t('wallets.table.operator') || 'Operator' }}</th>
             <th class="text-end">{{ t('wallets.table.virtual_balance') || 'Solde Virtuel' }}</th>
             <th class="text-center">{{ t('wallets.table.currency') || 'Currency' }}</th>
@@ -124,7 +123,7 @@
         <!-- end table-head -->
         <tbody v-if="loading">
           <tr>
-            <td colspan="8" class="text-center py-5">
+            <td colspan="7" class="text-center py-5">
               <div class="d-flex justify-content-center align-items-center">
                 <div
                   class="spinner-border text-primary"
@@ -139,91 +138,106 @@
         </tbody>
         <tbody v-else-if="!wallets.length">
           <tr>
-            <td colspan="8" class="text-center py-5">
+            <td colspan="7" class="text-center py-5">
               <span class="text-muted">{{ t('wallets.noResults') || 'No wallets found' }}</span>
             </td>
           </tr>
         </tbody>
         <tbody v-else>
-          <tr v-for="(wallet, index) in wallets" :key="wallet.id">
-            <td class="text-center">{{ index + from }}</td>
-            <td>
-              <span class="fw-medium">{{ wallet.wallet_number }}</span>
-            </td>
-            <td>{{ wallet.branch?.name || 'N/A' }}</td>
-            <td>{{ wallet.operator?.name || 'N/A' }}</td>
-            <td class="text-end">
-              <span class="fw-semibold">
-                {{ wallet.virtual_balance !== null && wallet.virtual_balance !== undefined ? Number(wallet.virtual_balance).toFixed(2) : '—' }}
-              </span>
-            </td>
-            <td class="text-center">
-              <span class="badge bg-secondary">{{ wallet.currency?.code || 'N/A' }}</span>
-            </td>
-            <td class="text-center">
-              <span
-                :class="[
-                  'badge',
-                  wallet.status === 'active' ? 'badge-soft-success' : 'badge-soft-danger',
-                ]"
-              >
-                {{ wallet.status_label }}
-              </span>
-            </td>
-            <td class="text-center">
-              <div class="dropdown">
-                <button
-                  class="btn btn-light btn-sm dropdown-toggle"
-                  type="button"
-                  :id="'dropdownMenuButton' + wallet.id"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+          <template v-for="group in groupedWallets" :key="group.branchId">
+            <!-- Branch group header -->
+            <tr class="table-light">
+              <td colspan="7">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ti ti-building text-primary"></i>
+                  <strong>{{ group.branchName }}</strong>
+                  <span class="badge bg-light text-secondary border ms-1">
+                    {{ group.wallets.length }}
+                    {{ group.wallets.length > 1 ? t('wallets.wallets') || 'portefeuilles' : t('wallets.wallet') || 'portefeuille' }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <!-- Wallet rows for this branch -->
+            <tr v-for="(wallet, index) in group.wallets" :key="wallet.id" class="wallet-row">
+              <td class="text-center ps-4">{{ walletGlobalIndex(group, index) }}</td>
+              <td>
+                <span class="fw-medium">{{ wallet.wallet_number }}</span>
+              </td>
+              <td>{{ wallet.operator?.name || 'N/A' }}</td>
+              <td class="text-end">
+                <span class="fw-semibold">
+                  {{ wallet.virtual_balance !== null && wallet.virtual_balance !== undefined ? Number(wallet.virtual_balance).toFixed(2) : '—' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-secondary">{{ wallet.currency?.code || 'N/A' }}</span>
+              </td>
+              <td class="text-center">
+                <span
+                  :class="[
+                    'badge',
+                    wallet.status === 'active' ? 'badge-soft-success' : 'badge-soft-danger',
+                  ]"
                 >
-                  <i class="ti ti-dots-vertical"></i>
-                </button>
-                <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButton' + wallet.id">
-                  <li v-if="canEdit">
-                    <a class="dropdown-item" href="#" @click.prevent="$emit('edit', wallet)">
-                      <i class="ti ti-edit me-2 text-info"></i>
-                      {{ t('wallets.edit') || 'Edit' }}
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      @click.prevent="$emit('toggle-status', wallet.id)"
-                    >
-                      <i
-                        :class="[
-                          'ti me-2',
+                  {{ wallet.status_label }}
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="dropdown">
+                  <button
+                    class="btn btn-light btn-sm dropdown-toggle"
+                    type="button"
+                    :id="'dropdownMenuButton' + wallet.id"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="ti ti-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButton' + wallet.id">
+                    <li v-if="canEdit">
+                      <a class="dropdown-item" href="#" @click.prevent="$emit('edit', wallet)">
+                        <i class="ti ti-edit me-2 text-info"></i>
+                        {{ t('wallets.edit') || 'Edit' }}
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        class="dropdown-item"
+                        href="#"
+                        @click.prevent="$emit('toggle-status', wallet.id)"
+                      >
+                        <i
+                          :class="[
+                            'ti me-2',
+                            wallet.status === 'active'
+                              ? 'ti-toggle-right text-warning'
+                              : 'ti-toggle-left text-success',
+                          ]"
+                        ></i>
+                        {{
                           wallet.status === 'active'
-                            ? 'ti-toggle-right text-warning'
-                            : 'ti-toggle-left text-success',
-                        ]"
-                      ></i>
-                      {{
-                        wallet.status === 'active'
-                          ? t('wallets.deactivate') || 'Deactivate'
-                          : t('wallets.activate') || 'Activate'
-                      }}
-                    </a>
-                  </li>
-                  <li v-if="canDelete"><hr class="dropdown-divider" /></li>
-                  <li v-if="canDelete">
-                    <a
-                      class="dropdown-item text-danger"
-                      href="#"
-                      @click.prevent="$emit('delete', wallet.id)"
-                    >
-                      <i class="ti ti-trash me-2"></i>
-                      {{ t('wallets.delete') || 'Delete' }}
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </td>
-          </tr>
+                            ? t('wallets.deactivate') || 'Deactivate'
+                            : t('wallets.activate') || 'Activate'
+                        }}
+                      </a>
+                    </li>
+                    <li v-if="canDelete"><hr class="dropdown-divider" /></li>
+                    <li v-if="canDelete">
+                      <a
+                        class="dropdown-item text-danger"
+                        href="#"
+                        @click.prevent="$emit('delete', wallet.id)"
+                      >
+                        <i class="ti ti-trash me-2"></i>
+                        {{ t('wallets.delete') || 'Delete' }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </template>
         </tbody>
         <!-- end table-body -->
       </table>
@@ -344,6 +358,38 @@ const total = computed(() => props.meta?.total ?? 0)
 const currentPage = computed(() => props.meta?.current_page ?? 1)
 const lastPage = computed(() => props.meta?.last_page ?? 1)
 
+interface WalletGroup {
+  branchId: number
+  branchName: string
+  wallets: Wallet[]
+}
+
+const groupedWallets = computed((): WalletGroup[] => {
+  const map = new Map<number, WalletGroup>()
+  for (const wallet of props.wallets) {
+    const id = wallet.branch?.id ?? wallet.branch_id ?? 0
+    if (!map.has(id)) {
+      map.set(id, {
+        branchId: id,
+        branchName: wallet.branch?.name ?? '—',
+        wallets: [],
+      })
+    }
+    map.get(id)!.wallets.push(wallet)
+  }
+  return Array.from(map.values())
+})
+
+// Returns the global row index (accounting for pagination offset) for a wallet inside a group
+const walletGlobalIndex = (group: WalletGroup, indexInGroup: number): number => {
+  let offset = 0
+  for (const g of groupedWallets.value) {
+    if (g.branchId === group.branchId) break
+    offset += g.wallets.length
+  }
+  return from.value + offset + indexInGroup
+}
+
 // Compute visible pages for pagination
 const visiblePages = computed(() => {
   const pages: number[] = []
@@ -406,17 +452,22 @@ const refreshTable = () => {
 const exportCSV = () => {
   // Prepare data for CSV
   const headers = [
-    t('wallets.table.wallet_number'),
     t('wallets.table.branch'),
+    t('wallets.table.wallet_number'),
     t('wallets.table.operator'),
     t('wallets.table.virtual_balance') || 'Solde Virtuel',
     t('wallets.table.currency'),
     t('wallets.table.status'),
   ]
 
-  const rows = props.wallets.map((wallet: Wallet) => [
-    wallet.wallet_number || '',
+  // Sort by branch for CSV to mirror the visual grouping
+  const sorted = [...props.wallets].sort((a, b) =>
+    (a.branch?.name ?? '').localeCompare(b.branch?.name ?? '')
+  )
+
+  const rows = sorted.map((wallet: Wallet) => [
     wallet.branch?.name || '',
+    wallet.wallet_number || '',
     wallet.operator?.name || '',
     Number(wallet.virtual_balance ?? 0).toFixed(2),
     wallet.currency?.code || '',
@@ -480,3 +531,9 @@ const exportPDF = async () => {
   }
 }
 </script>
+
+<style scoped>
+.wallet-row td {
+  padding-left: 1.5rem;
+}
+</style>
