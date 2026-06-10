@@ -330,7 +330,7 @@
                         v-model.number="localForm.gross_amount"
                         required
                         min="0"
-                        step="1"
+                        step="any"
                         :disabled="processing"
                         @input="onAmountChange"
                       />
@@ -351,7 +351,7 @@
                         v-model.number="localForm.fee_amount"
                         required
                         min="0"
-                        step="1"
+                        step="any"
                         :disabled="processing || autoCalculateFee"
                         :readonly="autoCalculateFee"
                       />
