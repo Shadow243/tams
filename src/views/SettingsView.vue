@@ -383,6 +383,7 @@
                   <label for="auto-lock-time" class="form-label">{{ t('settings.security.autoLock.label') }}</label>
                   <select id="auto-lock-time" class="form-select" v-model="settings.security.autoLockMinutes">
                     <option value="0">{{ t('common.never') }}</option>
+                    <option value="2">2 {{ t('common.minutes') }}</option>
                     <option value="5">5 {{ t('common.minutes') }}</option>
                     <option value="10">10 {{ t('common.minutes') }}</option>
                     <option value="15">15 {{ t('common.minutes') }}</option>

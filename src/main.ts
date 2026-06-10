@@ -43,6 +43,13 @@ import { vPreline } from './directives/preline'
 
 
 
+// Force-unregister any stale service workers so the new SW takes over immediately
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((r) => r.update())
+  })
+}
+
 // Application initialization
 async function initApp() {
   // Try to merge API locales but don't block app startup on failure

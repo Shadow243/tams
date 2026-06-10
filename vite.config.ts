@@ -12,8 +12,8 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png'],
-      manifestFilename: 'icons/manifest.json',
+      includeAssets: ['favicon.ico'],
+      manifestFilename: 'manifest.json',
       devOptions: {
         enabled: true,
         type: 'module',

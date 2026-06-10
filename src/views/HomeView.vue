@@ -1172,7 +1172,7 @@
     </div>
 
     <!-- ── Rapport Comptes Clients VIP ──────────────────────────────────── -->
-    <CustomerAccountsReport v-if="can('lire_clients')" />
+    <CustomerAccountsReport v-if="can('lire_rapport_comptes_clients')" />
   </div>
 </template>
 
