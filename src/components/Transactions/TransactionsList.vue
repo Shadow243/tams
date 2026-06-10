@@ -294,7 +294,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-success"
-                    v-if="transaction.status === 'pending' || transaction.status === 'available'"
+                    v-if="(transaction.status === 'pending' || transaction.status === 'available') && canCompleteTransaction(transaction)"
                     @click.prevent.stop="handleComplete(transaction.id || transaction.uuid)"
                     :title="t('transactions.complete') || 'Compléter'"
                   >
@@ -303,7 +303,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-warning"
-                    v-if="transaction.can_be_cancelled"
+                    v-if="transaction.can_be_cancelled && canCancelOrDeleteTransaction(transaction)"
                     @click.prevent.stop="handleCancel(transaction.id || transaction.uuid)"
                     :title="t('transactions.cancel') || 'Annuler'"
                   >
@@ -320,6 +320,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-danger"
+                    v-if="canCancelOrDeleteTransaction(transaction)"
                     @click.prevent.stop="handleDelete(transaction.id || transaction.uuid)"
                     :disabled="!transaction.can_be_cancelled"
                     :title="t('transactions.delete') || 'Supprimer'"
@@ -381,6 +382,7 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
 import { usePermissions } from '@/composables/usePermissions'
+import { useAuthStore } from '@/stores/auth'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { useFormat } from '@/plugins/format'
 import { axiosInstance } from '@/plugins/axios'
@@ -389,7 +391,21 @@ import type { Transaction, Meta } from '@/types'
 import TransactionReceiptModal from '@/components/Transactions/TransactionReceiptModal.vue'
 
 const { t } = useI18n()
-const { canEditTransaction } = usePermissions()
+const { canEditTransaction, isAgent } = usePermissions()
+const authStore = useAuthStore()
+
+// Un agent ne peut valider une transaction avec destination que si c'est SA branche
+const canCompleteTransaction = (transaction: any): boolean => {
+  if (!isAgent.value) return true
+  if (!transaction.destination_branch_id) return true
+  return transaction.destination_branch_id === authStore.user?.branch_id
+}
+
+// Les transactions inter-agences ne peuvent être annulées/supprimées que par un superviseur
+const canCancelOrDeleteTransaction = (transaction: any): boolean => {
+  if (!isAgent.value) return true
+  return !transaction.destination_branch_id
+}
 const { getItemsPerPage } = useUserSettings()
 const format = useFormat()
 

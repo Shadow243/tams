@@ -649,6 +649,7 @@
   "transactions": {
     "transactions": "Transactions",
     "daily_report": "Daily report",
+    "see_all": "See all",
     "page_title": "Transactions Management",
     "page_description": "Manage all transactions, create and track operations",
     "add_transaction": "New Transaction",

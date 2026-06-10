@@ -241,6 +241,10 @@ export const useTransactionStore = defineStore('transaction', () => {
         params.currency_id = filters.value.currency_id
       }
 
+      if (filters.value.user_id) {
+        params.user_id = filters.value.user_id
+      }
+
       const response = await axiosInstance.get(`${appConfig.apiUrl}/transactions/statistics`, {
         params
       })

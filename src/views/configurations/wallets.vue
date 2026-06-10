@@ -56,11 +56,13 @@ import WalletsList from '@/components/Wallets/WalletsList.vue'
 import WalletFormModal from '@/components/Wallets/WalletFormModal.vue'
 import { useI18n } from '@/composables/useI18n'
 import { usePermissions } from '@/composables/usePermissions'
+import { useAuthStore } from '@/stores/auth'
 import { confirmDialog } from '@/utils/notification'
 import type { Wallet, WalletFormData } from '@/types'
 
 const { t } = useI18n()
-const { canCreate } = usePermissions()
+const { canCreate, isAgent } = usePermissions()
+const authStore = useAuthStore()
 
 const store: ReturnType<typeof useWalletStore> = useWalletStore()
 const walletListRef = ref<InstanceType<typeof WalletsList> | null>(null)
@@ -100,6 +102,9 @@ const formData = reactive<WalletFormData>({
 })
 
 onMounted(() => {
+  if (isAgent.value && authStore.user?.branch_id) {
+    store.setBranchFilter(authStore.user.branch_id)
+  }
   store.fetchWallets()
 })
 

@@ -647,6 +647,7 @@
   "transactions": {
     "transactions": "Transactions",
     "daily_report": "Rapport journalier",
+    "see_all": "Voir tout",
     "page_title": "Gestion des Transactions",
     "page_description": "Gérer toutes les transactions, créer et suivre les opérations",
     "add_transaction": "Nouvelle Transaction",

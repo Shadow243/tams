@@ -43,8 +43,8 @@ export function usePermissions() {
   const canSeeBranchRanking  = computed(() => isAdmin.value || isSuperviseur.value)
   // Totaux système — caissier en a besoin pour connaître l'état global des liquidités
   const canSeeSystemTotals   = computed(() => isAdmin.value || isSuperviseur.value || isCaissier.value)
-  // Tableau des soldes par agence
-  const canSeeBranchBalances = computed(() => isAdmin.value || isSuperviseur.value || isCaissier.value)
+  // Tableau des soldes par agence (l'agent voit l'agence de son branch)
+  const canSeeBranchBalances = computed(() => isAdmin.value || isSuperviseur.value || isCaissier.value || isAgent.value)
 
   // ── Menu — configurations cachées pour caissier et agent ─────────────────────
   const canSeeConfigurations = computed(() => isAdmin.value)

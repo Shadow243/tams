@@ -10,10 +10,11 @@
         </div>
 
         <div class="text-end mt-3 mt-sm-0 d-flex gap-2 justify-content-end flex-wrap">
-          <!-- Rapport du jour — agent uniquement -->
-          <button v-if="isAgent" @click.prevent="applyDailyReport" type="button" class="btn btn-outline-success">
-            <i class="ti ti-calendar-today me-1"></i>
-            {{ t('transactions.daily_report') || 'Rapport du jour' }}
+          <!-- Toggle rapport du jour / voir tout — agent uniquement -->
+          <button v-if="isAgent" @click.prevent="toggleDailyReport" type="button"
+            :class="isDailyMode ? 'btn btn-success' : 'btn btn-outline-success'">
+            <i :class="isDailyMode ? 'ti ti-calendar-today me-1' : 'ti ti-list me-1'"></i>
+            {{ isDailyMode ? (t('transactions.see_all') || 'Voir tout') : (t('transactions.daily_report') || 'Rapport du jour') }}
           </button>
           <button v-if="canCreateTransaction" @click.prevent="handleAddTransaction" type="button" class="btn btn-primary">
             <i class="ti ti-plus me-1"></i> {{ t('transactions.add_transaction') }}
@@ -275,6 +276,8 @@ const showDetailsModal = ref(false)
 const showStatisticsModal = ref(false)
 const showReceiptModal = ref(false)
 const isEditing = ref(false)
+// true = vue du jour, false = toutes mes transactions
+const isDailyMode = ref(false)
 const selectedTransaction = ref<Transaction | null>(null)
 const receiptTransaction = ref<Transaction | null>(null)
 const formData = ref<TransactionFormData>({
@@ -296,14 +299,15 @@ const formData = ref<TransactionFormData>({
 })
 
 onMounted(async () => {
-  // Agent : restreindre la liste à ses propres transactions + aujourd'hui par défaut
-  const today = new Date().toISOString().split('T')[0]
+  // Pour les agents, le backend scope automatiquement (leurs transactions + entrantes)
+  // Ne pas passer user_id : ça écraserait le OR destination_branch_id du scoping
   store.updateFilters({
     currency_id: undefined,
-    start_date: isAgent.value ? today : undefined,
-    end_date: isAgent.value ? today : undefined,
-    user_id: isAgent.value ? (authStore.user?.id ?? null) : null,
+    start_date: undefined,
+    end_date: undefined,
+    user_id: null,
   })
+  isDailyMode.value = false
 
   await Promise.all([
     store.fetchTransactions(),
@@ -534,16 +538,30 @@ const handleCompleteTransaction = async (id: string) => {
   }
 }
 
-// Rapport du jour : applique le filtre aujourd'hui + user_id de l'agent
-const applyDailyReport = async () => {
+// Toggle : rapport du jour ↔ toutes mes transactions
+const toggleDailyReport = async () => {
   const today = new Date().toISOString().split('T')[0]
-  store.updateFilters({
-    start_date: today,
-    end_date: today,
-    user_id: authStore.user?.id ?? null,
-    status: '',
-  })
+  if (isDailyMode.value) {
+    // Retour à "toutes mes transactions"
+    store.updateFilters({
+      start_date: undefined,
+      end_date: undefined,
+      user_id: authStore.user?.id ?? null,
+      status: '',
+    })
+    isDailyMode.value = false
+  } else {
+    // Passer en vue du jour
+    store.updateFilters({
+      start_date: today,
+      end_date: today,
+      user_id: authStore.user?.id ?? null,
+      status: '',
+    })
+    isDailyMode.value = true
+  }
   await store.fetchTransactions()
+  await store.fetchStatistics()
 }
 
 const handleShowStatistics = async () => {

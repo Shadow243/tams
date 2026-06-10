@@ -22,8 +22,8 @@
           <i class="ti ti-toggle-left app-search-icon text-muted"></i>
         </div>
 
-        <!-- Branch Filter -->
-        <div class="app-search">
+        <!-- Branch Filter — hidden for agents (already locked to their branch) -->
+        <div v-if="!isAgent" class="app-search">
           <select v-model="branchFilter" class="form-select form-control my-1 my-md-0">
             <option :value="null">{{ t('wallets.allBranches') || 'All Branches' }}</option>
             <option v-for="branch in branches" :key="branch.id" :value="branch.id">
@@ -153,7 +153,9 @@
             <td>{{ wallet.branch?.name || 'N/A' }}</td>
             <td>{{ wallet.operator?.name || 'N/A' }}</td>
             <td class="text-end">
-              <span class="fw-semibold">{{ Number(wallet.virtual_balance ?? 0).toFixed(2) }}</span>
+              <span class="fw-semibold">
+                {{ wallet.virtual_balance !== null && wallet.virtual_balance !== undefined ? Number(wallet.virtual_balance).toFixed(2) : '—' }}
+              </span>
             </td>
             <td class="text-center">
               <span class="badge bg-secondary">{{ wallet.currency?.code || 'N/A' }}</span>
@@ -289,7 +291,7 @@ import { appConfig } from '@/config/app'
 import type { Wallet, Meta } from '@/types'
 
 const { t } = useI18n()
-const { canEdit, canDelete } = usePermissions()
+const { canEdit, canDelete, isAgent } = usePermissions()
 const { getItemsPerPage } = useUserSettings()
 const branchStore = useBranchStore()
 const operatorStore = useOperatorStore()
