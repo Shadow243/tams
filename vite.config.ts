@@ -12,7 +12,7 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico'],
+      includeAssets: ['favicon.ico', 'icons/*.png'],
       manifestFilename: 'manifest.json',
       devOptions: {
         enabled: true,
@@ -71,8 +71,8 @@ export default defineConfig({
       },
 
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff,woff2,ttf,eot}'],
-        globIgnores: ['**/icons/**', '**/static/**'],
+        globPatterns: ['**/*.{js,css,html,ico,png,woff,woff2,ttf,eot}'],
+        globIgnores: ['**/static/**'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
