@@ -69,16 +69,37 @@
                 </select>
               </div>
 
-              <!-- Branch -->
+              <!-- Source Branch -->
               <div class="col-md-6 mb-3">
                 <label for="branch_id" class="form-label">
-                  {{ t('fee_rules.branch') || 'Agence' }}
+                  {{ t('fee_rules.branch') || 'Agence source' }}
                   <small class="text-muted">({{ t('fee_rules.optional') || 'optionnel' }})</small>
                 </label>
                 <select
                   class="form-select"
                   id="branch_id"
                   v-model.number="localForm.branch_id"
+                  :disabled="processing"
+                >
+                  <option :value="null">
+                    {{ t('fee_rules.all_branches') || 'Toutes les agences' }}
+                  </option>
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                    {{ branch.name }} ({{ branch.code }})
+                  </option>
+                </select>
+              </div>
+
+              <!-- Destination Branch -->
+              <div class="col-md-6 mb-3">
+                <label for="destination_branch_id" class="form-label">
+                  {{ t('fee_rules.destination_branch') || 'Agence destination' }}
+                  <small class="text-muted">({{ t('fee_rules.optional') || 'optionnel' }})</small>
+                </label>
+                <select
+                  class="form-select"
+                  id="destination_branch_id"
+                  v-model.number="localForm.destination_branch_id"
                   :disabled="processing"
                 >
                   <option :value="null">
@@ -182,6 +203,48 @@
                 />
               </div>
 
+              <!-- Min Amount -->
+              <div class="col-md-6 mb-3">
+                <label for="min_amount" class="form-label">
+                  {{ t('fee_rules.min_amount') || 'Montant minimum' }}
+                  <small class="text-muted">({{ t('fee_rules.optional') || 'optionnel' }})</small>
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="min_amount"
+                  v-model.number="localForm.min_amount"
+                  :placeholder="t('fee_rules.min_amount_placeholder') || 'Ex: 0'"
+                  step="0.01"
+                  min="0"
+                  :disabled="processing"
+                />
+                <small class="text-muted">
+                  {{ t('fee_rules.min_amount_hint') || 'Montant minimum de transaction pour appliquer cette règle' }}
+                </small>
+              </div>
+
+              <!-- Max Amount -->
+              <div class="col-md-6 mb-3">
+                <label for="max_amount" class="form-label">
+                  {{ t('fee_rules.max_amount') || 'Montant maximum' }}
+                  <small class="text-muted">({{ t('fee_rules.optional') || 'optionnel' }})</small>
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="max_amount"
+                  v-model.number="localForm.max_amount"
+                  :placeholder="t('fee_rules.max_amount_placeholder') || 'Ex: 500'"
+                  step="0.01"
+                  min="0"
+                  :disabled="processing"
+                />
+                <small class="text-muted">
+                  {{ t('fee_rules.max_amount_hint') || 'Montant maximum de transaction pour appliquer cette règle' }}
+                </small>
+              </div>
+
               <!-- Is Active -->
               <div class="col-12 mb-3">
                 <div class="form-check form-switch">
@@ -271,10 +334,13 @@ const localForm = ref<FeeRuleFormData>({
   transaction_type_id: null,
   operator_id: null,
   branch_id: null,
+  destination_branch_id: null,
   fee_mode: 'fixed',
   value: null,
   min_fee: null,
   max_fee: null,
+  min_amount: null,
+  max_amount: null,
   is_active: true,
 })
 
@@ -296,10 +362,13 @@ watch(
         transaction_type_id: null,
         operator_id: null,
         branch_id: null,
+        destination_branch_id: null,
         fee_mode: 'fixed',
         value: null,
         min_fee: null,
         max_fee: null,
+        min_amount: null,
+        max_amount: null,
         is_active: true,
       }
     }

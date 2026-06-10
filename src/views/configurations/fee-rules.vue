@@ -78,10 +78,13 @@ const formData = reactive<FeeRuleFormData>({
   transaction_type_id: null,
   operator_id: null,
   branch_id: null,
+  destination_branch_id: null,
   fee_mode: 'fixed',
   value: null,
   min_fee: null,
   max_fee: null,
+  min_amount: null,
+  max_amount: null,
   is_active: true,
 })
 
@@ -106,10 +109,13 @@ const handleAddFeeRule = () => {
   formData.transaction_type_id = null
   formData.operator_id = null
   formData.branch_id = null
+  formData.destination_branch_id = null
   formData.fee_mode = 'fixed'
   formData.value = null
   formData.min_fee = null
   formData.max_fee = null
+  formData.min_amount = null
+  formData.max_amount = null
   formData.is_active = true
   store.setCurrentFeeRule(null)
   showModal.value = true
@@ -121,10 +127,13 @@ const handleEditFeeRule = (feeRule: any) => {
     transaction_type_id: feeRule.transaction_type_id,
     operator_id: feeRule.operator_id,
     branch_id: feeRule.branch_id,
+    destination_branch_id: feeRule.destination_branch_id ?? null,
     fee_mode: feeRule.fee_mode,
     value: feeRule.value,
     min_fee: feeRule.min_fee,
     max_fee: feeRule.max_fee,
+    min_amount: feeRule.min_amount ?? null,
+    max_amount: feeRule.max_amount ?? null,
     is_active: feeRule.is_active,
   })
   store.setCurrentFeeRule(feeRule)

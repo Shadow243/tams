@@ -1,3 +1,9 @@
+interface BranchRef {
+  id: number
+  code: string
+  name: string
+}
+
 export interface FeeRule {
   id: number
   uuid: string
@@ -13,16 +19,16 @@ export interface FeeRule {
     name: string
   }
   branch_id: number | null
-  branch?: {
-    id: number
-    code: string
-    name: string
-  }
+  branch?: BranchRef
+  destination_branch_id: number | null
+  destination_branch?: BranchRef
   fee_mode: 'fixed' | 'percentage' | 'negotiable'
   fee_mode_label: string
   value: number | null
   min_fee: number | null
   max_fee: number | null
+  min_amount: number | null
+  max_amount: number | null
   is_active: boolean
   created_at: string
   updated_at: string
@@ -43,16 +49,16 @@ export interface FeeRuleList {
     name: string
   }
   branch_id: number | null
-  branch?: {
-    id: number
-    code: string
-    name: string
-  }
+  branch?: BranchRef
+  destination_branch_id: number | null
+  destination_branch?: BranchRef
   fee_mode: 'fixed' | 'percentage' | 'negotiable'
   fee_mode_label: string
   value: number | null
   min_fee: number | null
   max_fee: number | null
+  min_amount: number | null
+  max_amount: number | null
   is_active: boolean
   created_at: string
   updated_at: string
@@ -81,9 +87,12 @@ export interface FeeRuleFormData {
   transaction_type_id: number | null
   operator_id: number | null
   branch_id: number | null
+  destination_branch_id: number | null
   fee_mode: 'fixed' | 'percentage' | 'negotiable'
   value: number | null
   min_fee: number | null
   max_fee: number | null
+  min_amount: number | null
+  max_amount: number | null
   is_active: boolean
 }
